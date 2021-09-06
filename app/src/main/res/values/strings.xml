@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">ChatApp</string>
+    <string name="title_message">Message</string>
+    <string name="title_contact">Contact</string>
+    <string name="title_group">Group</string>
+    <string name="title_recent">Recent</string>
+    <string name="title_more">More</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
+    <string name="full_name">Enter your full name</string>
+    <string name="create_account">Create Account</string>
+    <string name="create_account_name_detail">Using real name make you more recognize</string>
+    <string name="create_account_phone_detail">Enter your phone number to create a new account</string>
+    <string name="create_account_mail_detail">Enter your email to create a new account</string>
+    <string name="create_account_vetify_email_title_dialog">Confirm Email</string>
+    <string name="create_account_vetify_email_content_dialog">We will send a confirmation code to your email. Please confirm this email is correct.</string>
+    <string name="change_button">Change</string>
+    <string name="confirm_button">Confirm</string>
+    <string name="enter_confirmation">Please check your email and enter confirmation code</string>
+    <string name="enter_birthday">Enter your birthday</string>
+    <string name="gender">Gender</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="phone_number">Enter your phone number</string>
+    <string name="email">Enter your email</string>
+    <string name="enter_password">Enter your password</string>
+    <string name="re_enter_password">Re-enter your password</string>
+    <string name="check_password">These passwords don\'t match. Try again?</string>
+    <string name="check_password_empty">Please enter your password...</string>
+    <string name="check_email_empty">Please enter your email...</string>
+    <string name="check_user_name_empty">Please enter your username...</string>
+    <string name="success_text">SUCCESS</string>
+    <string name="continue_text">CONTINUE</string>
+    <string name="sign_in_button">SIGN IN</string>
+    <string name="sign_up_success">Congratulations, your account has been successfully created.</string>
+    <string name="language">Choose your language</string>
+    <string name="accept">Accept</string>
+    <string name="notification_feature_error">The feature has not been updated</string>
+    <string name="feature_error_content">Waiting for new update...</string>
+    <string name="search">Search your friends ...</string>
+    <string name="friend_request">Friend request</string>
+    <string name="phonebook_friend">Phonebook friend</string>
+    <string name="all_contact">All contacts</string>
+    <string name="refresh">Refresh</string>
+
+
+
+
+</resources>

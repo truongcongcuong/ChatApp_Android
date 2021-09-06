@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_message"
+        android:icon="@drawable/ic_baseline_message_24"
+        android:title="@string/title_message"
+        ></item>
+
+<item
+        android:id="@+id/navigation_contact"
+        android:icon="@drawable/ic_baseline_contact_page_24"
+        android:title="@string/title_contact"
+        ></item>
+
+<item
+        android:id="@+id/navigation_group"
+        android:icon="@drawable/ic_baseline_groups_24"
+        android:title="@string/title_group"
+        ></item>
+
+<item
+        android:id="@+id/navigation_recent"
+        android:icon="@drawable/ic_baseline_access_time_24"
+        android:title="@string/title_recent"
+        ></item>
+
+<item
+        android:id="@+id/navigation_info"
+        android:icon="@drawable/ic_baseline_more_24"
+        android:title="@string/title_more"
+        ></item>
+
+
+</menu>

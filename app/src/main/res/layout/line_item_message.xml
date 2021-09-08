@@ -84,6 +84,7 @@
             android:gravity="center_vertical"
             android:paddingBottom="1dp"
             android:textColor="@color/white"
+            android:textSize="12sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/txt_lim_last_message"
             app:layout_constraintEnd_toEndOf="@+id/txt_lim_time_last_message"

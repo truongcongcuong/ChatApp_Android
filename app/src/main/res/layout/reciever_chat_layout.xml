@@ -1,56 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:paddingBottom="5dp">
 
-    android:padding="2dp">
+
+    <ImageView
+        android:id="@+id/senderImage"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        tools:srcCompat="@tools:sample/avatars" />
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/reciever_chat_custom"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="50dp"
-        android:id="@+id/layoutformessage">
+        android:layout_toRightOf="@+id/senderImage">
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/blank"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sender Message Display Here "
-            android:textSize="18sp"
-            android:textColor="@color/black"
-            android:paddingLeft="7dp"
-            android:paddingRight="40dp"
-            android:paddingBottom="7dp"
-            android:paddingTop="7dp"
-            android:id="@+id/sendermessage">
-
-        </TextView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/timeofmessage"
-            android:textSize="10sp"
-            android:layout_toRightOf="@id/sendermessage"
-            android:layout_marginLeft="-40dp"
-            android:layout_alignBottom="@id/sendermessage"
-            android:text="20:09"
-            android:padding="7dp"
-            android:textColor="#434343" />
+            android:layout_marginStart="6dp"
+            android:layout_marginLeft="6dp"
+            android:padding="5dp"
+            android:background="@drawable/background_message_receiver"
+            android:orientation="vertical">
 
 
+            <TextView
+                android:id="@+id/sendermessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:paddingRight="5dp"
+                android:text="content"
+                android:textSize="16sp" />
 
-
-
-
-
-
+            <TextView
+                android:id="@+id/timeofmessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:textSize="10sp" />
+        </LinearLayout>
     </RelativeLayout>
-
-
-
-
-
-
 
 </RelativeLayout>

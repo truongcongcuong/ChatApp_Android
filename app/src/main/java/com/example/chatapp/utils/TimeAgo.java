@@ -11,6 +11,7 @@ public class TimeAgo {
     private static final SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat yearFormat = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat monthFormatt = new SimpleDateFormat("dd/MM");
+    private static final SimpleDateFormat onlyTimeFormat = new SimpleDateFormat("HH:mm");
 
     public static final List<Long> times = Arrays.asList(
             TimeUnit.DAYS.toMillis(365),
@@ -22,7 +23,7 @@ public class TimeAgo {
 
     public static final List<String> timesString = Arrays.asList("năm", "tháng", "ngày", "giờ", "phút", "giây");
 
-    public static String get(String date1) {
+    public static String getTime(String date1) {
 
         Date d1 = new Date();
         Date d2 = new Date();
@@ -61,5 +62,18 @@ public class TimeAgo {
             return "bây giờ";
         else
             return res.toString();
+    }
+
+    public static String getTimeStamp(String date1) {
+
+        Date d1 = new Date();
+        Date d2 = new Date();
+
+        try {
+            d2 = timeStampFormat.parse(date1);
+        } catch (Exception e) {
+        }
+
+        return onlyTimeFormat.format(d2);
     }
 }

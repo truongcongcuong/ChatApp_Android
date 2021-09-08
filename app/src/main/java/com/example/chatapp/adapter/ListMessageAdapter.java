@@ -81,13 +81,13 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
 
         holder.txt_lim_display_name.setText(displayName);
         holder.txt_lim_last_message.setText(inboxDto.getLastMessage().getContent());
-        holder.txt_lim_time_last_message.setText(TimeAgo.get(inboxDto.getLastMessage().getCreateAt()));
-//        inboxDto.setCountNewMessage(6L);
+        holder.txt_lim_time_last_message.setText(TimeAgo.getTime(inboxDto.getLastMessage().getCreateAt()));
+        inboxDto.setCountNewMessage(6L);
         if (inboxDto.getCountNewMessage() != null && inboxDto.getCountNewMessage() > 0) {
-            holder.txt_lim_unread_message.setPadding(15, 5, 15, 5);
+            holder.txt_lim_unread_message.setPadding(18, 7, 18, 7);
             holder.txt_lim_unread_message.setBackgroundResource(R.drawable.background_unreadmessage);
             holder.txt_lim_unread_message.setText(inboxDto.getCountNewMessage() < 5
-                    ? inboxDto.getCountNewMessage().toString() : inboxDto.getCountNewMessage().toString() + "+");
+                    ? inboxDto.getCountNewMessage().toString() : "5+");
             holder.txt_lim_last_message.setTypeface(null, Typeface.BOLD);
             holder.txt_lim_time_last_message.setTypeface(null, Typeface.BOLD);
         }

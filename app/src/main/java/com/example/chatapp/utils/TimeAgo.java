@@ -25,16 +25,14 @@ public class TimeAgo {
 
     public static String getTime(String date1) {
 
-        Date d1 = new Date();
+        Date d1 = new Date(new Date().getTime() + 7 * 3600 * 1000);
         Date d2 = new Date();
 
         try {
             d2 = timeStampFormat.parse(date1);
         } catch (Exception e) {
         }
-
         long mseconds = (d1.getTime() - d2.getTime());
-
         StringBuilder res = new StringBuilder();
         for (int i = 0; i < TimeAgo.times.size(); i++) {
             Long current = TimeAgo.times.get(i);
@@ -45,11 +43,11 @@ public class TimeAgo {
             calendar1.setTime(d2);
             if ((i == 0 && temp > 0) || calendar1.get(Calendar.YEAR) - calendar2.get(Calendar.YEAR) > 0)
                 return yearFormat.format(d2);
-            if (i == 1 && temp > 0)
+            if ((i == 1 && temp > 0) || calendar1.get(Calendar.MONTH) - calendar2.get(Calendar.MONTH) > 0)
                 return monthFormatt.format(d2);
             if (i == 2 && temp == 1)
                 return "hôm qua";
-            if (i == 2 && temp > 7)
+            if ((i == 2 && temp > 7) || calendar1.get(Calendar.DAY_OF_MONTH) - calendar2.get(Calendar.DAY_OF_MONTH) > 0)
                 return monthFormatt.format(d2);
             if (temp > 0) {
                 res.append(temp)

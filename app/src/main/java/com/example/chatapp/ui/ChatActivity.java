@@ -31,6 +31,7 @@ import com.example.chatapp.adapter.MessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.CroppedDrawable;
 import com.example.chatapp.cons.GetNewAccessToken;
+import com.example.chatapp.cons.WebsocketClient;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
@@ -53,26 +54,24 @@ import java.util.Map;
 import io.vertx.core.json.Json;
 
 
-public class ChatActivity extends AppCompatActivity implements MessageAdapter.LoadEarlierMessages{
-
+public class ChatActivity extends AppCompatActivity implements MessageAdapter.LoadEarlierMessages {
 
     ImageView img_chat_user_avt;
     TextView txt_chat_user_name;
     RecyclerView rcv_chat_list;
     EditText edt_chat_message_send;
-    ImageButton ibt_chat_send_message,ibt_chat_back;
+    ImageButton ibt_chat_send_message, ibt_chat_back;
     Toolbar tlb_chat;
     private String enteredMessage, displayName, url;
     InboxDto dto;
     GetNewAccessToken getNewAccessToken;
     MessageAdapter adapter;
     Gson gson;
-    int page =1;
+    int page = 0;
     UserSummaryDTO user;
     LinearLayoutManager linearLayoutManager;
     String access_token;
-
-
+    WebsocketClient websocketClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,33 +98,31 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         getNewAccessToken = new GetNewAccessToken(this);
         getNewAccessToken.sendGetNewTokenRequest();
 
-        if(dto.getRoom().getType().equalsIgnoreCase("GROUP")){
+        if (dto.getRoom().getType().equalsIgnoreCase("GROUP")) {
             displayName = dto.getRoom().getName();
-            url =dto.getRoom().getImageUrl();
-        }else{
+            url = dto.getRoom().getImageUrl();
+        } else {
             displayName = dto.getRoom().getTo().getDisplayName();
-            url =dto.getRoom().getTo().getImageUrl();
+            url = dto.getRoom().getTo().getImageUrl();
         }
         txt_chat_user_name.setText(displayName);
         try {
             URL urlOnl = new URL(url);
             Bitmap bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(),bitmap);
+            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
             CroppedDrawable cd = new CroppedDrawable(bitmap);
             img_chat_user_avt.setImageDrawable(cd);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        SharedPreferences sharedPreferencesUser = getSharedPreferences("user",MODE_PRIVATE);
-        user = gson.fromJson(sharedPreferencesUser.getString("user-info",null),UserSummaryDTO.class);
+        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
+        user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         Log.e("user-info", user.toString());
-        SharedPreferences sharedPreferencesToken = getSharedPreferences("token",MODE_PRIVATE);
-        access_token = sharedPreferencesToken.getString("access_token",null);
+        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", MODE_PRIVATE);
+        access_token = sharedPreferencesToken.getString("access_token", null);
 
 
-
-
-       updateList();
+        updateList();
         linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         rcv_chat_list.setLayoutManager(linearLayoutManager);
@@ -133,25 +130,22 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
 //         setup socket
 
 
-
-
         // evt button
 
-        ibt_chat_back.setOnClickListener(v->{
+        ibt_chat_back.setOnClickListener(v -> {
             finish();
         });
 
-        ibt_chat_send_message.setOnClickListener(v->{
+        ibt_chat_send_message.setOnClickListener(v -> {
             String message = edt_chat_message_send.getText().toString();
-            if(!TextUtils.isEmpty(message)){
+            if (!TextUtils.isEmpty(message)) {
                 Log.e("test send pt : ", "suscc");
                 sendMessage(message);
-            }
-            else Log.e("test send pt : ", "failed");
+            } else Log.e("test send pt : ", "failed");
         });
 
-
-
+        websocketClient = new WebsocketClient();
+        websocketClient.connect(user.getId(), user.getAccessToken());
     }
 
     private void sendMessage(String message) {
@@ -160,11 +154,12 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         messageSendToServer.setRoomId(dto.getRoom().getId());
         messageSendToServer.setType("TEXT");
         Log.e("send : ", Json.encode(messageSendToServer));
+        websocketClient.send(Json.encode(messageSendToServer));
+
     }
 
 
-
-    private void loadMoreData(){
+    private void loadMoreData() {
         page++;
         adapter.setLoadEarlierMsgs(true);
         updateList();
@@ -174,26 +169,25 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
     private void updateList() {
         List<MessageDto> list = new ArrayList<>();
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
-        String token = sharedPreferencesToken.getString("access-token",null);
-        StringRequest request  =  new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId()+"?page="+page+"&size=15",
+        String token = sharedPreferencesToken.getString("access-token", null);
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId(),
                 response -> {
                     try {
-                        String res = URLDecoder.decode(URLEncoder.encode(response,"iso8859-1"),"UTF-8");
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        for(int i =0;i<array.length();i++){
+                        for (int i = 0; i < array.length(); i++) {
                             JSONObject objectInbox = new JSONObject(String.valueOf(array.getJSONObject(i)));
-                            MessageDto messageDto = gson.fromJson(objectInbox.toString(),MessageDto.class);
+                            MessageDto messageDto = gson.fromJson(objectInbox.toString(), MessageDto.class);
                             list.add(messageDto);
                         }
-                        if(page == 1){
-                            adapter = new MessageAdapter(ChatActivity.this,list);
+                        if (page == 0) {
+                            adapter = new MessageAdapter(ChatActivity.this, list);
                             rcv_chat_list.setAdapter(adapter);
                             rcv_chat_list.scrollToPosition(list.size());
-                        }
-                        else {
+                        } else {
                             View v = rcv_chat_list.getChildAt(0);
-                            int top =(v==null) ?0 : v.getTop();
+                            int top = (v == null) ? 0 : v.getTop();
                             adapter.updateList(list);
                             rcv_chat_list.scrollToPosition(16);
 
@@ -204,13 +198,12 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
                     }
                 },
                 error -> {
-                    Log.i("error",error.toString());
-                })
-        {
+                    Log.i("error", error.toString());
+                }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String,String> map = new HashMap<>();
-                map.put("Authorization","Bearer "+token);
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
                 return map;
             }
         };

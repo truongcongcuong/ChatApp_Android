@@ -36,14 +36,13 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-       View view = LayoutInflater.from(context).inflate(R.layout.friend_list_adapter_layout,parent,false);
-       return new ViewHolder(this,view);
+        View view = LayoutInflater.from(context).inflate(R.layout.friend_list_adapter_layout, parent, false);
+        return new ViewHolder(this, view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if (android.os.Build.VERSION.SDK_INT > 9)
-        {
+        if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
@@ -51,7 +50,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         try {
             URL urlOnl = new URL(friend.getFriend().getImageUrl());
             Bitmap bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.getResources(),bitmap);
+            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), bitmap);
             CroppedDrawable cd = new CroppedDrawable(bitmap);
             holder.img_list_contact_avt.setImageDrawable(cd);
         } catch (Exception e) {
@@ -59,6 +58,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         }
 
         holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());
+        holder.txt_list_contact_create_at.setText("Bạn bè từ " + friend.getCreateAt().substring(0, 10));
     }
 
     @Override
@@ -70,11 +70,14 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         FriendListAdapter friendListAdapter;
         ImageView img_list_contact_avt;
         TextView txt_list_contact_display_name;
+        TextView txt_list_contact_create_at;
+
         public ViewHolder(FriendListAdapter friendListAdapter, @NonNull View itemView) {
             super(itemView);
             this.friendListAdapter = friendListAdapter;
             txt_list_contact_display_name = itemView.findViewById(R.id.txt_list_contact_display_name);
             img_list_contact_avt = itemView.findViewById(R.id.img_list_contact_avt);
+            txt_list_contact_create_at = itemView.findViewById(R.id.txt_list_contact_create_at);
         }
     }
 }

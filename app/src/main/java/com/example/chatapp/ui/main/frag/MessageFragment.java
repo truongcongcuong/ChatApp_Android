@@ -4,17 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -51,7 +49,7 @@ public class MessageFragment extends Fragment {
     List<InboxDto> list = new ArrayList<>();
     Gson gson = new Gson();
     SharedPreferences sharedPreferencesToken;
-    int page =1;
+    int page = 0;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -108,21 +106,21 @@ public class MessageFragment extends Fragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void updateListString(){
+    private void updateListString() {
         List<InboxDto> list = new ArrayList<>();
-        String token = sharedPreferencesToken.getString("access-token",null);
-        StringRequest request  =  new StringRequest(Request.Method.GET, Constant.API_INBOX+"?page="+page+"&size=15",
+        String token = sharedPreferencesToken.getString("access-token", null);
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=15",
                 response -> {
                     try {
-                        String res = URLDecoder.decode(URLEncoder.encode(response,"iso8859-1"),"UTF-8");
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        for(int i =0;i<array.length();i++){
+                        for (int i = 0; i < array.length(); i++) {
                             JSONObject objectInbox = new JSONObject(String.valueOf(array.getJSONObject(i)));
-                            InboxDto inboxDto = gson.fromJson(objectInbox.toString(),InboxDto.class);
+                            InboxDto inboxDto = gson.fromJson(objectInbox.toString(), InboxDto.class);
                             list.add(inboxDto);
                         }
-                        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(),list);
+                        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), list);
                         this.rcv_list_message.setAdapter(adapter);
 
                     } catch (JSONException | UnsupportedEncodingException e) {
@@ -130,13 +128,12 @@ public class MessageFragment extends Fragment {
                     }
                 },
                 error -> {
-                    Log.i("error",error.toString());
-                })
-        {
+                    Log.i("error", error.toString());
+                }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String,String> map = new HashMap<>();
-                map.put("Authorization","Bearer "+token);
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
                 return map;
             }
         };

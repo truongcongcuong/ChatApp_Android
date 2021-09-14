@@ -1,9 +1,11 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,26 +13,44 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
-import com.example.chatapp.cons.CroppedDrawable;
+import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.FriendDTO;
+import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.ui.ChatActivity;
+import com.google.gson.Gson;
 
-import java.net.URL;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.ViewHolder> {
 
     List<FriendDTO> list = new ArrayList<>();
     Context context;
+    Gson gson = new Gson();
+    SharedPreferences sharedPreferencesToken;
 
     public FriendListAdapter(List<FriendDTO> list, Context context) {
         this.list = list;
         this.context = context;
+        sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
     }
 
     @NonNull
@@ -47,18 +67,17 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
             StrictMode.setThreadPolicy(policy);
         }
         FriendDTO friend = list.get(position);
-        try {
-            URL urlOnl = new URL(friend.getFriend().getImageUrl());
-            Bitmap bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), bitmap);
-            CroppedDrawable cd = new CroppedDrawable(bitmap);
-            holder.img_list_contact_avt.setImageDrawable(cd);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        // load image
+        Glide.with(context).load(friend.getFriend().getImageUrl())
+                .placeholder(R.drawable.image_placeholer)
+                .centerCrop().circleCrop().into(holder.img_list_contact_avt);
 
         holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());
         holder.txt_list_contact_create_at.setText("Bạn bè từ " + friend.getCreateAt().substring(0, 10));
+        holder.itemView.setOnClickListener(v -> {
+            getInboxWith(friend.getFriend().getId());
+        });
     }
 
     @Override
@@ -79,5 +98,39 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
             img_list_contact_avt = itemView.findViewById(R.id.img_list_contact_avt);
             txt_list_contact_create_at = itemView.findViewById(R.id.txt_list_contact_create_at);
         }
+    }
+
+    private void getInboxWith(String anotherUserId) {
+        String token = sharedPreferencesToken.getString("access-token", null);
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "/with/" + anotherUserId,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                        JSONObject object = new JSONObject(res);
+                        InboxDto dto = gson.fromJson(object.toString(), InboxDto.class);
+                        Intent intent = new Intent(context, ChatActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", dto);
+                        intent.putExtras(bundle);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    } catch (JSONException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                    Log.i("error", error.toString());
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+
+        request.setRetryPolicy(new DefaultRetryPolicy(0, 1, 1));
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        requestQueue.add(request);
     }
 }

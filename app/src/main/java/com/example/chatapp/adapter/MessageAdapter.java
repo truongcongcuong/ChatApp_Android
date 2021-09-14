@@ -1,8 +1,10 @@
 package com.example.chatapp.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,17 +82,18 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 }
                 break;
             case ITEM_SEND:
-                messageDto = list.get(position);
+                messageDto = list.get(position-1);
                 SenderViewHolder senderViewHolder = (SenderViewHolder) holder;
                 senderViewHolder.sendermessage.setText(messageDto.getContent());
                 senderViewHolder.timeofmessage.setText(TimeAgo.getTimeStamp(messageDto.getCreateAt()));
                 break;
             case ITEM_REVIEVER:
-                messageDto = list.get(position);
+                messageDto = list.get(position-1);
                 Log.i("----", messageDto.getSender().getId());
                 RecieverViewHolder recieverViewHolder = (RecieverViewHolder) holder;
                 recieverViewHolder.sendermessage.setText(messageDto.getSender().getId() + "_" + messageDto.getContent());
                 recieverViewHolder.timeofmessage.setText(TimeAgo.getTimeStamp(messageDto.getCreateAt()));
+
 //                Bitmap bitmap = null;
 //                try {
 //                    URL urlOnl = new URL(messageDto.getSender().getImageUrl());
@@ -106,7 +109,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list.size()+1;
     }
 
     @Override
@@ -163,10 +166,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     public void updateList(List<MessageDto> messageDtos) {
 
-//        for (int i = 0; i < messageDtos.size(); i++) {
-//            this.list.add(0, messageDtos.get(i));
-//        }
-        list.addAll(messageDtos);
+        for (int i = messageDtos.size()-1; i >=0; i--) {
+            this.list.add(0, messageDtos.get(i));
+        }
+//        list.addAll(messageDtos);
         notifyDataSetChanged();
     }
 
@@ -176,5 +179,16 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     public void setLoadEarlierMsgs(boolean isLoadEarlierMsgs) {
         this.isLoadEarlierMsgs = isLoadEarlierMsgs;
+    }
+
+    public void updateMessage(MessageDto messageDto){
+        list.add(messageDto);
+        Activity activity = (Activity) context;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 }

@@ -27,6 +27,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.MessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
+import com.example.chatapp.cons.SendData;
 import com.example.chatapp.cons.WebsocketClient;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
@@ -49,7 +50,7 @@ import java.util.Map;
 import io.vertx.core.json.Json;
 
 
-public class ChatActivity extends AppCompatActivity implements MessageAdapter.LoadEarlierMessages {
+public class ChatActivity extends AppCompatActivity implements MessageAdapter.LoadEarlierMessages, SendData {
 
     ImageView img_chat_user_avt;
     TextView txt_chat_user_name;
@@ -87,6 +88,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
 
         Bundle bundle = getIntent().getExtras();
         dto = (InboxDto) bundle.getSerializable("dto");
+
 
         Log.e("user ", dto.toString());
 
@@ -134,7 +136,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         });
 
         websocketClient = new WebsocketClient();
-        websocketClient.connect(user.getId(), user.getAccessToken());
+        websocketClient.connect(user.getId(), user.getAccessToken(),ChatActivity.this);
     }
 
     private void sendMessage(String message) {
@@ -159,7 +161,8 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         List<MessageDto> list = new ArrayList<>();
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         String token = sharedPreferencesToken.getString("access-token", null);
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId(),
+        Log.e("url : ",Constant.API_CHAT + dto.getId());
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId()+"?size=15&page="+page,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
@@ -201,9 +204,27 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         requestQueue.add(request);
     }
 
+    private void updateMessageRealTime(MessageDto messageDto){
+        this.adapter.updateMessage(messageDto);
+        ChatActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+//                rcv_chat_list.scrollToPosition(adapter.getItemCount());
+                rcv_chat_list.getLayoutManager().smoothScrollToPosition(rcv_chat_list, new RecyclerView.State(),rcv_chat_list.getAdapter().getItemCount());
+            }
+        });
+    }
+
     @Override
     public void onLoadEarlierMessages() {
         page++;
         updateList();
+    }
+
+    @Override
+    public void SendingData(String s) {
+        MessageDto messageDto = gson.fromJson(s,MessageDto.class);
+        Log.e("da nhan nhe baby : ", messageDto.toString());
+        updateMessageRealTime(messageDto);
     }
 }

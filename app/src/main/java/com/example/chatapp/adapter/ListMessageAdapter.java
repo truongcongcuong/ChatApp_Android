@@ -2,8 +2,6 @@ package com.example.chatapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,18 +14,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
-import com.example.chatapp.cons.CroppedDrawable;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.ui.ChatActivity;
 import com.example.chatapp.utils.TimeAgo;
 import com.google.gson.Gson;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +32,9 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     private List<InboxDto> list = new ArrayList<>();
     private Gson gson = new Gson();
 
-
     public ListMessageAdapter(Context context, List<InboxDto> dtos) {
         this.context = context;
         this.list = dtos;
-
     }
 
     @NonNull
@@ -69,19 +63,21 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             url = inboxDto.getRoom().getTo().getImageUrl();
         }
 
-        try {
-            URL urlOnl = new URL(url);
-            Bitmap bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), bitmap);
-            CroppedDrawable cd = new CroppedDrawable(bitmap);
-            holder.img_lim_avt.setImageDrawable(cd);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // load image
+        Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
+                .centerCrop().circleCrop().into(holder.img_lim_avt);
 
+        MessageDto lastMessage = inboxDto.getLastMessage();
+        if (lastMessage != null) {
+            holder.txt_lim_last_message.setText(lastMessage.getContent());
+            holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
+            if (inboxDto.getRoom().getType().equalsIgnoreCase("GROUP")) {
+                String content = lastMessage.getSender().getDisplayName() + ": " + lastMessage.getContent();
+                holder.txt_lim_last_message.setText(content);
+            } else
+                holder.txt_lim_last_message.setText(lastMessage.getContent());
+        }
         holder.txt_lim_display_name.setText(displayName);
-        holder.txt_lim_last_message.setText(inboxDto.getLastMessage().getContent());
-        holder.txt_lim_time_last_message.setText(TimeAgo.getTime(inboxDto.getLastMessage().getCreateAt()));
         inboxDto.setCountNewMessage(6L);
         if (inboxDto.getCountNewMessage() != null && inboxDto.getCountNewMessage() > 0) {
             holder.txt_lim_unread_message.setPadding(18, 7, 18, 7);

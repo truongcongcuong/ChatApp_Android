@@ -12,13 +12,14 @@
 
         <Button
             android:id="@+id/btn_info_signout"
-            android:layout_margin="30dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:layout_marginTop="32dp"
             android:text="Sign out"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout2" />
 
         <TextView
             android:id="@+id/txt_info_error"
@@ -30,5 +31,45 @@
             app:layout_constraintTop_toBottomOf="@+id/btn_info_signout">
 
         </TextView>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dark_background"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/image_info_image"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/txt_info_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_toEndOf="@+id/image_info_image"
+                android:text="TextView"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txt_info_name"
+                android:layout_alignStart="@+id/txt_info_name"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="13dp"
+                android:text="Xem trang cá nhân"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+        </RelativeLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

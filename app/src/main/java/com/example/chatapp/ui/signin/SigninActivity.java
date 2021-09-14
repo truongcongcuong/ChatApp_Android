@@ -82,6 +82,7 @@ public class SigninActivity extends AppCompatActivity {
 
 
     private void sendSignInRequest() {
+        Log.e("a: ", "ádfasda");
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_AUTH+"signin",
                 response -> {
                     try {

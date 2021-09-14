@@ -7,5 +7,6 @@ public class Constant {
     public static final String API_CHAT = "http://10.0.3.2:8080/api/messages/inbox/";
     public static final String API_FRIEND_LIST = "http://10.0.3.2:8080/api/friends";
     public static final String API_CHAT_TO = "http://10.0.3.2:8080/chat";
+    public static final String API_ME = "http://10.0.3.2:8080/api/user/me";
 
 }

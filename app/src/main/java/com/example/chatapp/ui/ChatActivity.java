@@ -3,8 +3,6 @@ package com.example.chatapp.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,8 +14,6 @@ import android.widget.TextView;
 import android.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,10 +22,10 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MessageAdapter;
 import com.example.chatapp.cons.Constant;
-import com.example.chatapp.cons.CroppedDrawable;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.cons.WebsocketClient;
 import com.example.chatapp.dto.InboxDto;
@@ -43,7 +39,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -106,15 +101,9 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
             url = dto.getRoom().getTo().getImageUrl();
         }
         txt_chat_user_name.setText(displayName);
-        try {
-            URL urlOnl = new URL(url);
-            Bitmap bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
-            CroppedDrawable cd = new CroppedDrawable(bitmap);
-            img_chat_user_avt.setImageDrawable(cd);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        Glide.with(this).load(url).placeholder(R.drawable.image_placeholer)
+                .centerCrop().circleCrop().into(img_chat_user_avt);
         SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         Log.e("user-info", user.toString());

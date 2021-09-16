@@ -34,15 +34,18 @@ import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.cons.SendData;
 import com.example.chatapp.cons.WebsocketClient;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.dto.MemberDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.entity.MemberInRoom;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -73,6 +76,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
     LinearLayoutManager linearLayoutManager;
     String access_token;
     WebsocketClient websocketClient;
+    Map<String, CroppedDrawable> members = new HashMap();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +97,24 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
 
         Bundle bundle = getIntent().getExtras();
         dto = (InboxDto) bundle.getSerializable("dto");
+       /* Log.e("memberDto", dto.toString());
+        for(MemberDto memberDto :dto.getRoom().getMembers()){
+            MemberInRoom memberInRoom = new MemberInRoom();
+            Bitmap bitmap = null;
+                try {
+                    URL urlOnl = new URL(memberDto.getUser().getImageUrl());
+                    bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                CroppedDrawable cd = new CroppedDrawable(bitmap);
+                memberInRoom.setDrawable(cd);
+                members.put(memberDto.getUser().getId(), cd);
+        }*/
 
 
         Log.e("user ", dto.toString());
+        getMemberInRoom();
 
         getNewAccessToken = new GetNewAccessToken(this);
         getNewAccessToken.sendGetNewTokenRequest();
@@ -119,7 +138,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         }
         SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
-        Log.e("user-info", user.toString());
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", MODE_PRIVATE);
         access_token = sharedPreferencesToken.getString("access_token", null);
 
@@ -150,6 +168,50 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         websocketClient.connect(user.getId(), user.getAccessToken(),ChatActivity.this);
     }
 
+    private void getMemberInRoom() {
+        Map<String, CroppedDrawable> members = new HashMap();
+        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
+        String token = sharedPreferencesToken.getString("access-token", null);
+        StringRequest request = new StringRequest(Request.Method.GET,Constant.API_GET_MEMBERS+dto.getRoom().getId(),
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                        JSONArray array = new JSONArray(res);
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject objectInbox = new JSONObject(String.valueOf(array.getJSONObject(i)));
+                            MemberDto memberDto = gson.fromJson(objectInbox.toString(), MemberDto.class);
+                            Bitmap bitmap = null;
+                            try {
+                                URL urlOnl = new URL(memberDto.getUser().getImageUrl());
+                                bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            CroppedDrawable cd = new CroppedDrawable(bitmap);
+                            members.put(memberDto.getUser().getId(),cd);
+                        }
+                        saveMap(members);
+
+                    } catch (JSONException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+
+                },error -> {
+
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        Log.e("members ou1",members.toString());
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(request);
+        Log.e("members ou2",members.toString());
+    }
+
     private void sendMessage(String message) {
         MessageSendToServer messageSendToServer = new MessageSendToServer();
         messageSendToServer.setContent(message);
@@ -172,7 +234,8 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         List<MessageDto> list = new ArrayList<>();
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         String token = sharedPreferencesToken.getString("access-token", null);
-        Log.e("url : ",Constant.API_CHAT + dto.getId());
+
+
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId()+"?size=15&page="+page,
                 response -> {
                     try {
@@ -185,7 +248,8 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
                             list.add(messageDto);
                         }
                         if (page == 0) {
-                            adapter = new MessageAdapter(ChatActivity.this, list);
+                            Log.e("member 1", members.toString());
+                            adapter = new MessageAdapter(ChatActivity.this, list, members);
                             rcv_chat_list.setAdapter(adapter);
                             rcv_chat_list.scrollToPosition(list.size());
                         } else {
@@ -226,6 +290,12 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         });
     }
 
+    public void saveMap(Map<String,CroppedDrawable> map){
+        this.members = map;
+        Log.e("map : ", map.toString());
+        Log.e("members : ", members.toString());
+    }
+
     @Override
     public void onLoadEarlierMessages() {
         page++;
@@ -235,7 +305,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
     @Override
     public void SendingData(String s) {
         MessageDto messageDto = gson.fromJson(s,MessageDto.class);
-        Log.e("da nhan nhe baby : ", messageDto.toString());
         updateMessageRealTime(messageDto);
     }
 }

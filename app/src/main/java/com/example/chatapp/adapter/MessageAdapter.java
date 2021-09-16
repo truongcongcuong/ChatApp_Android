@@ -16,13 +16,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatapp.R;
+import com.example.chatapp.cons.CroppedDrawable;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.entity.MemberInRoom;
 import com.example.chatapp.utils.TimeAgo;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MessageAdapter extends RecyclerView.Adapter {
 
@@ -37,12 +40,19 @@ public class MessageAdapter extends RecyclerView.Adapter {
     Gson gson = new Gson();
     boolean isLoadEarlierMsgs = true;
     LoadEarlierMessages mLoadEarlierMessages;
+    Map<String, CroppedDrawable> members;
+    String id;
+    UserSummaryDTO dto;
 
-    public MessageAdapter(Context context, List<MessageDto> messageDtos) {
+    public MessageAdapter(Context context, List<MessageDto> messageDtos,Map<String, CroppedDrawable> members) {
         this.context = context;
         this.sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         this.list = messageDtos;
         mLoadEarlierMessages = (LoadEarlierMessages) this.context;
+        this.members = members;
+        String user = sharedPreferencesUser.getString("user-info", null);
+        this.dto = gson.fromJson(user, UserSummaryDTO.class);
+        this.id = dto.getId();
     }
 
     @NonNull
@@ -82,6 +92,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 }
                 break;
             case ITEM_SEND:
+                this.id = dto.getId();
                 messageDto = list.get(position-1);
                 SenderViewHolder senderViewHolder = (SenderViewHolder) holder;
                 senderViewHolder.sendermessage.setText(messageDto.getContent());
@@ -89,10 +100,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 break;
             case ITEM_REVIEVER:
                 messageDto = list.get(position-1);
-                Log.i("----", messageDto.getSender().getId());
                 RecieverViewHolder recieverViewHolder = (RecieverViewHolder) holder;
                 recieverViewHolder.sendermessage.setText(messageDto.getSender().getId() + "_" + messageDto.getContent());
                 recieverViewHolder.timeofmessage.setText(TimeAgo.getTimeStamp(messageDto.getCreateAt()));
+
+                recieverViewHolder.senderImage.setImageDrawable(members.get(messageDto.getSender().getId()));
 
 //                Bitmap bitmap = null;
 //                try {
@@ -114,8 +126,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        String user = sharedPreferencesUser.getString("user-info", null);
-        UserSummaryDTO dto = gson.fromJson(user, UserSummaryDTO.class);
+
         if (position == 0)
             return ROW_TYPE_LOAD_EARLIER_MESSAGES;
         else {
@@ -190,5 +201,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 notifyDataSetChanged();
             }
         });
+    }
+
+    public void setMembers(Map<String,CroppedDrawable> members){
+        this.members = members;
     }
 }

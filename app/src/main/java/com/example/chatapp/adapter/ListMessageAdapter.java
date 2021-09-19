@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -47,10 +48,8 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-        }
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         InboxDto inboxDto = list.get(position);
         String url;
         String displayName;
@@ -89,6 +88,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         }
 
         holder.itemView.setOnClickListener(v -> {
+            Toast.makeText(context, inboxDto.getRoom().getId(), Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(context, ChatActivity.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("dto", inboxDto);
@@ -104,11 +104,10 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         ListMessageAdapter adapter;
         ImageView img_lim_avt;
         TextView txt_lim_display_name, txt_lim_last_message, txt_lim_time_last_message, txt_lim_unread_message;
-
 
         public ViewHolder(@NonNull View itemView, ListMessageAdapter adapter) {
             super(itemView);

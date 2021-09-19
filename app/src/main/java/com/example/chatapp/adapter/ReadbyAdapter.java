@@ -1,13 +1,15 @@
 package com.example.chatapp.adapter;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,19 +56,34 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
                 .placeholder(R.drawable.image_placeholer)
                 .centerCrop().circleCrop().into(holder.readby_image);
 
-        if (position == list.size() - 1 && position > max) {
+        if (position == list.size() - 2 && position >= max) {
             holder.readby_image.setAlpha(0.3f);
-            holder.readby_more.setText(String.format("%s%d", "+", (list.size() - max - 1)));
+            holder.readby_more.setText(String.format("%s%d", "+", (list.size() - max - 2)));
         }
         // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
         holder.itemView.setOnClickListener(v -> {
-            Toast.makeText(context, messageDto.getId(), Toast.LENGTH_SHORT).show();
+            final Dialog dialog = new Dialog(context);
+            dialog.setContentView(R.layout.readby_dialog);
+//            if (dialog.getWindow() != null) {
+//                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // this is optional
+//            }
+            ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
+            TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
+
+            ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, messageDto.getReadbyes());
+            listView.setAdapter(arrayAdapter);
+            listView.setOnItemClickListener((adapterView, view, which, l) -> {
+                Log.d("readby on cli", "showAssignmentsList: " + messageDto.getReadbyes().get(which).getReadByUser().getId());
+            });
+            titleOfDialog.setText("Những người đã xem");
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+            dialog.show();
         });
     }
 
     @Override
     public int getItemCount() {
-        return list.size() - max + 1;
+        return list.size() - max;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

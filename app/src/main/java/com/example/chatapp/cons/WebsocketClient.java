@@ -1,7 +1,5 @@
 package com.example.chatapp.cons;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -12,13 +10,26 @@ import ua.naiksoftware.stomp.StompClient;
 import ua.naiksoftware.stomp.dto.StompHeader;
 
 public class WebsocketClient {
-    private StompClient mStompClient;
-    private Context context;
-    private SendData sendData;
+    private static StompClient stompClient;
+    private static WebsocketClient instance = null;
 
-    public void connect(String userId, String access_token, Context context) {
-        this.context = context;
-        sendData = (SendData) context;
+    private WebsocketClient() {
+        stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, Constant.WEB_SOCKET);
+    }
+
+    public static WebsocketClient getInstance() {
+        if (instance == null)
+            instance = new WebsocketClient();
+        if (stompClient == null)
+            stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, Constant.WEB_SOCKET);
+        return instance;
+    }
+
+    public StompClient getStompClient() {
+        return stompClient;
+    }
+
+    public void connect(String userId, String access_token) {
         List<StompHeader> headers = new ArrayList<>();
         headers.add(new StompHeader("userId", userId));
         headers.add(new StompHeader("access_token", access_token));
@@ -26,33 +37,8 @@ public class WebsocketClient {
         Log.i("userId", userId);
         Log.i("access_token", access_token);
 
-        mStompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, "ws://10.0.2.2:8080/ws/websocket");
-
-//        mStompClient.disconnect();
-
-        mStompClient.connect(headers);
-        final String[] str = {null};
-        mStompClient.topic("/users/queue/messages").subscribe(x -> {
-            Log.i(">>>receiver", x.getPayload());
-            str[0] = x.getPayload().toString();
-            sendData.SendingData(str[0]);
-        });
-
-
-
+        stompClient.connect(headers);
 
     }
-
-
-    public void send(String s) {
-
-        mStompClient.send("/app/chat", s)
-                .subscribe(() -> {
-                    //ok
-                }, throwable -> {
-                    //error
-                });
-    }
-
 
 }

@@ -1,39 +1,67 @@
 package com.example.chatapp.ui.main;
 
+import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-
 import com.example.chatapp.R;
-import com.example.chatapp.cons.GetNewAccessToken;
-import com.example.chatapp.ui.HomePageActivity;
+import com.example.chatapp.cons.WebsocketClient;
+import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.main.frag.ContactFragment;
+import com.example.chatapp.ui.main.frag.GroupFragment;
 import com.example.chatapp.ui.main.frag.InforFragment;
 import com.example.chatapp.ui.main.frag.MessageFragment;
 import com.example.chatapp.ui.main.frag.RecentFragment;
-import com.example.chatapp.ui.main.frag.GroupFragment;
-import com.example.chatapp.ui.signin.SigninActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
     BottomNavigationView bnv_menu;
+    MessageFragment messageFragment;
+    Gson gson;
+    SharedPreferences sharedPreferencesUser;
+    UserSummaryDTO user;
 
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.N)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
         bnv_menu = findViewById(R.id.bnv_bot);
+        gson = new Gson();
+        sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
+        user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+        messageFragment = new MessageFragment();
+        WebsocketClient.getInstance().connect(user.getId(), user.getAccessToken());
+        WebsocketClient.getInstance().getStompClient()
+                .topic("/users/queue/messages")
+                .subscribe(x -> {
+                    Log.i(">>>receiver in main", x.getPayload());
+                    MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
+                    Log.i(">>>message dto", messageDto.toString());
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, messageDto.getSender().getDisplayName() + " " + messageDto.getContent(), Toast.LENGTH_SHORT).show();
+                            messageFragment.setNewMessage(messageDto);
+                        }
+                    });
+                }, throwable -> {
+                    Log.i(">>>receiver error", throwable.getMessage());
+                });
         bnv_menu.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        loadFragment(new MessageFragment());
+        loadFragment(messageFragment);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -41,20 +69,20 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             Fragment fragment;
-            switch (item.getItemId()){
-                case R.id.navigation_message :
-                    fragment = new MessageFragment();
-                    loadFragment(fragment);
+            switch (item.getItemId()) {
+                case R.id.navigation_message:
+                    messageFragment = new MessageFragment();
+                    loadFragment(messageFragment);
                     return true;
-                case R.id.navigation_contact :
+                case R.id.navigation_contact:
                     fragment = new ContactFragment();
                     loadFragment(fragment);
                     return true;
-                case R.id.navigation_group :
+                case R.id.navigation_group:
                     fragment = new GroupFragment();
                     loadFragment(fragment);
                     return true;
-                case R.id.navigation_recent :
+                case R.id.navigation_recent:
                     fragment = new RecentFragment();
                     loadFragment(fragment);
                     return true;
@@ -62,16 +90,14 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new InforFragment();
                     loadFragment(fragment);
                     return true;
-
             }
             return false;
         }
     };
 
-
-    private void loadFragment(Fragment fragment){
+    private void loadFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fla_content,fragment);
+        transaction.replace(R.id.fla_content, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }

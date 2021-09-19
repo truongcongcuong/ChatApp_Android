@@ -24,6 +24,7 @@ import com.example.chatapp.adapter.ListMessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.dto.MessageDto;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -33,7 +34,10 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +54,7 @@ public class MessageFragment extends Fragment {
     Gson gson = new Gson();
     SharedPreferences sharedPreferencesToken;
     int page = 0;
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -59,6 +64,8 @@ public class MessageFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private MessageDto messageDto = null;
 
     public MessageFragment() {
         // Required empty public constructor
@@ -91,7 +98,19 @@ public class MessageFragment extends Fragment {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void setNewMessage(MessageDto newMessage) {
+        messageDto = newMessage;
+        for (InboxDto inboxDto : list) {
+            if (messageDto != null && inboxDto.getRoom().getId().equals(messageDto.getRoomId())) {
+                inboxDto.setLastMessage(messageDto);
+            }
+        }
+        sortTimeLastMessage();
+        adapter.notifyDataSetChanged();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -105,9 +124,9 @@ public class MessageFragment extends Fragment {
         return view;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateListString() {
-        List<InboxDto> list = new ArrayList<>();
+        list = new ArrayList<>();
         String token = sharedPreferencesToken.getString("access-token", null);
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=15",
                 response -> {
@@ -120,6 +139,7 @@ public class MessageFragment extends Fragment {
                             InboxDto inboxDto = gson.fromJson(objectInbox.toString(), InboxDto.class);
                             list.add(inboxDto);
                         }
+                        sortTimeLastMessage();
                         this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), list);
                         this.rcv_list_message.setAdapter(adapter);
 
@@ -139,5 +159,21 @@ public class MessageFragment extends Fragment {
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
         requestQueue.add(request);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void sortTimeLastMessage() {
+        if (list != null) {
+            list.sort((x, y) -> {
+                try {
+                    Date d1 = dateFormat.parse(x.getLastMessage().getCreateAt());
+                    Date d2 = dateFormat.parse(y.getLastMessage().getCreateAt());
+                    return d2.compareTo(d1);
+                } catch (ParseException | NullPointerException e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+            });
+        }
     }
 }

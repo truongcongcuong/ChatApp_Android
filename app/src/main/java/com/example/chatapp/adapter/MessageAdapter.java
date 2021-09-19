@@ -8,7 +8,6 @@ import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -54,13 +53,14 @@ public class MessageAdapter extends RecyclerView.Adapter {
         if (viewType == ITEM_SEND) {
             View view = LayoutInflater.from(context).inflate(R.layout.sender_chat_layout, parent, false);
             return new SenderViewHolder(view);
-        } else if (viewType == ITEM_REVIEVER) {
+        } else {
             View view = LayoutInflater.from(context).inflate(R.layout.reciever_chat_layout, parent, false);
             return new RecieverViewHolder(view);
-        } else {
-            View view = LayoutInflater.from(context).inflate(R.layout.row_load_earlier_messages, parent, false);
-            return new LoadEarlierMsgsViewHolder(view);
         }
+//        else {
+//            View view = LayoutInflater.from(context).inflate(R.layout.row_load_earlier_messages, parent, false);
+//            return new LoadEarlierMsgsViewHolder(view);
+//        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -68,25 +68,25 @@ public class MessageAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         MessageDto messageDto = null;
         switch (getItemViewType(position)) {
-            case ROW_TYPE_LOAD_EARLIER_MESSAGES:
-                LoadEarlierMsgsViewHolder loadEarlierMsgsViewHolder =
-                        (LoadEarlierMsgsViewHolder) holder;
-                if (isLoadEarlierMsgs) {
-                    loadEarlierMsgsViewHolder.btLoadEarlierMessages
-                            .setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    if (mLoadEarlierMessages != null) {
-                                        mLoadEarlierMessages.onLoadEarlierMessages();
-                                    }
-                                }
-                            });
-                } else {
-                    loadEarlierMsgsViewHolder.btLoadEarlierMessages.setVisibility(View.GONE);
-                }
-                break;
+//            case ROW_TYPE_LOAD_EARLIER_MESSAGES:
+//                LoadEarlierMsgsViewHolder loadEarlierMsgsViewHolder =
+//                        (LoadEarlierMsgsViewHolder) holder;
+//                if (isLoadEarlierMsgs) {
+//                    loadEarlierMsgsViewHolder.btLoadEarlierMessages
+//                            .setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View view) {
+//                                    if (mLoadEarlierMessages != null) {
+//                                        mLoadEarlierMessages.onLoadEarlierMessages();
+//                                    }
+//                                }
+//                            });
+//                } else {
+//                    loadEarlierMsgsViewHolder.btLoadEarlierMessages.setVisibility(View.GONE);
+//                }
+//                break;
             case ITEM_SEND:
-                messageDto = list.get(position - 1);
+                messageDto = list.get(position);
                 SenderViewHolder senderViewHolder = (SenderViewHolder) holder;
                 senderViewHolder.sendermessage.setText(messageDto.getContent());
                 senderViewHolder.timeofmessage.setText(TimeAgo.getTimeStamp(messageDto.getCreateAt()));
@@ -116,7 +116,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 }
                 break;
             case ITEM_REVIEVER:
-                messageDto = list.get(position - 1);
+                messageDto = list.get(position);
                 RecieverViewHolder recieverViewHolder = (RecieverViewHolder) holder;
                 if (messageDto != null) {
                     if (messageDto.getSender() != null) {
@@ -171,11 +171,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
                 dialog.show();
 
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                lp.copyFrom(dialog.getWindow().getAttributes());
-                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                dialog.getWindow().setAttributes(lp);
+//                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+//                lp.copyFrom(dialog.getWindow().getAttributes());
+//                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+//                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+//                dialog.getWindow().setAttributes(lp);
                 return true;
             });
         }
@@ -183,22 +183,22 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return list.size() + 1;
+        return list.size();
     }
 
     @Override
     public int getItemViewType(int position) {
         String user = sharedPreferencesUser.getString("user-info", null);
         UserSummaryDTO dto = gson.fromJson(user, UserSummaryDTO.class);
-        if (position == 0)
-            return ROW_TYPE_LOAD_EARLIER_MESSAGES;
-        else {
-            MessageDto message = list.get(position - 1);
-            if (message != null && message.getSender() != null && message.getSender().getId().equalsIgnoreCase(dto.getId()))
-                return ITEM_SEND;
-            else
-                return ITEM_REVIEVER;
-        }
+//        if (position == 0)
+//            return ROW_TYPE_LOAD_EARLIER_MESSAGES;
+//        else {
+        MessageDto message = list.get(position);
+        if (message != null && message.getSender() != null && message.getSender().getId().equalsIgnoreCase(dto.getId()))
+            return ITEM_SEND;
+        else
+            return ITEM_REVIEVER;
+//        }
     }
 
     static class SenderViewHolder extends RecyclerView.ViewHolder {

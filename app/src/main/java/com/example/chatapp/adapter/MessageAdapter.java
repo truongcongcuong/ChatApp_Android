@@ -3,8 +3,6 @@ package com.example.chatapp.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
-import android.util.LogPrinter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +11,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter {
-
 
     Context context;
 
@@ -82,34 +81,64 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 }
                 break;
             case ITEM_SEND:
-                messageDto = list.get(position-1);
+                messageDto = list.get(position - 1);
                 SenderViewHolder senderViewHolder = (SenderViewHolder) holder;
                 senderViewHolder.sendermessage.setText(messageDto.getContent());
                 senderViewHolder.timeofmessage.setText(TimeAgo.getTimeStamp(messageDto.getCreateAt()));
+                if (messageDto.getReadbyes() != null) {
+                    ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+                    layoutManager.setStackFromEnd(true);
+                    if (messageDto.getReadbyes().size() == 1) {
+                        senderViewHolder.rcv_read_one.setLayoutManager(layoutManager);
+                        senderViewHolder.rcv_read_one.setAdapter(readbyAdapter);
+                    }
+                    if (messageDto.getReadbyes().size() > 1) {
+                        senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
+                        senderViewHolder.rcv_read_many.setAdapter(readbyAdapter);
+                        if (senderViewHolder.rcv_read_one.getAdapter() != null) {
+                            ReadbyAdapter empty = new ReadbyAdapter(null, context);
+                            senderViewHolder.rcv_read_one.setAdapter(empty);
+                        }
+                    }
+                }
                 break;
             case ITEM_REVIEVER:
-                messageDto = list.get(position-1);
-                Log.i("----", messageDto.getSender().getId());
+                messageDto = list.get(position - 1);
                 RecieverViewHolder recieverViewHolder = (RecieverViewHolder) holder;
-                recieverViewHolder.sendermessage.setText(messageDto.getSender().getId() + "_" + messageDto.getContent());
-                recieverViewHolder.timeofmessage.setText(TimeAgo.getTimeStamp(messageDto.getCreateAt()));
-
-//                Bitmap bitmap = null;
-//                try {
-//                    URL urlOnl = new URL(messageDto.getSender().getImageUrl());
-//                    bitmap = BitmapFactory.decodeStream(urlOnl.openConnection().getInputStream());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                CroppedDrawable cd = new CroppedDrawable(bitmap);
-//                recieverViewHolder.senderImage.setImageDrawable(cd);
+                if (messageDto != null) {
+                    if (messageDto.getSender() != null) {
+                        recieverViewHolder.sendermessage.setText(messageDto.getContent());
+                        Glide.with(context).load(messageDto.getSender().getImageUrl())
+                                .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                .into(recieverViewHolder.senderImage);
+                    }
+                    recieverViewHolder.timeofmessage.setText(TimeAgo.getTimeStamp(messageDto.getCreateAt()));
+                    if (messageDto.getReadbyes() != null) {
+                        ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
+                        LinearLayoutManager layoutManager2 = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+                        layoutManager2.setStackFromEnd(true);
+                        if (messageDto.getReadbyes().size() == 1) {
+                            recieverViewHolder.rcv_read_one.setLayoutManager(layoutManager2);
+                            recieverViewHolder.rcv_read_one.setAdapter(readbyAdapter);
+                        }
+                        if (messageDto.getReadbyes().size() > 1) {
+                            recieverViewHolder.rcv_read_many.setLayoutManager(layoutManager2);
+                            recieverViewHolder.rcv_read_many.setAdapter(readbyAdapter);
+                            if (recieverViewHolder.rcv_read_one.getAdapter() != null) {
+                                ReadbyAdapter empty = new ReadbyAdapter(null, context);
+                                recieverViewHolder.rcv_read_one.setAdapter(empty);
+                            }
+                        }
+                    }
+                }
                 break;
         }
     }
 
     @Override
     public int getItemCount() {
-        return list.size()+1;
+        return list.size() + 1;
     }
 
     @Override
@@ -120,7 +149,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
             return ROW_TYPE_LOAD_EARLIER_MESSAGES;
         else {
             MessageDto message = list.get(position - 1);
-            if (message.getSender().getId().equalsIgnoreCase(dto.getId()))
+            if (message != null && message.getSender() != null && message.getSender().getId().equalsIgnoreCase(dto.getId()))
                 return ITEM_SEND;
             else
                 return ITEM_REVIEVER;
@@ -130,12 +159,17 @@ public class MessageAdapter extends RecyclerView.Adapter {
     static class SenderViewHolder extends RecyclerView.ViewHolder {
 
         TextView sendermessage, timeofmessage;
+        RecyclerView rcv_read_one;
+        RecyclerView rcv_read_many;
 
         public SenderViewHolder(@NonNull View itemView) {
             super(itemView);
-            timeofmessage = itemView.findViewById(R.id.timeofmessage);
-            sendermessage = itemView.findViewById(R.id.sendermessage);
-
+            timeofmessage = itemView.findViewById(R.id.send_message_time);
+            sendermessage = itemView.findViewById(R.id.send_message_content);
+            rcv_read_one = itemView.findViewById(R.id.send_rcv_read_one);
+            rcv_read_many = itemView.findViewById(R.id.send_rcv_read_many);
+            rcv_read_one.addItemDecoration(new ItemDecorator(-15));
+            rcv_read_many.addItemDecoration(new ItemDecorator(-15));
         }
     }
 
@@ -143,15 +177,19 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
         TextView sendermessage, timeofmessage;
         ImageView senderImage;
+        RecyclerView rcv_read_one;
+        RecyclerView rcv_read_many;
 
         public RecieverViewHolder(@NonNull View itemView) {
             super(itemView);
-            timeofmessage = itemView.findViewById(R.id.timeofmessage);
-            sendermessage = itemView.findViewById(R.id.sendermessage);
-            senderImage = itemView.findViewById(R.id.senderImage);
-
+            timeofmessage = itemView.findViewById(R.id.receiver_message_time);
+            sendermessage = itemView.findViewById(R.id.receiver_message_content);
+            senderImage = itemView.findViewById(R.id.receiver_sender_image);
+            rcv_read_one = itemView.findViewById(R.id.receiver_rcv_read_one);
+            rcv_read_many = itemView.findViewById(R.id.receiver_rcv_read_many);
+            rcv_read_one.addItemDecoration(new ItemDecorator(-15));
+            rcv_read_many.addItemDecoration(new ItemDecorator(-15));
         }
-
     }
 
     static class LoadEarlierMsgsViewHolder extends RecyclerView.ViewHolder {
@@ -165,11 +203,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
     }
 
     public void updateList(List<MessageDto> messageDtos) {
-
-        for (int i = messageDtos.size()-1; i >=0; i--) {
+        for (int i = messageDtos.size() - 1; i >= 0; i--) {
             this.list.add(0, messageDtos.get(i));
         }
-//        list.addAll(messageDtos);
         notifyDataSetChanged();
     }
 
@@ -181,7 +217,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         this.isLoadEarlierMsgs = isLoadEarlierMsgs;
     }
 
-    public void updateMessage(MessageDto messageDto){
+    public void updateMessage(MessageDto messageDto) {
         list.add(messageDto);
         Activity activity = (Activity) context;
         activity.runOnUiThread(new Runnable() {

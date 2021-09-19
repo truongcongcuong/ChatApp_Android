@@ -35,6 +35,8 @@
                 android:layout_height="35dp"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/ibt_chat_back"
+                android:background="@drawable/background_circle_image"
+                android:padding="1dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/defaultprofile"></ImageView>
 
@@ -68,7 +70,7 @@
     <EditText
         android:id="@+id/edt_chat_message_send"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="45dp"
         android:layout_alignParentBottom="true"
         android:layout_gravity="start"
         android:layout_marginLeft="5dp"
@@ -93,11 +95,12 @@
         android:layout_marginBottom="5dp"
         android:layout_toRightOf="@+id/edt_chat_message_send"
         android:backgroundTint="@color/bg_app"
-        app:cardCornerRadius="45dp">
+        android:padding="0dp"
+        app:cardCornerRadius="23dp">
 
         <ImageButton
             android:id="@+id/ibt_chat_send_message"
-            android:layout_width="39dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:background="@android:color/transparent"
@@ -108,5 +111,21 @@
         </ImageButton>
 
     </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btn_scroll_to_bottom"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignBottom="@+id/rcv_chat_list"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/custom_button_circle"
+        android:rotation="90"
+        android:visibility="gone"
+        app:backgroundTint="@null" />
+
 
 </RelativeLayout>

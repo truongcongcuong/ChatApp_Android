@@ -13,11 +13,13 @@
 
         <ImageView
             android:id="@+id/img_lim_avt"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="4dp"
+            android:background="@drawable/background_circle_image"
             android:foregroundGravity="center_vertical"
-            android:paddingLeft="10dp"
+            android:padding="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

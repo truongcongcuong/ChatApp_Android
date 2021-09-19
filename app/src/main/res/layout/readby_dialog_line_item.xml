@@ -11,6 +11,8 @@
         android:id="@+id/image_readby_dialog_item"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:background="@drawable/background_circle_image"
+        android:padding="1dp"
         android:visibility="visible" />
 
     <LinearLayout

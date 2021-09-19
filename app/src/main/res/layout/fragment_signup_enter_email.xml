@@ -35,10 +35,12 @@
             android:id="@+id/btn_sign_up_confirm_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/confirm_button"
-            android:layout_margin="10dp"
             android:layout_gravity="end"
-            android:backgroundTint="@color/bg_app"/>
+            android:layout_margin="10dp"
+            android:background="@drawable/custom_button"
+            android:backgroundTint="@color/bg_app"
+            android:text="@string/confirm_button"
+            app:backgroundTint="@null" />
 
         <TextView
             android:id="@+id/txt_sign_up_vetify"
@@ -72,9 +74,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
+            android:layout_margin="10dp"
+            android:background="@drawable/custom_button"
             android:backgroundTint="@color/bg_app"
             android:text="@string/confirm_button"
-            android:layout_margin="10dp"/>
+            app:backgroundTint="@null" />
 
     </LinearLayout>
 </FrameLayout>

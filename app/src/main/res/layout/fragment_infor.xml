@@ -16,7 +16,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="30dp"
             android:layout_marginTop="32dp"
+            android:background="@drawable/custom_button"
             android:text="Sign out"
+            app:backgroundTint="@null"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/relativeLayout2" />
@@ -46,7 +48,8 @@
                 android:id="@+id/image_info_image"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
-                tools:src="@tools:sample/avatars" />
+                android:background="@drawable/background_circle_image"
+                android:padding="1dp"/>
 
             <TextView
                 android:id="@+id/txt_info_name"

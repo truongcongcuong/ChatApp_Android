@@ -1,16 +1,20 @@
 package com.example.chatapp.adapter;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -59,9 +63,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        MessageDto messageDto;
+        MessageDto messageDto = null;
         switch (getItemViewType(position)) {
             case ROW_TYPE_LOAD_EARLIER_MESSAGES:
                 LoadEarlierMsgsViewHolder loadEarlierMsgsViewHolder =
@@ -102,6 +107,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         }
                     }
                 }
+                if (messageDto.getReactions() != null) {
+                    ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+                    layoutManager.setStackFromEnd(true);
+                    senderViewHolder.send_rcv_reaction.setLayoutManager(layoutManager);
+                    senderViewHolder.send_rcv_reaction.setAdapter(reactionAdapter);
+                }
                 break;
             case ITEM_REVIEVER:
                 messageDto = list.get(position - 1);
@@ -131,8 +143,41 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             }
                         }
                     }
+                    if (messageDto.getReactions() != null) {
+                        ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
+                        LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+                        layoutManager.setStackFromEnd(true);
+                        recieverViewHolder.receiver_rcv_reaction.setLayoutManager(layoutManager);
+                        recieverViewHolder.receiver_rcv_reaction.setAdapter(reactionAdapter);
+                    }
                 }
                 break;
+        }
+        if (messageDto != null) {
+            MessageDto finalMessageDto = messageDto;
+            holder.itemView.setOnLongClickListener(v -> {
+                final Dialog dialog = new Dialog(context);
+                dialog.setContentView(R.layout.reaction_dialog_create);
+
+                RecyclerView listView = dialog.findViewById(R.id.rcv_reaction_dialog_create);
+                TextView titleOfDialog = dialog.findViewById(R.id.txt_reaction_dialog_create_title);
+
+                LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+                ReactionDialogCreateAdapter arrayAdapter = new ReactionDialogCreateAdapter(finalMessageDto, context);
+                listView.setLayoutManager(layoutManager);
+                listView.setAdapter(arrayAdapter);
+
+                titleOfDialog.setText("Bày tỏ cảm xúc");
+                dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+                dialog.show();
+
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(dialog.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                dialog.getWindow().setAttributes(lp);
+                return true;
+            });
         }
     }
 
@@ -161,6 +206,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         TextView sendermessage, timeofmessage;
         RecyclerView rcv_read_one;
         RecyclerView rcv_read_many;
+        RecyclerView send_rcv_reaction;
 
         public SenderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -168,8 +214,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
             sendermessage = itemView.findViewById(R.id.send_message_content);
             rcv_read_one = itemView.findViewById(R.id.send_rcv_read_one);
             rcv_read_many = itemView.findViewById(R.id.send_rcv_read_many);
+            send_rcv_reaction = itemView.findViewById(R.id.send_rcv_reaction);
+
             rcv_read_one.addItemDecoration(new ItemDecorator(-15));
             rcv_read_many.addItemDecoration(new ItemDecorator(-15));
+            send_rcv_reaction.addItemDecoration(new ItemDecorator(-15));
         }
     }
 
@@ -179,6 +228,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         ImageView senderImage;
         RecyclerView rcv_read_one;
         RecyclerView rcv_read_many;
+        RecyclerView receiver_rcv_reaction;
 
         public RecieverViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -187,8 +237,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
             senderImage = itemView.findViewById(R.id.receiver_sender_image);
             rcv_read_one = itemView.findViewById(R.id.receiver_rcv_read_one);
             rcv_read_many = itemView.findViewById(R.id.receiver_rcv_read_many);
+            receiver_rcv_reaction = itemView.findViewById(R.id.receiver_rcv_reaction);
+
             rcv_read_one.addItemDecoration(new ItemDecorator(-15));
             rcv_read_many.addItemDecoration(new ItemDecorator(-15));
+            receiver_rcv_reaction.addItemDecoration(new ItemDecorator(-15));
         }
     }
 

@@ -9,14 +9,14 @@
     android:paddingBottom="20dp">
 
     <TextView
-        android:id="@+id/txt_readby_dialog_title"
+        android:id="@+id/txt_reaction_dialog_create_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:gravity="center_horizontal"
         android:paddingStart="4dp"
         android:singleLine="true"
-        android:text="Những người đã xem"
+        android:text="Bày tỏ cảm xúc"
         android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -28,9 +28,8 @@
         android:layout_marginBottom="8dp"
         android:background="#c4c4c4" />
 
-    <ListView
-        android:id="@+id/lv_readby_dialog"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcv_reaction_dialog_create"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="wrap_content" />
 </LinearLayout>

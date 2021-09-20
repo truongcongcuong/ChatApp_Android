@@ -3,7 +3,6 @@ package com.example.chatapp.adapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,7 @@ import java.util.List;
 
 public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder> {
 
-    private List<ReadByDto> list = new ArrayList<>();
+    private List<ReadByDto> list;
     private final Context context;
     private MessageDto messageDto;
     private final int max = 1;
@@ -60,20 +59,19 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
             holder.readby_image.setAlpha(0.3f);
             holder.readby_more.setText(String.format("%s%d", "+", (list.size() - max - 2)));
         }
+
         // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
         holder.itemView.setOnClickListener(v -> {
             final Dialog dialog = new Dialog(context);
             dialog.setContentView(R.layout.readby_dialog);
-//            if (dialog.getWindow() != null) {
-//                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // this is optional
-//            }
+
             ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
             TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
 
             ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, messageDto.getReadbyes());
             listView.setAdapter(arrayAdapter);
             listView.setOnItemClickListener((adapterView, view, which, l) -> {
-                Log.d("readby on cli", "showAssignmentsList: " + messageDto.getReadbyes().get(which).getReadByUser().getId());
+
             });
             titleOfDialog.setText("Những người đã xem");
             dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);

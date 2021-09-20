@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -38,11 +37,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InforFragment extends Fragment {
-    TextView txt_info_error, txt_info_name;
-    Button btn_info_signout;
-    ImageView image_info_image;
-    Gson gson = new Gson();
-    UserSummaryDTO user;
+    private TextView txt_info_error;
+    private TextView txt_info_name;
+    private Button btn_info_signout;
+    private ImageView image_info_image;
+    private Gson gson;
+    private UserSummaryDTO user;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -69,18 +69,20 @@ public class InforFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        gson = new Gson();
+
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_infor, container, false);
+
         txt_info_error = view.findViewById(R.id.txt_info_error);
         txt_info_error.setTextColor(getActivity().getResources().getColor(R.color.red));
         btn_info_signout = view.findViewById(R.id.btn_info_signout);
         txt_info_name = view.findViewById(R.id.txt_info_name);
         image_info_image = view.findViewById(R.id.image_info_image);
-        getUserInfo();
+
         btn_info_signout.setOnClickListener(v -> {
             callSignout();
             SharedPreferences sharedPreferencesIsLogin = getActivity().getApplicationContext().getSharedPreferences("is-login", getActivity().getApplicationContext().MODE_PRIVATE);
@@ -94,6 +96,7 @@ public class InforFragment extends Fragment {
             startActivity(i);
             getActivity().finish();
         });
+        getUserInfo();
 
         return view;
     }
@@ -115,14 +118,14 @@ public class InforFragment extends Fragment {
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        txt_info_error.setText(res.toString());
+                        txt_info_error.setText(res);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 },
                 error -> {
                     NetworkResponse response = error.networkResponse;
-                    if (error instanceof ServerError && error != null) {
+                    if (error instanceof ServerError) {
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                             JSONObject object = new JSONObject(res);
@@ -134,7 +137,7 @@ public class InforFragment extends Fragment {
                     }
                 }) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 HashMap<String, String> map = new HashMap<>();
                 SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", getActivity().getApplicationContext().MODE_PRIVATE);
                 String rfToken = sharedPreferencesToken.getString("refresh-token", null);

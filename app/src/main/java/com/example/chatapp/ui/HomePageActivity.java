@@ -1,15 +1,14 @@
 package com.example.chatapp.ui;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chatapp.R;
 import com.example.chatapp.ui.signin.SigninActivity;
@@ -17,7 +16,10 @@ import com.example.chatapp.ui.signup.SignUpActivity;
 
 public class HomePageActivity extends AppCompatActivity {
 
-    Button btn_home_page_sign_in,btn_home_page_sign_up,btn_home_page_language_english,btn_home_page_language_vietnamese;
+    private Button btn_home_page_sign_in;
+    private Button btn_home_page_sign_up;
+    private Button btn_home_page_language_english;
+    private Button btn_home_page_language_vietnamese;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -33,29 +35,27 @@ public class HomePageActivity extends AppCompatActivity {
 
         btn_home_page_language_vietnamese.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.gray)));
 
-        btn_home_page_sign_in.setOnClickListener(v->{
+        btn_home_page_sign_in.setOnClickListener(v -> {
             Intent intent = new Intent(HomePageActivity.this, SigninActivity.class);
             startActivity(intent);
         });
 
-        btn_home_page_sign_up.setOnClickListener(v->{
+        btn_home_page_sign_up.setOnClickListener(v -> {
             Intent intent = new Intent(HomePageActivity.this, SignUpActivity.class);
             startActivity(intent);
         });
 
-
-        btn_home_page_language_vietnamese.setOnClickListener(v->{
+        btn_home_page_language_vietnamese.setOnClickListener(v -> {
             showDialogSignupSuccess();
         });
 
     }
 
-
-    private void showDialogSignupSuccess(){
+    private void showDialogSignupSuccess() {
         AlertDialog alertDialog = new AlertDialog.Builder(HomePageActivity.this)
                 .setTitle(R.string.notification_feature_error)
                 .setMessage(R.string.feature_error_content)
-                .setNegativeButton(R.string.accept,null)
+                .setNegativeButton(R.string.accept, null)
                 .create();
         alertDialog.show();
     }

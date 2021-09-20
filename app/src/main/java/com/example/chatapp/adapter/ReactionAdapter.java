@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -42,10 +41,10 @@ import java.util.Map;
 
 public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHolder> {
 
-    private List<Reaction> list = new ArrayList<>();
+    private List<Reaction> list;
     private final Context context;
     private MessageDto messageDto;
-    SharedPreferences sharedPreferencesToken;
+    private final SharedPreferences sharedPreferencesToken;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ReactionAdapter(MessageDto messageDto, Context context) {
@@ -69,8 +68,8 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        Reaction reaction = list.get(position);
 
+        Reaction reaction = list.get(position);
         switch (reaction.getType()) {
             case "HAHA":
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_haha);
@@ -91,16 +90,16 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_like);
                 break;
         }
+
         holder.itemView.setOnClickListener(v -> {
             String token = sharedPreferencesToken.getString("access-token", null);
             StringRequest request = new StringRequest(Request.Method.GET, Constant.API_MESSAGE + "react/" + messageDto.getId(),
                     response -> {
                         try {
-                            List<ReactionDto> reactionDtos = new ArrayList<>();
                             String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                             Type listType = new TypeToken<List<ReactionDto>>() {
                             }.getType();
-                            reactionDtos = new Gson().fromJson(res, listType);
+                            List<ReactionDto> reactionDtos = new Gson().fromJson(res, listType);
 
                             final Dialog dialog = new Dialog(context);
                             dialog.setContentView(R.layout.reaction_dialog);
@@ -110,7 +109,7 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
                             ReactionDialogAdapter arrayAdapter = new ReactionDialogAdapter(context, R.layout.reaction_dialog_line_item, reactionDtos);
                             listView.setAdapter(arrayAdapter);
                             listView.setOnItemClickListener((adapterView, view, which, l) -> {
-                                Log.d("reaction on cli", "showAssignmentsList: " + messageDto.getReadbyes().get(which).getReadByUser().getId());
+
                             });
                             titleOfDialog.setText("Những người đã bày tỏ cảm xúc");
                             dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
@@ -120,11 +119,9 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
                             e.printStackTrace();
                         }
                     },
-                    error -> {
-                        Log.i("error", error.toString());
-                    }) {
+                    error -> Log.i("get reaction error", error.toString())) {
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
+                public Map<String, String> getHeaders() {
                     HashMap<String, String> map = new HashMap<>();
                     map.put("Authorization", "Bearer " + token);
                     return map;

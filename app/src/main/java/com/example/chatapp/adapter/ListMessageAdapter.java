@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -23,15 +22,12 @@ import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.ui.ChatActivity;
 import com.example.chatapp.utils.TimeAgo;
-import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.ViewHolder> {
-    private Context context;
-    private List<InboxDto> list = new ArrayList<>();
-    private Gson gson = new Gson();
+    private final Context context;
+    private List<InboxDto> list;
 
     public ListMessageAdapter(Context context, List<InboxDto> dtos) {
         this.context = context;
@@ -88,7 +84,6 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         }
 
         holder.itemView.setOnClickListener(v -> {
-            Toast.makeText(context, inboxDto.getRoom().getId(), Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(context, ChatActivity.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("dto", inboxDto);
@@ -107,7 +102,10 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ListMessageAdapter adapter;
         ImageView img_lim_avt;
-        TextView txt_lim_display_name, txt_lim_last_message, txt_lim_time_last_message, txt_lim_unread_message;
+        TextView txt_lim_display_name;
+        TextView txt_lim_last_message;
+        TextView txt_lim_time_last_message;
+        TextView txt_lim_unread_message;
 
         public ViewHolder(@NonNull View itemView, ListMessageAdapter adapter) {
             super(itemView);

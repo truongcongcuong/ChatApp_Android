@@ -1,21 +1,32 @@
 package com.example.chatapp.ui;
 
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,17 +45,23 @@ import com.example.chatapp.cons.WebsocketClient;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
+import com.example.chatapp.dto.ReactionReceiver;
 import com.example.chatapp.dto.ReadByDto;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.entity.Reaction;
+import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -54,32 +71,43 @@ import java.util.List;
 import java.util.Map;
 
 import io.vertx.core.json.Json;
+import lombok.SneakyThrows;
 import ua.naiksoftware.stomp.dto.StompMessage;
 
-public class ChatActivity extends AppCompatActivity implements MessageAdapter.LoadEarlierMessages, SendData {
+public class ChatActivity extends AppCompatActivity implements SendData {
 
-    ImageView img_chat_user_avt;
-    TextView txt_chat_user_name;
-    RecyclerView rcv_chat_list;
-    EditText edt_chat_message_send;
-    ImageButton ibt_chat_send_message, ibt_chat_back;
-    Toolbar tlb_chat;
-    private String enteredMessage, displayName, url;
-    InboxDto dto;
-    GetNewAccessToken getNewAccessToken;
-    MessageAdapter adapter;
-    Gson gson;
-    int page = 0;
-    UserSummaryDTO user;
-    LinearLayoutManager linearLayoutManager;
-    String access_token;
-    List<MessageDto> list = new ArrayList<>();
+    private ImageView img_chat_user_avt;
+    private TextView txt_chat_user_name;
+    private RecyclerView rcv_chat_list;
+    private EditText edt_chat_message_send;
+    private ImageButton ibt_chat_send_message;
+    private ImageButton ibt_chat_back;
+    private ImageButton ibt_chat_send_media;
+    private Toolbar tlb_chat;
+    private String displayName, url;
+    private InboxDto dto;
+    private GetNewAccessToken getNewAccessToken;
+    private MessageAdapter adapter;
+    private Gson gson;
+    private int page = 0;
+    private int size = 20;
+    private int first = 0;
+    private int last = first;
+    private UserSummaryDTO user;
+    private LinearLayoutManager linearLayoutManager;
+    private String access_token;
+    private String token;
+    private List<MessageDto> list;
+    private Button btnScrollToBottom;
+    private static final int PICK_IMAGE = 1;
+    private SharedPreferences sharedPreferencesToken;
 
+    @SuppressLint("CheckResult")
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
         getSupportActionBar().hide();
 
         ibt_chat_back = findViewById(R.id.ibt_chat_back);
@@ -89,7 +117,10 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         ibt_chat_send_message = findViewById(R.id.ibt_chat_send_message);
         tlb_chat = findViewById(R.id.tlb_chat);
         img_chat_user_avt = findViewById(R.id.img_chat_user_avt);
+        ibt_chat_send_media = findViewById(R.id.ibt_chat_send_media);
+        btnScrollToBottom = findViewById(R.id.btn_scroll_to_bottom);
 
+        list = new ArrayList<>();
         gson = new Gson();
 
         Bundle bundle = getIntent().getExtras();
@@ -118,28 +149,81 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", MODE_PRIVATE);
         access_token = sharedPreferencesToken.getString("access_token", null);
 
-        updateList();
-        linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager = new LinearLayoutManager(ChatActivity.this);
         linearLayoutManager.setStackFromEnd(true);
         rcv_chat_list.setLayoutManager(linearLayoutManager);
 
-//         setup socket
+        // scroll event
+        rcv_chat_list.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                first = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findFirstVisibleItemPosition();
+                last = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findLastVisibleItemPosition();
+                if (!recyclerView.canScrollVertically(-1)) {
+                    loadMoreData();
+                }
+                if ((rcv_chat_list.getAdapter().getItemCount() - last) > (size / 2)) {
+                    btnScrollToBottom.setVisibility(View.VISIBLE);
+                } else
+                    btnScrollToBottom.setVisibility(View.GONE);
+            }
 
-        // evt button
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                first = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findFirstVisibleItemPosition();
+                last = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findLastVisibleItemPosition();
+
+                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // scroll to bottom
+                }
+                if (!recyclerView.canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    loadMoreData();
+                }
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    // scrolling
+                }
+                if ((rcv_chat_list.getAdapter().getItemCount() - last) > (size / 2)) {
+                    btnScrollToBottom.setVisibility(View.VISIBLE);
+                } else
+                    btnScrollToBottom.setVisibility(View.GONE);
+            }
+        });
 
         ibt_chat_back.setOnClickListener(v -> {
             finish();
         });
 
+        btnScrollToBottom.setOnClickListener(v -> {
+            rcv_chat_list.getLayoutManager().smoothScrollToPosition(rcv_chat_list, new RecyclerView.State(), rcv_chat_list.getAdapter().getItemCount());
+            btnScrollToBottom.setVisibility(View.GONE);
+        });
+
+        ibt_chat_send_media.setOnClickListener(v -> {
+            // xin quyền truy cập vào bộ sưu tập
+            int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            }
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        });
+
         WebsocketClient.getInstance().getStompClient()
                 .topic("/users/queue/messages")
                 .subscribe(x -> {
-                    Log.i(">>>receiver", x.getPayload());
+                    Log.i("chat activ subcri mess", x.getPayload());
+                    @SuppressLint("CheckResult")
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
                     updateMessageRealTime(messageDto);
                 }, throwable -> {
-                    Log.i(">>>receiver error", throwable.getMessage());
+                    Log.i("chat activ subcri erro", throwable.getMessage());
                 });
 
         WebsocketClient.getInstance().getStompClient()
@@ -153,23 +237,61 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
                         }
                     });
                 }, throwable -> {
-                    Log.i(">>>read tracking error", throwable.getMessage());
+                    Log.i("chat activ subc read er", throwable.getMessage());
+                });
+
+        WebsocketClient.getInstance().getStompClient()
+                .topic("/users/queue/reaction")
+                .subscribe(x -> {
+                    ChatActivity.this.runOnUiThread(new Runnable() {
+                        @RequiresApi(api = Build.VERSION_CODES.N)
+                        @Override
+                        public void run() {
+                            updateReactionMessage(x);
+                        }
+                    });
+                }, throwable -> {
+                    Log.i("chat activ react error", throwable.getMessage());
                 });
 
         ibt_chat_send_message.setOnClickListener(v -> {
             String message = edt_chat_message_send.getText().toString();
             if (!TextUtils.isEmpty(message)) {
-                Log.e("test send pt : ", "suscc");
                 sendMessage(message);
                 edt_chat_message_send.setText("");
-            } else Log.e("test send pt : ", "failed");
+            }
         });
+
+        adapter = new MessageAdapter(ChatActivity.this, list);
+        rcv_chat_list.setHasFixedSize(true);
+        rcv_chat_list.setAdapter(adapter);
+        updateList();
+    }
+
+    private void updateReactionMessage(StompMessage x) {
+        Log.i("chat activ subcri react", x.getPayload());
+        ReactionReceiver receiver = gson.fromJson(x.getPayload(), ReactionReceiver.class);
+        for (MessageDto m : list) {
+            if (m.getId().equals(receiver.getMessageId())) {
+                List<Reaction> reactions = m.getReactions();
+                if (reactions == null)
+                    reactions = new ArrayList<>();
+                Reaction reaction = new Reaction();
+                reaction.setType(receiver.getType());
+                reaction.setReactByUserId(receiver.getReactByUser().getId());
+                reactions.add(reaction);
+
+                m.setReactions(reactions);
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateReadMessage(StompMessage stompMessage) {
         ReadByReceiver readbyReceiver = gson.fromJson(stompMessage.getPayload(), ReadByReceiver.class);
         Log.e("readbyreceiver", readbyReceiver.toString());
+
         for (MessageDto m : list) {
             if (m.getId().equals(readbyReceiver.getMessageId())) {
                 List<ReadByDto> readbyes = m.getReadbyes();
@@ -180,9 +302,9 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
                 readByDto.setReadByUser(readbyReceiver.getReadByUser());
                 if (!readbyes.contains(readByDto))
                     readbyes.add(readByDto);
+
+                m.setReadbyes(readbyes);
                 Log.i("message readed", m.toString());
-            } else {
-                m.setReadbyes(new ArrayList<>());
             }
             if (m.getId().equals(readbyReceiver.getOldMessageId()) &&
                     !m.getId().equals(readbyReceiver.getMessageId())) {
@@ -191,17 +313,21 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
                 if (readbyes != null) {
                     readbyes.removeIf(x -> x.getReadByUser().getId().equals(readbyReceiver.getReadByUser().getId()));
                 }
+
+                m.setReadbyes(readbyes);
             }
         }
         adapter.notifyDataSetChanged();
     }
 
+    @SuppressLint("CheckResult")
     private void sendMessage(String message) {
         MessageSendToServer messageSendToServer = new MessageSendToServer();
         messageSendToServer.setContent(message);
         messageSendToServer.setRoomId(dto.getRoom().getId());
         messageSendToServer.setType("TEXT");
         Log.e("send : ", Json.encode(messageSendToServer));
+
         WebsocketClient.getInstance().getStompClient()
                 .send("/app/chat", Json.encode(messageSendToServer))
                 .subscribe(() -> {
@@ -209,6 +335,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
                 });
     }
 
+    @SuppressLint("CheckResult")
     private void sendReadMessageNotification() {
         if (list.size() != 0) {
             MessageDto lastMessage = list.get(list.size() - 1);
@@ -230,45 +357,43 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
 
     private void loadMoreData() {
         page++;
-        adapter.setLoadEarlierMsgs(true);
         updateList();
     }
 
     private void updateList() {
         list = new ArrayList<>();
-        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
-        String token = sharedPreferencesToken.getString("access-token", null);
+        sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
         Log.e("url : ", Constant.API_CHAT + dto.getId());
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId() + "?size=15&page=" + page,
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId() + "?size=" + size + "&page=" + page,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject objectInbox = new JSONObject(String.valueOf(array.getJSONObject(i)));
-                            MessageDto messageDto = gson.fromJson(objectInbox.toString(), MessageDto.class);
-                            list.add(messageDto);
-                        }
-                        if (page == 0) {
-                            adapter = new MessageAdapter(ChatActivity.this, list);
-                            rcv_chat_list.setAdapter(adapter);
-                            rcv_chat_list.scrollToPosition(list.size());
-                        } else {
-                            View v = rcv_chat_list.getChildAt(0);
-                            int top = (v == null) ? 0 : v.getTop();
-                            adapter.updateList(list);
-                            rcv_chat_list.scrollToPosition(16);
 
+                        Type listType = new TypeToken<List<MessageDto>>() {
+                        }.getType();
+                        list = gson.fromJson(array.toString(), listType);
+                        if (!list.isEmpty()) {
+                            if (page == 0) {
+//                            adapter = new MessageAdapter(ChatActivity.this, list);
+//                            rcv_chat_list.setHasFixedSize(true);
+//                            rcv_chat_list.setAdapter(adapter);
+                                adapter.updateList(list);
+                                rcv_chat_list.scrollToPosition(list.size() - 1);
+                            } else {
+                                adapter.updateList(list);
+                                rcv_chat_list.scrollToPosition(size + (last - first) - 1);
+                            }
                         }
-                        sendReadMessageNotification();
+//                        adapter.notifyDataSetChanged();
+//                        sendReadMessageNotification();
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 },
-                error -> {
-                    Log.i("error", error.toString());
-                }) {
+                error -> Log.i("chat activ get mess er", error.toString())) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> map = new HashMap<>();
@@ -286,23 +411,42 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.Lo
         ChatActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-//                rcv_chat_list.scrollToPosition(adapter.getItemCount());
-                rcv_chat_list.getLayoutManager().smoothScrollToPosition(rcv_chat_list, new RecyclerView.State(), rcv_chat_list.getAdapter().getItemCount());
+                rcv_chat_list.getLayoutManager()
+                        .smoothScrollToPosition(rcv_chat_list,
+                                new RecyclerView.State(),
+                                rcv_chat_list.getAdapter().getItemCount());
             }
         });
         sendReadMessageNotification();
     }
 
     @Override
-    public void onLoadEarlierMessages() {
-        page++;
-        updateList();
+    public void SendingData(String s) {
+//        MessageDto messageDto = gson.fromJson(s, MessageDto.class);
+//        updateMessageRealTime(messageDto);
     }
 
+    @SneakyThrows
     @Override
-    public void SendingData(String s) {
-        MessageDto messageDto = gson.fromJson(s, MessageDto.class);
-        Log.e("da nhan nhe baby : ", messageDto.toString());
-        updateMessageRealTime(messageDto);
+    // xử lý khi chọn hình ảnh để gửi
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        List<File> files = new ArrayList<>();
+        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK && data != null) {
+            if (data.getClipData() != null) {
+                int count = data.getClipData().getItemCount();
+                for (int i = 0; i < count; i++) {
+                    Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                    File file = new File(PathUtil.getPath(ChatActivity.this, imageUri));
+                    files.add(file);
+                }
+            } else {
+                File file = new File(PathUtil.getPath(ChatActivity.this, data.getData()));
+                files.add(file);
+            }
+            Toast.makeText(this, "file đã chọn " + files.toString(), Toast.LENGTH_SHORT).show();
+        } else {
+            // chưa có hình ảnh nào được chọn
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

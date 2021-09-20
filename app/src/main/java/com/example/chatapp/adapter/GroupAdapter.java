@@ -23,12 +23,11 @@ import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.ui.ChatActivity;
 import com.example.chatapp.utils.TimeAgo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> {
-    private Context context;
-    private List<InboxDto> list = new ArrayList<>();
+    private final Context context;
+    private List<InboxDto> list;
 
     public GroupAdapter(Context context, List<InboxDto> dtos) {
         this.context = context;
@@ -45,10 +44,8 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if (Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-        }
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         InboxDto inboxDto = list.get(position);
         String url;
         String displayName;
@@ -100,10 +97,13 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> 
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         GroupAdapter adapter;
         ImageView img_lim_avt;
-        TextView txt_lim_display_name, txt_lim_last_message, txt_lim_time_last_message, txt_lim_unread_message;
+        TextView txt_lim_display_name;
+        TextView txt_lim_last_message;
+        TextView txt_lim_time_last_message;
+        TextView txt_lim_unread_message;
 
         public ViewHolder(@NonNull View itemView, GroupAdapter adapter) {
             super(itemView);

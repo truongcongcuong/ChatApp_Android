@@ -28,13 +28,10 @@ public class ReadbyDialogAdapter extends ArrayAdapter<ReadByDto> {
     @SuppressLint("ViewHolder")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        View rowView = inflater.inflate(R.layout.readby_dialog_line_item, parent, false);
-        ImageView imageOfUser = rowView.findViewById(R.id.image_readby_dialog_item);
-        TextView displayName = rowView.findViewById(R.id.txt_readby_dialog_displayname);
-        TextView readAt = rowView.findViewById(R.id.txt_readby_dialog_read_at);
+        View view = LayoutInflater.from(context).inflate(R.layout.readby_dialog_line_item, parent, false);
+        ImageView imageOfUser = view.findViewById(R.id.image_readby_dialog_item);
+        TextView displayName = view.findViewById(R.id.txt_readby_dialog_displayname);
+        TextView readAt = view.findViewById(R.id.txt_readby_dialog_read_at);
 
         ReadByDto readBy = readByes.get(position);
         Glide.with(context).load(readBy.getReadByUser().getImageUrl())
@@ -46,6 +43,6 @@ public class ReadbyDialogAdapter extends ArrayAdapter<ReadByDto> {
         displayName.setText(readBy.getReadByUser().getDisplayName());
         readAt.setText("Đã xem: " + readBy.getReadAt());
 
-        return rowView;
+        return view;
     }
 }

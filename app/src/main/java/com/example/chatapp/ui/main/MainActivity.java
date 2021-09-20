@@ -26,11 +26,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
-    BottomNavigationView bnv_menu;
-    MessageFragment messageFragment;
-    Gson gson;
-    SharedPreferences sharedPreferencesUser;
-    UserSummaryDTO user;
+    private BottomNavigationView bnv_menu;
+    private MessageFragment messageFragment;
+    private Gson gson;
+    private SharedPreferences sharedPreferencesUser;
+    private UserSummaryDTO user;
 
     @Override
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -38,18 +38,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+
         bnv_menu = findViewById(R.id.bnv_bot);
         gson = new Gson();
         sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         messageFragment = new MessageFragment();
+
+        // connect to websocket
         WebsocketClient.getInstance().connect(user.getId(), user.getAccessToken());
+
+        //subcribe message
         WebsocketClient.getInstance().getStompClient()
                 .topic("/users/queue/messages")
                 .subscribe(x -> {
-                    Log.i(">>>receiver in main", x.getPayload());
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
-                    Log.i(">>>message dto", messageDto.toString());
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -58,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }, throwable -> {
-                    Log.i(">>>receiver error", throwable.getMessage());
+                    Log.i("main acti subc mess err", throwable.getMessage());
                 });
         bnv_menu.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         loadFragment(messageFragment);

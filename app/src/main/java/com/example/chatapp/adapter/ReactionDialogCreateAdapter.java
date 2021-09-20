@@ -1,5 +1,6 @@
 package com.example.chatapp.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -8,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -17,26 +17,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.WebsocketClient;
 import com.example.chatapp.dto.MessageDto;
-import com.example.chatapp.entity.Reaction;
+import com.example.chatapp.dto.ReactionSend;
+import com.example.chatapp.dto.UserSummaryDTO;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.vertx.core.json.Json;
 
 public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDialogCreateAdapter.ViewHolder> {
 
-    private List<Integer> resources = new ArrayList<>();
-    private List<String> types = new ArrayList<>();
+    private final List<Integer> resources = new ArrayList<>();
+    private final List<String> types = new ArrayList<>();
     private final Context context;
     private MessageDto messageDto;
+    private UserSummaryDTO user;
+    private Gson gson;
     private SharedPreferences sharedPreferencesToken;
-    private Map<Integer, String> map = new HashMap<>();
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ReactionDialogCreateAdapter(MessageDto messageDto, Context context) {
+        this.context = context;
         this.messageDto = messageDto;
         resources.add(R.drawable.ic_reaction_haha);
         resources.add(R.drawable.ic_reaction_sad);
@@ -52,8 +54,9 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
         types.add("ANGRY");
         types.add("LIKE");
 
-        this.context = context;
-        sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+        gson = new Gson();
+        sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
     }
 
     @NonNull
@@ -63,6 +66,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
         return new ViewHolder(view);
     }
 
+    @SuppressLint("CheckResult")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -70,16 +74,18 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
 
         holder.image_reaction_item.setImageResource(resources.get(position));
 
-        Reaction reaction = new Reaction();
-        reaction.setType(types.get(position));
+        ReactionSend reactionSend = new ReactionSend();
+        reactionSend.setType(types.get(position));
+        reactionSend.setMessageId(messageDto.getId());
+        reactionSend.setRoomId(messageDto.getRoomId());
+        reactionSend.setUserId(user.getId());
 
         holder.itemView.setOnClickListener(v -> {
             WebsocketClient.getInstance().getStompClient()
-                    .send("/app/reaction", Json.encode(reaction))
+                    .send("/app/reaction", Json.encode(reactionSend))
                     .subscribe(() -> {
 
                     });
-            Toast.makeText(context, "sent " + types.get(position) + " to server", Toast.LENGTH_SHORT).show();
         });
     }
 

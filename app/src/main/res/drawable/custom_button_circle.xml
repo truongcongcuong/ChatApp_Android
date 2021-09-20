@@ -6,8 +6,8 @@
             android:shape="oval">
             <solid android:color="@color/bg_app"/>
             <size
-                android:width="25dp"
-                android:height="25dp"
+                android:width="40dp"
+                android:height="40dp"
                 />
         </shape>
     </item>

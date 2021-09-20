@@ -33,6 +33,7 @@ public class TimeAgo {
         } catch (Exception e) {
         }
         long mseconds = (d1.getTime() - d2.getTime());
+
         StringBuilder res = new StringBuilder();
         for (int i = 0; i < TimeAgo.times.size(); i++) {
             Long current = TimeAgo.times.get(i);

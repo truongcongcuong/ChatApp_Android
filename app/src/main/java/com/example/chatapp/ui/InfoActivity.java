@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 public class InfoActivity extends AppCompatActivity {
 
     private UserSummaryDTO user;
-    private Gson gson = new Gson();
+    private Gson gson;
     private ImageView info_image;
     private TextView info_name;
 
@@ -24,6 +24,7 @@ public class InfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
+        gson = new Gson();
 
         SharedPreferences sharedPreferencesUser = getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);

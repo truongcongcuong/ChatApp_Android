@@ -1,8 +1,5 @@
 package com.example.chatapp.ui.signin;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +11,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -23,13 +24,15 @@ import com.android.volley.ServerError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.chatapp.cons.Constant;
 import com.example.chatapp.R;
+import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.main.MainActivity;
 import com.google.gson.Gson;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -40,12 +43,14 @@ import io.vertx.core.json.Json;
 
 public class SigninActivity extends AppCompatActivity {
 
-    EditText edt_sign_in_user_name,edt_sign_in_password;
-    Button btn_sign_in;
-    ImageButton ibt_sign_in_back;
-    TextView txt_sign_in_error;
-    String username,password;
-    String rfCookie;
+    private EditText edt_sign_in_user_name;
+    private EditText edt_sign_in_password;
+    private Button btn_sign_in;
+    private ImageButton ibt_sign_in_back;
+    private TextView txt_sign_in_error;
+    private String username, password;
+    private String rfCookie;
+    private Gson gson;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -54,70 +59,61 @@ public class SigninActivity extends AppCompatActivity {
         setContentView(R.layout.activity_signin);
         getSupportActionBar().hide();
 
-
         btn_sign_in = findViewById(R.id.btn_sign_in);
         edt_sign_in_user_name = findViewById(R.id.edt_sign_in_user_name);
         edt_sign_in_password = findViewById(R.id.edt_sign_in_password);
         ibt_sign_in_back = findViewById(R.id.ibt_sign_in_back);
         txt_sign_in_error = findViewById(R.id.txt_sign_in_error);
+        gson = new Gson();
 
-
-
-        btn_sign_in.setOnClickListener(v->{
+        btn_sign_in.setOnClickListener(v -> {
             username = edt_sign_in_user_name.getText().toString();
-            if(TextUtils.isEmpty(username)){
+            if (TextUtils.isEmpty(username)) {
                 txt_sign_in_error.setText(R.string.check_user_name_empty);
                 return;
             }
             password = edt_sign_in_password.getText().toString();
-            if(TextUtils.isEmpty(password)){
+            if (TextUtils.isEmpty(password)) {
                 txt_sign_in_error.setText(R.string.check_password_empty);
                 return;
             }
             sendSignInRequest();
         });
 
-        ibt_sign_in_back.setOnClickListener(v-> finish());
+        ibt_sign_in_back.setOnClickListener(v -> finish());
     }
 
-
     private void sendSignInRequest() {
-        Log.e("a: ", "ádfasda");
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_AUTH+"signin",
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_AUTH + "signin",
                 response -> {
                     try {
-
-                        String res = URLDecoder.decode(URLEncoder.encode(response,"iso8859-1"),"UTF-8");
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
-                        Gson gson = new Gson();
-                        UserSummaryDTO user = gson.fromJson(String.valueOf(object),UserSummaryDTO.class);
-                        System.out.println("++++++++++++_____________________------------"+user.toString());
 
+                        UserSummaryDTO user = gson.fromJson(String.valueOf(object), UserSummaryDTO.class);
+                        System.out.println("++++++++++++_____________________------------" + user.toString());
 
-
-                        SharedPreferences sharedPreferencesUser = getSharedPreferences("user",MODE_PRIVATE);
-                        SharedPreferences.Editor editor =sharedPreferencesUser.edit();
+                        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferencesUser.edit();
                         editor.putString("user-info", Json.encode(user)).apply();
 
-
-                        SharedPreferences sharedPreferencesToken = getSharedPreferences("token",MODE_PRIVATE);
+                        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", MODE_PRIVATE);
                         SharedPreferences.Editor editorToken = sharedPreferencesToken.edit();
-                        editorToken.putString("access-token",user.getAccessToken()).apply();
-
+                        editorToken.putString("access-token", user.getAccessToken()).apply();
 
                         SharedPreferences sharedPreferencesStatus = getSharedPreferences("status", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editorStatus = sharedPreferencesStatus.edit();
-                        editorStatus.putBoolean("status-code",true).apply();
+                        editorStatus.putBoolean("status-code", true).apply();
 
-                        SharedPreferences sharedPreferencesIsLogin = getSharedPreferences("is-login",MODE_PRIVATE);
+                        SharedPreferences sharedPreferencesIsLogin = getSharedPreferences("is-login", MODE_PRIVATE);
                         SharedPreferences.Editor editorIsLogin = sharedPreferencesIsLogin.edit();
-                        editorIsLogin.putBoolean("status-login",true).apply();
+                        editorIsLogin.putBoolean("status-login", true).apply();
 
-                        Intent intent = new Intent(SigninActivity.this,MainActivity.class);
+                        Intent intent = new Intent(SigninActivity.this, MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("EXIT",true);
+                        intent.putExtra("EXIT", true);
                         startActivity(intent);
                         finish();
 
@@ -127,7 +123,7 @@ public class SigninActivity extends AppCompatActivity {
                 },
                 error -> {
                     NetworkResponse response = error.networkResponse;
-                    if(error instanceof ServerError && error != null){
+                    if (error instanceof ServerError) {
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                             JSONObject object = new JSONObject(res);
@@ -137,28 +133,26 @@ public class SigninActivity extends AppCompatActivity {
                         }
 
                     }
-                }){
-            @Nullable
+                }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String,String> map = new HashMap<>();
-                map.put("username",username);
-                map.put("password",password);
+                HashMap<String, String> map = new HashMap<>();
+                map.put("username", username);
+                map.put("password", password);
 
                 return map;
-
             }
 
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                Log.i("response",response.headers.toString());
-                Map<String,String> responseHeader = response.headers;
+                Log.i("response", response.headers.toString());
+                Map<String, String> responseHeader = response.headers;
                 rfCookie = responseHeader.get("Set-Cookie");
-                Log.i("rf-token",rfCookie);
-                SharedPreferences sharedPreferencesToken = getSharedPreferences("token",MODE_PRIVATE);
+                Log.i("rf-token", rfCookie);
+                SharedPreferences sharedPreferencesToken = getSharedPreferences("token", MODE_PRIVATE);
                 SharedPreferences.Editor editorToken = sharedPreferencesToken.edit();
-                editorToken.putString("refresh-token",rfCookie).apply();
-                return  super.parseNetworkResponse(response);
+                editorToken.putString("refresh-token", rfCookie).apply();
+                return super.parseNetworkResponse(response);
             }
 
         };

@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -25,12 +24,14 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.InboxDto;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -38,19 +39,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link GroupFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class GroupFragment extends Fragment {
 
-    RecyclerView rcv_list_group;
-    GroupAdapter adapter;
-    List<InboxDto> list = new ArrayList<>();
-    Gson gson = new Gson();
-    SharedPreferences sharedPreferencesToken;
-    int page = 0;
+    private RecyclerView rcv_list_group;
+    private GroupAdapter adapter;
+    private List<InboxDto> list;
+    private Gson gson;
+    private SharedPreferences sharedPreferencesToken;
+    private int page = 0;
+    private int size = 20;
+    private final String type = "GROUP";
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -77,6 +75,10 @@ public class GroupFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        gson = new Gson();
+        GetNewAccessToken getNewAccessToken = new GetNewAccessToken(getActivity().getApplicationContext());
+        getNewAccessToken.sendGetNewTokenRequest();
+        sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -84,9 +86,6 @@ public class GroupFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_group, container, false);
-        GetNewAccessToken getNewAccessToken = new GetNewAccessToken(getActivity().getApplicationContext());
-        getNewAccessToken.sendGetNewTokenRequest();
-        sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
         rcv_list_group = view.findViewById(R.id.rcv_list_group);
         rcv_list_group.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         updateListString();
@@ -95,19 +94,19 @@ public class GroupFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void updateListString() {
-        List<InboxDto> list = new ArrayList<>();
+        list = new ArrayList<>();
         String token = sharedPreferencesToken.getString("access-token", null);
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=15&type=GROUP",
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size + "&type=" + type,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject objectInbox = new JSONObject(String.valueOf(array.getJSONObject(i)));
-                            InboxDto inboxDto = gson.fromJson(objectInbox.toString(), InboxDto.class);
-                            list.add(inboxDto);
-                        }
+                        Type listType = new TypeToken<List<InboxDto>>() {
+                        }.getType();
+                        list = gson.fromJson(array.toString(), listType);
+
                         this.adapter = new GroupAdapter(getActivity().getApplicationContext(), list);
                         this.rcv_list_group.setAdapter(adapter);
 
@@ -115,11 +114,9 @@ public class GroupFragment extends Fragment {
                         e.printStackTrace();
                     }
                 },
-                error -> {
-                    Log.i("error", error.toString());
-                }) {
+                error -> Log.i("group list error", error.toString())) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 HashMap<String, String> map = new HashMap<>();
                 map.put("Authorization", "Bearer " + token);
                 return map;

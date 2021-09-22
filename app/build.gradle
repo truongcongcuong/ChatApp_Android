@@ -19,7 +19,7 @@ android {
     defaultConfig {
         multiDexEnabled true
         applicationId "com.example.chatapp"
-        minSdkVersion 17
+        minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -40,6 +40,9 @@ android {
 }
 
 dependencies {
+
+    implementation 'com.r0adkll:slidableactivity:2.1.0'
+
 //    implementation 'com.squareup.picasso:picasso:2.71828'
     // dependency load iamge from url
     implementation 'com.github.bumptech.glide:glide:4.12.0'

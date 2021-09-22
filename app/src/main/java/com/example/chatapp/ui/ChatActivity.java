@@ -54,6 +54,9 @@ import com.example.chatapp.entity.Reaction;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,6 +86,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private ImageButton ibt_chat_send_message;
     private ImageButton ibt_chat_back;
     private ImageButton ibt_chat_send_media;
+    private ImageButton btn_room_detail;
     private Toolbar tlb_chat;
     private String displayName, url;
     private InboxDto dto;
@@ -100,15 +104,28 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private List<MessageDto> list;
     private Button btnScrollToBottom;
     private static final int PICK_IMAGE = 1;
+    private static final int ROOM_DETAIL = 2;
     private SharedPreferences sharedPreferencesToken;
 
     @SuppressLint("CheckResult")
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         getSupportActionBar().hide();
+
+        SlidrConfig config = new SlidrConfig.Builder()
+                .position(SlidrPosition.LEFT)
+                .sensitivity(1f)
+                .velocityThreshold(2400)
+                .distanceThreshold(0.25f)
+                .edge(true)
+                .edgeSize(0.5f)
+                .build();
+
+        Slidr.attach(this, config);
 
         ibt_chat_back = findViewById(R.id.ibt_chat_back);
         txt_chat_user_name = findViewById(R.id.txt_chat_user_name);
@@ -119,6 +136,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         img_chat_user_avt = findViewById(R.id.img_chat_user_avt);
         ibt_chat_send_media = findViewById(R.id.ibt_chat_send_media);
         btnScrollToBottom = findViewById(R.id.btn_scroll_to_bottom);
+        btn_room_detail = findViewById(R.id.btn_room_detail);
 
         list = new ArrayList<>();
         gson = new Gson();
@@ -193,7 +211,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         });
 
         ibt_chat_back.setOnClickListener(v -> {
-            finish();
+            onBackPressed();
         });
 
         btnScrollToBottom.setOnClickListener(v -> {
@@ -260,6 +278,13 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 sendMessage(message);
                 edt_chat_message_send.setText("");
             }
+        });
+
+        btn_room_detail.setOnClickListener(v -> {
+            Intent intent = new Intent(ChatActivity.this, RoomDetailActivity.class);
+            intent.putExtra("dto", dto);
+            startActivityForResult(intent, ROOM_DETAIL);
+            overridePendingTransition(R.anim.enter, R.anim.exit);
         });
 
         adapter = new MessageAdapter(ChatActivity.this, list);
@@ -430,8 +455,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     @Override
     // xử lý khi chọn hình ảnh để gửi
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        List<File> files = new ArrayList<>();
         if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK && data != null) {
+            List<File> files = new ArrayList<>();
             if (data.getClipData() != null) {
                 int count = data.getClipData().getItemCount();
                 for (int i = 0; i < count; i++) {
@@ -447,6 +472,21 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         } else {
             // chưa có hình ảnh nào được chọn
         }
+        if (requestCode == ROOM_DETAIL && resultCode == Activity.RESULT_OK && data != null) {
+            Bundle bundle = data.getExtras();
+            if (bundle != null) {
+                InboxDto inboxDto = (InboxDto) bundle.getSerializable("dto");
+                dto = inboxDto;
+                txt_chat_user_name.setText(inboxDto.getRoom().getName());
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+        finish();
     }
 }

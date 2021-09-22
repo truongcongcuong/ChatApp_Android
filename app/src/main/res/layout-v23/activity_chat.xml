@@ -54,6 +54,16 @@
 
             </TextView>
 
+            <ImageButton
+                android:id="@+id/btn_room_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:background="@null"
+                app:srcCompat="@drawable/ic_menu" />
+
         </RelativeLayout>
     </Toolbar>
 
@@ -100,7 +110,7 @@
             android:layout_height="45dp"
             android:layout_marginStart="5dp"
             android:layout_toStartOf="@+id/ibt_chat_send_message"
-            android:background="@drawable/ic_chat_activity_send_image"
+            android:background="@drawable/ic_menu"
             android:foregroundGravity="center_vertical|center_horizontal" />
 
         <ImageButton

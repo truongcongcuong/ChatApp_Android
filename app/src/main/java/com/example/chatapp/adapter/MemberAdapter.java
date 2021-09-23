@@ -28,7 +28,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
     private final List<MemberDto> members;
     private Gson gson;
     private UserSummaryDTO user;
-    private boolean isAdmin;
+    private boolean currentUserIsAdmin;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public MemberAdapter(Context context, int resource, List<MemberDto> members) {
@@ -40,10 +40,12 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         MemberDto memberDto = new MemberDto();
+        boolean find = false;
         for (MemberDto m : members) {
-            if (m.getUser().getId().equals(user.getId())) {
-                isAdmin = m.isAdmin();
+            if (m.getUser().getId().equals(user.getId()) && !find) {
+                currentUserIsAdmin = m.isAdmin();
                 memberDto = m;
+                find = true;
             }
         }
         members.removeIf(x -> x.getUser().getId().equals(user.getId()));
@@ -77,7 +79,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                 if (member.getUser().getId().equals(user.getId()))
                     detail.setText("Tôi");
             } else {
-                if (isAdmin) {
+                if (currentUserIsAdmin) {
                     setAdmin.setImageResource(R.drawable.friend_request_custom);
                     delete.setImageResource(R.drawable.ic_baseline_clear_24);
                     setAdmin.setOnClickListener(v -> {

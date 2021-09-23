@@ -1,6 +1,5 @@
 package com.example.chatapp.ui;
 
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -30,7 +29,6 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -46,11 +44,9 @@ import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
 import com.example.chatapp.dto.ReactionReceiver;
-import com.example.chatapp.dto.ReadByDto;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
 import com.example.chatapp.dto.UserSummaryDTO;
-import com.example.chatapp.entity.Reaction;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -75,7 +71,7 @@ import java.util.Map;
 
 import io.vertx.core.json.Json;
 import lombok.SneakyThrows;
-import ua.naiksoftware.stomp.dto.StompMessage;
+import ua.naiksoftware.stomp.StompClient;
 
 public class ChatActivity extends AppCompatActivity implements SendData {
 
@@ -88,9 +84,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private ImageButton ibt_chat_send_media;
     private ImageButton btn_room_detail;
     private Toolbar tlb_chat;
-    private String displayName, url;
-    private InboxDto dto;
-    private GetNewAccessToken getNewAccessToken;
+    private InboxDto inboxDto;
     private MessageAdapter adapter;
     private Gson gson;
     private int page = 0;
@@ -98,17 +92,14 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private int first = 0;
     private int last = first;
     private UserSummaryDTO user;
-    private LinearLayoutManager linearLayoutManager;
     private String access_token;
-    private String token;
-    private List<MessageDto> list;
     private Button btnScrollToBottom;
     private static final int PICK_IMAGE = 1;
-    private static final int ROOM_DETAIL = 2;
-    private SharedPreferences sharedPreferencesToken;
+    private static final int VIEW_ROOM_DETAIL = 2;
+    private StompClient stompClient;
 
     @SuppressLint("CheckResult")
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
@@ -138,23 +129,24 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         btnScrollToBottom = findViewById(R.id.btn_scroll_to_bottom);
         btn_room_detail = findViewById(R.id.btn_room_detail);
 
-        list = new ArrayList<>();
         gson = new Gson();
 
         Bundle bundle = getIntent().getExtras();
-        dto = (InboxDto) bundle.getSerializable("dto");
+        inboxDto = (InboxDto) bundle.getSerializable("dto");
 
-        Log.e("user ", dto.toString());
+        Log.e("user ", inboxDto.toString());
 
-        getNewAccessToken = new GetNewAccessToken(this);
+        GetNewAccessToken getNewAccessToken = new GetNewAccessToken(this);
         getNewAccessToken.sendGetNewTokenRequest();
 
-        if (dto.getRoom().getType().equalsIgnoreCase("GROUP")) {
-            displayName = dto.getRoom().getName();
-            url = dto.getRoom().getImageUrl();
+        String displayName = "";
+        String url = "";
+        if (inboxDto.getRoom().getType().equalsIgnoreCase("GROUP")) {
+            displayName = inboxDto.getRoom().getName();
+            url = inboxDto.getRoom().getImageUrl();
         } else {
-            displayName = dto.getRoom().getTo().getDisplayName();
-            url = dto.getRoom().getTo().getImageUrl();
+            displayName = inboxDto.getRoom().getTo().getDisplayName();
+            url = inboxDto.getRoom().getTo().getImageUrl();
         }
         txt_chat_user_name.setText(displayName);
 
@@ -164,10 +156,12 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         Log.e("user-info", user.toString());
-        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", MODE_PRIVATE);
-        access_token = sharedPreferencesToken.getString("access_token", null);
 
-        linearLayoutManager = new LinearLayoutManager(ChatActivity.this);
+        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
+        access_token = sharedPreferencesToken.getString("access-token", null);
+        Log.d("accessssss", access_token);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ChatActivity.this);
         linearLayoutManager.setStackFromEnd(true);
         rcv_chat_list.setLayoutManager(linearLayoutManager);
 
@@ -182,10 +176,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 if (!recyclerView.canScrollVertically(-1)) {
                     loadMoreData();
                 }
-                if ((rcv_chat_list.getAdapter().getItemCount() - last) > (size / 2)) {
-                    btnScrollToBottom.setVisibility(View.VISIBLE);
-                } else
-                    btnScrollToBottom.setVisibility(View.GONE);
+                visibleOrGoneButtonScrollToBottom();
             }
 
             @Override
@@ -203,16 +194,11 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     // scrolling
                 }
-                if ((rcv_chat_list.getAdapter().getItemCount() - last) > (size / 2)) {
-                    btnScrollToBottom.setVisibility(View.VISIBLE);
-                } else
-                    btnScrollToBottom.setVisibility(View.GONE);
+                visibleOrGoneButtonScrollToBottom();
             }
         });
 
-        ibt_chat_back.setOnClickListener(v -> {
-            onBackPressed();
-        });
+        ibt_chat_back.setOnClickListener(v -> onBackPressed());
 
         btnScrollToBottom.setOnClickListener(v -> {
             rcv_chat_list.getLayoutManager().smoothScrollToPosition(rcv_chat_list, new RecyclerView.State(), rcv_chat_list.getAdapter().getItemCount());
@@ -233,41 +219,31 @@ public class ChatActivity extends AppCompatActivity implements SendData {
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
         });
 
-        WebsocketClient.getInstance().getStompClient()
+        stompClient = WebsocketClient.getInstance().getStompClient();
+        stompClient
                 .topic("/users/queue/messages")
                 .subscribe(x -> {
                     Log.i("chat activ subcri mess", x.getPayload());
-                    @SuppressLint("CheckResult")
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
                     updateMessageRealTime(messageDto);
                 }, throwable -> {
                     Log.i("chat activ subcri erro", throwable.getMessage());
                 });
 
-        WebsocketClient.getInstance().getStompClient()
+        stompClient
                 .topic("/users/queue/read")
                 .subscribe(x -> {
-                    ChatActivity.this.runOnUiThread(new Runnable() {
-                        @RequiresApi(api = Build.VERSION_CODES.N)
-                        @Override
-                        public void run() {
-                            updateReadMessage(x);
-                        }
-                    });
+                    ReadByReceiver readByReceiver = gson.fromJson(x.getPayload(), ReadByReceiver.class);
+                    adapter.updateReadToMessage(readByReceiver);
                 }, throwable -> {
                     Log.i("chat activ subc read er", throwable.getMessage());
                 });
 
-        WebsocketClient.getInstance().getStompClient()
+        stompClient
                 .topic("/users/queue/reaction")
                 .subscribe(x -> {
-                    ChatActivity.this.runOnUiThread(new Runnable() {
-                        @RequiresApi(api = Build.VERSION_CODES.N)
-                        @Override
-                        public void run() {
-                            updateReactionMessage(x);
-                        }
-                    });
+                    ReactionReceiver receiver = gson.fromJson(x.getPayload(), ReactionReceiver.class);
+                    adapter.updateReactionToMessage(receiver);
                 }, throwable -> {
                     Log.i("chat activ react error", throwable.getMessage());
                 });
@@ -275,85 +251,41 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         ibt_chat_send_message.setOnClickListener(v -> {
             String message = edt_chat_message_send.getText().toString();
             if (!TextUtils.isEmpty(message)) {
-                sendMessage(message);
+                sendTextMessage(message);
                 edt_chat_message_send.setText("");
             }
         });
 
         btn_room_detail.setOnClickListener(v -> {
             Intent intent = new Intent(ChatActivity.this, RoomDetailActivity.class);
-            intent.putExtra("dto", dto);
-            startActivityForResult(intent, ROOM_DETAIL);
+            intent.putExtra("dto", inboxDto);
+            startActivityForResult(intent, VIEW_ROOM_DETAIL);
             overridePendingTransition(R.anim.enter, R.anim.exit);
         });
 
-        adapter = new MessageAdapter(ChatActivity.this, list);
-        rcv_chat_list.setHasFixedSize(true);
+        adapter = new MessageAdapter(ChatActivity.this, new ArrayList<>());
+//        rcv_chat_list.setHasFixedSize(true);
         rcv_chat_list.setAdapter(adapter);
         updateList();
     }
 
-    private void updateReactionMessage(StompMessage x) {
-        Log.i("chat activ subcri react", x.getPayload());
-        ReactionReceiver receiver = gson.fromJson(x.getPayload(), ReactionReceiver.class);
-        for (MessageDto m : list) {
-            if (m.getId().equals(receiver.getMessageId())) {
-                List<Reaction> reactions = m.getReactions();
-                if (reactions == null)
-                    reactions = new ArrayList<>();
-                Reaction reaction = new Reaction();
-                reaction.setType(receiver.getType());
-                reaction.setReactByUserId(receiver.getReactByUser().getId());
-                reactions.add(reaction);
-
-                m.setReactions(reactions);
-            }
-        }
-        adapter.notifyDataSetChanged();
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    private void updateReadMessage(StompMessage stompMessage) {
-        ReadByReceiver readbyReceiver = gson.fromJson(stompMessage.getPayload(), ReadByReceiver.class);
-        Log.e("readbyreceiver", readbyReceiver.toString());
-
-        for (MessageDto m : list) {
-            if (m.getId().equals(readbyReceiver.getMessageId())) {
-                List<ReadByDto> readbyes = m.getReadbyes();
-                if (readbyes == null)
-                    readbyes = new ArrayList<>();
-                ReadByDto readByDto = new ReadByDto();
-                readByDto.setReadAt(readbyReceiver.getReadAt());
-                readByDto.setReadByUser(readbyReceiver.getReadByUser());
-                if (!readbyes.contains(readByDto))
-                    readbyes.add(readByDto);
-
-                m.setReadbyes(readbyes);
-                Log.i("message readed", m.toString());
-            }
-            if (m.getId().equals(readbyReceiver.getOldMessageId()) &&
-                    !m.getId().equals(readbyReceiver.getMessageId())) {
-                Log.i("old message read", m.toString());
-                List<ReadByDto> readbyes = m.getReadbyes();
-                if (readbyes != null) {
-                    readbyes.removeIf(x -> x.getReadByUser().getId().equals(readbyReceiver.getReadByUser().getId()));
-                }
-
-                m.setReadbyes(readbyes);
-            }
-        }
-        adapter.notifyDataSetChanged();
+    // nếu cuộn quá size/3 item thì hiện nút bấm để xuống cuối
+    private void visibleOrGoneButtonScrollToBottom() {
+        if ((rcv_chat_list.getAdapter().getItemCount() - last) > (size / 3)) {
+            btnScrollToBottom.setVisibility(View.VISIBLE);
+        } else
+            btnScrollToBottom.setVisibility(View.GONE);
     }
 
     @SuppressLint("CheckResult")
-    private void sendMessage(String message) {
+    private void sendTextMessage(String message) {
         MessageSendToServer messageSendToServer = new MessageSendToServer();
         messageSendToServer.setContent(message);
-        messageSendToServer.setRoomId(dto.getRoom().getId());
+        messageSendToServer.setRoomId(inboxDto.getRoom().getId());
         messageSendToServer.setType("TEXT");
         Log.e("send : ", Json.encode(messageSendToServer));
 
-        WebsocketClient.getInstance().getStompClient()
+        stompClient
                 .send("/app/chat", Json.encode(messageSendToServer))
                 .subscribe(() -> {
 
@@ -362,8 +294,9 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 
     @SuppressLint("CheckResult")
     private void sendReadMessageNotification() {
-        if (list.size() != 0) {
-            MessageDto lastMessage = list.get(list.size() - 1);
+        Log.d("--------", "send read mess");
+        MessageDto lastMessage = adapter.getLastMessage();
+        if (lastMessage != null) {
             ReadBySend readBySend = ReadBySend.builder()
                     .messageId(lastMessage.getId())
                     .readAt(new Date())
@@ -371,8 +304,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                     .userId(user.getId())
                     .build();
 
-            WebsocketClient.getInstance()
-                    .getStompClient()
+            stompClient
                     .send("/app/read", Json.encode(readBySend))
                     .subscribe(() -> {
 
@@ -386,11 +318,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     }
 
     private void updateList() {
-        list = new ArrayList<>();
-        sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
-        token = sharedPreferencesToken.getString("access-token", null);
-        Log.e("url : ", Constant.API_CHAT + dto.getId());
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + dto.getId() + "?size=" + size + "&page=" + page,
+        Log.e("url : ", Constant.API_CHAT + inboxDto.getId());
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + inboxDto.getId() + "?size=" + size + "&page=" + page,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
@@ -399,30 +328,25 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 
                         Type listType = new TypeToken<List<MessageDto>>() {
                         }.getType();
-                        list = gson.fromJson(array.toString(), listType);
+                        List<MessageDto> list = gson.fromJson(array.toString(), listType);
                         if (!list.isEmpty()) {
+                            adapter.updateList(list);
                             if (page == 0) {
-//                            adapter = new MessageAdapter(ChatActivity.this, list);
-//                            rcv_chat_list.setHasFixedSize(true);
-//                            rcv_chat_list.setAdapter(adapter);
-                                adapter.updateList(list);
                                 rcv_chat_list.scrollToPosition(list.size() - 1);
                             } else {
-                                adapter.updateList(list);
                                 rcv_chat_list.scrollToPosition(size + (last - first) - 1);
                             }
+                            sendReadMessageNotification();
                         }
-//                        adapter.notifyDataSetChanged();
-//                        sendReadMessageNotification();
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 },
                 error -> Log.i("chat activ get mess er", error.toString())) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
+                map.put("Authorization", "Bearer " + access_token);
                 return map;
             }
         };
@@ -434,7 +358,6 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private void updateMessageRealTime(MessageDto messageDto) {
         this.adapter.updateMessage(messageDto);
         ChatActivity.this.runOnUiThread(new Runnable() {
-            @Override
             public void run() {
                 rcv_chat_list.getLayoutManager()
                         .smoothScrollToPosition(rcv_chat_list,
@@ -472,11 +395,11 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         } else {
             // chưa có hình ảnh nào được chọn
         }
-        if (requestCode == ROOM_DETAIL && resultCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == VIEW_ROOM_DETAIL && resultCode == Activity.RESULT_OK && data != null) {
             Bundle bundle = data.getExtras();
             if (bundle != null) {
                 InboxDto inboxDto = (InboxDto) bundle.getSerializable("dto");
-                dto = inboxDto;
+                this.inboxDto = inboxDto;
                 txt_chat_user_name.setText(inboxDto.getRoom().getName());
             }
         }
@@ -488,5 +411,41 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
         finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        /*stompClient
+                .send(new StompMessage(StompCommand.UNSUBSCRIBE,
+                        Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/read"))),
+                        null))
+                .subscribe(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        Log.d("unsubscribe read", "ok");
+                    }
+                });
+
+        stompClient
+                .send(new StompMessage(StompCommand.UNSUBSCRIBE,
+                        Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/messages"))),
+                        null))
+                .subscribe(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        Log.d("unsubscribe message", "ok");
+                    }
+                });
+        stompClient
+                .send(new StompMessage(StompCommand.UNSUBSCRIBE,
+                        Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/reaction"))),
+                        null))
+                .subscribe(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        Log.d("unsubscribe reaction", "ok");
+                    }
+                });*/
     }
 }

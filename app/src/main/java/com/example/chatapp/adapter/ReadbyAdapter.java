@@ -82,7 +82,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
 
             ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, messageDto.getReadbyes());
             listView.setAdapter(arrayAdapter);
-            listView.setOnItemClickListener((adapterView, view, which, l) -> {
+            listView.setOnItemClickListener((parent, view, pos, itemId) -> {
 
             });
             titleOfDialog.setText("Những người đã xem");
@@ -96,7 +96,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
         return Math.min(list.size(), max);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView readby_image;
         TextView readby_more;
 

@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,12 +16,11 @@ import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -32,18 +32,29 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.RoomDTO;
+import com.example.chatapp.utils.MultiPartFileRequest;
+import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.SneakyThrows;
+
 public class RoomDetailActivity extends AppCompatActivity {
 
+    private static final int PICK_IMAGE = 1;
     private List<MenuItem> menuItems;
     private MenuButtonAdapter menuAdapter;
     private ListView lv_menu_items;
@@ -55,8 +66,8 @@ public class RoomDetailActivity extends AppCompatActivity {
     private ImageButton btn_change_name_of_room;
     private TextView nameOfRoom;
     private NestedScrollView scrollView;
-    private SharedPreferences sharedPreferencesToken;
     private Gson gson;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +102,8 @@ public class RoomDetailActivity extends AppCompatActivity {
         if (bundle != null)
             inboxDto = (InboxDto) bundle.getSerializable("dto");
 
-        sharedPreferencesToken = RoomDetailActivity.this.getSharedPreferences("token", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesToken = RoomDetailActivity.this.getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
 
         menuItems = new ArrayList<>();
         menuItems.add(MenuItem.builder()
@@ -145,46 +157,53 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .imageResource(R.drawable.ic_reaction_love)
                     .name("Rời khỏi nhóm")
                     .build());
-            btn_change_image_of_room.setPadding(1, 1, 1, 1);
+            btn_change_image_of_room.setPadding(3, 0, 3, 3);
             Glide.with(RoomDetailActivity.this)
-                    .load(R.drawable.ic_reaction_haha)
+                    .load(R.drawable.ic_camera)
                     .centerCrop().circleCrop()
                     .placeholder(R.drawable.image_placeholer)
                     .into(btn_change_image_of_room);
+
+            // thay doi hinh anh cua nhom
             btn_change_image_of_room.setOnClickListener(v -> {
-                Toast.makeText(this, "thay doi anh cua nhom", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
             });
 
             btn_change_name_of_room.setPadding(1, 1, 1, 1);
             Glide.with(RoomDetailActivity.this)
-                    .load(R.drawable.ic_reaction_sad)
+                    .load(R.drawable.ic_edit)
                     .centerCrop().circleCrop()
                     .placeholder(R.drawable.image_placeholer)
                     .into(btn_change_name_of_room);
 
-            btn_change_name_of_room.setOnClickListener(v -> {
-                showRenameDialog();
-            });
+            btn_change_name_of_room.setOnClickListener(v -> showRenameDialog());
         }
 
-        menuItems.add(MenuItem.builder()
-                .key("delete")
-                .imageResource(R.drawable.ic_reaction_sad)
-                .name("Xóa cuộc trò chuyện")
-                .build());
+        for (int i = 0; i < 3; i++) {
+            menuItems.add(MenuItem.builder()
+                    .key("delete")
+                    .imageResource(R.drawable.ic_reaction_sad)
+                    .name("Xóa cuộc trò chuyện")
+                    .build());
 
-        menuItems.add(MenuItem.builder()
-                .key("report")
-                .imageResource(R.drawable.ic_reaction_love)
-                .name("Báo cáo")
-                .build());
+            menuItems.add(MenuItem.builder()
+                    .key("report")
+                    .imageResource(R.drawable.ic_reaction_love)
+                    .name("Báo cáo")
+                    .build());
+        }
 
         title.setText("Tùy chọn");
         btnBack.setOnClickListener(v -> onBackPressed());
 
         menuAdapter = new MenuButtonAdapter(RoomDetailActivity.this, R.layout.line_item_menu_button, menuItems);
         lv_menu_items.setAdapter(menuAdapter);
-        lv_menu_items.setOnItemClickListener((parent, view, position, id) -> {
+        lv_menu_items.setOnItemClickListener((parent, view, position, itemId) -> {
             MenuItem item = menuItems.get(position);
             if (item.getKey().equals("viewMembers")) {
                 Intent intent = new Intent(RoomDetailActivity.this, MemberActivity.class);
@@ -221,13 +240,10 @@ public class RoomDetailActivity extends AppCompatActivity {
         dialog.show();
 
         btn_cancel.setOnClickListener(v1 -> dialog.dismiss());
-        btn_ok.setOnClickListener(v1 -> {
-            rename(inboxDto, dialog, newName.getText().toString().trim());
-        });
+        btn_ok.setOnClickListener(v1 -> rename(inboxDto, dialog, newName.getText().toString().trim()));
     }
 
     private void rename(InboxDto ibdto, Dialog dialog, String newName) {
-        String token = sharedPreferencesToken.getString("access-token", null);
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_ROOM + "rename/" + inboxDto.getRoom().getId(),
                 response -> {
                     nameOfRoom.setText(newName);
@@ -245,7 +261,7 @@ public class RoomDetailActivity extends AppCompatActivity {
             }
 
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 HashMap<String, String> map = new HashMap<>();
                 map.put("name", newName);
 
@@ -275,7 +291,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     }
 
     // set dynamic height for list view
-    public static void setListViewHeightBasedOnChildren(ListView listView) {
+    private static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
             return;
@@ -294,4 +310,67 @@ public class RoomDetailActivity extends AppCompatActivity {
         listView.setLayoutParams(params);
         listView.requestLayout();
     }
+
+    @SneakyThrows
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK && data != null) {
+            List<File> files = new ArrayList<>();
+            if (data.getClipData() != null) {
+                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                    Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                    File file = new File(PathUtil.getPath(RoomDetailActivity.this, imageUri));
+                    files.add(file);
+                }
+            } else {
+                File file = new File(PathUtil.getPath(RoomDetailActivity.this, data.getData()));
+                files.add(file);
+            }
+            uploadMultiFiles(files);
+        } else {
+            // chưa có hình ảnh nào được chọn
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void uploadMultiFiles(List<File> files) {
+        MultiPartFileRequest<String> restApiMultiPartRequest =
+                new MultiPartFileRequest<String>(Constant.API_ROOM + "changeImage/" + inboxDto.getRoom().getId(),
+                        new HashMap<>(), // danh sách request param
+                        files,
+                        response -> {
+                            try {
+                                String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                                Type listType = new TypeToken<List<String>>() {
+                                }.getType();
+                                List<String> urls = new Gson().fromJson(res, listType);
+                                for (String url : urls) {
+                                    Log.d("", url);
+                                }
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        },
+                        error -> {
+                            Log.i("upload error", "error");
+                        }) {
+
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + token);
+                        return map;
+                    }
+
+                    @Override
+                    protected Map<String, String> getParams() {
+                        Map<String, String> params = new HashMap<String, String>();
+                        return params;
+                    }
+                };
+
+//        restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
+        Volley.newRequestQueue(this).add(restApiMultiPartRequest);
+    }
+
 }

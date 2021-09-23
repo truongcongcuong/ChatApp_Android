@@ -28,6 +28,7 @@ import java.util.List;
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> {
     private final Context context;
     private List<InboxDto> list;
+    private final int maxMessageSizeDisplay = 5;
 
     public GroupAdapter(Context context, List<InboxDto> dtos) {
         this.context = context;
@@ -77,7 +78,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.ViewHolder> 
             holder.txt_lim_unread_message.setPadding(18, 7, 18, 7);
             holder.txt_lim_unread_message.setBackgroundResource(R.drawable.background_unreadmessage);
             holder.txt_lim_unread_message.setText(inboxDto.getCountNewMessage() < 5
-                    ? inboxDto.getCountNewMessage().toString() : "5+");
+                    ? inboxDto.getCountNewMessage().toString() : maxMessageSizeDisplay + "+");
             holder.txt_lim_last_message.setTypeface(null, Typeface.BOLD);
             holder.txt_lim_time_last_message.setTypeface(null, Typeface.BOLD);
         }

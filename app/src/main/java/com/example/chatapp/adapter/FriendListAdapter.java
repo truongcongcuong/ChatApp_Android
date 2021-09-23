@@ -41,13 +41,15 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
 
     private List<FriendDTO> list;
     private final Context context;
-    private final Gson gson = new Gson();
-    private final SharedPreferences sharedPreferencesToken;
+    private final Gson gson;
+    private final String token;
 
     public FriendListAdapter(List<FriendDTO> list, Context context) {
         this.list = list;
         this.context = context;
-        sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+        gson = new Gson();
+        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
     }
 
     @NonNull
@@ -94,7 +96,6 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
     }
 
     private void getInboxWith(String anotherUserId) {
-        String token = sharedPreferencesToken.getString("access-token", null);
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "/with/" + anotherUserId,
                 response -> {
                     try {

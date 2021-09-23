@@ -2,6 +2,7 @@ package com.example.chatapp.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton;
@@ -9,6 +10,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
@@ -40,10 +42,11 @@ public class MemberActivity extends AppCompatActivity {
     private ImageButton ibt_add_member;
     private TextView title;
     private ListView lv_members;
-    private SharedPreferences sharedPreferencesToken;
+    private String token;
     private Gson gson;
     private InboxDto inboxDto;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
@@ -73,14 +76,14 @@ public class MemberActivity extends AppCompatActivity {
         });
 
         gson = new Gson();
-        sharedPreferencesToken = MemberActivity.this.getSharedPreferences("token", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesToken = MemberActivity.this.getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
         title.setText("Thành viên");
 
         Bundle bundle = getIntent().getExtras();
         inboxDto = (InboxDto) bundle.getSerializable("dto");
 
         if (inboxDto != null) {
-            String token = sharedPreferencesToken.getString("access-token", null);
             StringRequest request = new StringRequest(Request.Method.GET, Constant.API_ROOM + "members/" + inboxDto.getRoom().getId(),
                     response -> {
                         try {
@@ -91,7 +94,7 @@ public class MemberActivity extends AppCompatActivity {
 
                             MemberAdapter adapter = new MemberAdapter(MemberActivity.this, R.layout.line_item_member, memberDtos);
                             lv_members.setAdapter(adapter);
-                            lv_members.setOnItemClickListener((adapterView, view, which, l) -> {
+                            lv_members.setOnItemClickListener((parent, view, pos, itemId) -> {
 
                             });
                         } catch (UnsupportedEncodingException e) {

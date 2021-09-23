@@ -44,7 +44,7 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
     private List<Reaction> list;
     private final Context context;
     private MessageDto messageDto;
-    private final SharedPreferences sharedPreferencesToken;
+    private final String token;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ReactionAdapter(MessageDto messageDto, Context context) {
@@ -54,7 +54,8 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
         else
             this.list = new ArrayList<>();
         this.context = context;
-        sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
     }
 
     @NonNull
@@ -94,7 +95,6 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
         }
 
         holder.itemView.setOnClickListener(v -> {
-            String token = sharedPreferencesToken.getString("access-token", null);
             StringRequest request = new StringRequest(Request.Method.GET, Constant.API_MESSAGE + "react/" + messageDto.getId(),
                     response -> {
                         try {
@@ -103,19 +103,7 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
                             }.getType();
                             List<ReactionDto> reactionDtos = new Gson().fromJson(res, listType);
 
-                            final Dialog dialog = new Dialog(context);
-                            dialog.setContentView(R.layout.reaction_dialog);
-                            ListView listView = dialog.findViewById(R.id.lv_reaction_dialog);
-                            TextView titleOfDialog = dialog.findViewById(R.id.txt_reaction_dialog_title);
-
-                            ReactionDialogAdapter arrayAdapter = new ReactionDialogAdapter(context, R.layout.reaction_dialog_line_item, reactionDtos);
-                            listView.setAdapter(arrayAdapter);
-                            listView.setOnItemClickListener((adapterView, view, which, l) -> {
-
-                            });
-                            titleOfDialog.setText("Những người đã bày tỏ cảm xúc");
-                            dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
-                            dialog.show();
+                            showDialogListReaction(reactionDtos);
 
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -134,12 +122,28 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
         });
     }
 
+    private void showDialogListReaction(List<ReactionDto> reactionDtos) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.reaction_dialog);
+        ListView listView = dialog.findViewById(R.id.lv_reaction_dialog);
+        TextView titleOfDialog = dialog.findViewById(R.id.txt_reaction_dialog_title);
+
+        ReactionDialogAdapter arrayAdapter = new ReactionDialogAdapter(context, R.layout.reaction_dialog_line_item, reactionDtos);
+        listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener((parent, view, pos, itemId) -> {
+
+        });
+        titleOfDialog.setText("Những người đã bày tỏ cảm xúc");
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+        dialog.show();
+    }
+
     @Override
     public int getItemCount() {
         return list.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView image_reaction_item;
 
         public ViewHolder(@NonNull View itemView) {

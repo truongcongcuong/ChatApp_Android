@@ -34,7 +34,6 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
     private MessageDto messageDto;
     private UserSummaryDTO user;
     private Gson gson;
-    private SharedPreferences sharedPreferencesToken;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ReactionDialogCreateAdapter(MessageDto messageDto, Context context) {
@@ -55,7 +54,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
         types.add("LIKE");
 
         gson = new Gson();
-        sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
     }
 
@@ -94,7 +93,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
         return resources.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView image_reaction_item;
 
         public ViewHolder(@NonNull View itemView) {

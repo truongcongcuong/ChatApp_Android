@@ -47,7 +47,7 @@ public class MessageFragment extends Fragment {
     private ListMessageAdapter adapter;
     private List<InboxDto> list;
     private Gson gson;
-    private SharedPreferences sharedPreferencesToken;
+    private String token;
     private int page = 0;
     private int size = 20;
     private SimpleDateFormat dateFormat;
@@ -83,7 +83,8 @@ public class MessageFragment extends Fragment {
         list = new ArrayList<>();
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -114,7 +115,6 @@ public class MessageFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateListString() {
         list = new ArrayList<>();
-        String token = sharedPreferencesToken.getString("access-token", null);
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size,
                 response -> {
                     try {

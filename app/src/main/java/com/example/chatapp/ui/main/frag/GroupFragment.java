@@ -45,7 +45,7 @@ public class GroupFragment extends Fragment {
     private GroupAdapter adapter;
     private List<InboxDto> list;
     private Gson gson;
-    private SharedPreferences sharedPreferencesToken;
+    private String token;
     private int page = 0;
     private int size = 20;
     private final String type = "GROUP";
@@ -78,7 +78,8 @@ public class GroupFragment extends Fragment {
         gson = new Gson();
         GetNewAccessToken getNewAccessToken = new GetNewAccessToken(getActivity().getApplicationContext());
         getNewAccessToken.sendGetNewTokenRequest();
-        sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -95,7 +96,6 @@ public class GroupFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void updateListString() {
         list = new ArrayList<>();
-        String token = sharedPreferencesToken.getString("access-token", null);
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size + "&type=" + type,
                 response -> {
                     try {

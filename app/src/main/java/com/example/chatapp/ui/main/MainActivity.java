@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bnv_menu;
     private MessageFragment messageFragment;
     private Gson gson;
-    private SharedPreferences sharedPreferencesUser;
     private UserSummaryDTO user;
 
     @Override
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         bnv_menu = findViewById(R.id.bnv_bot);
         gson = new Gson();
-        sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         messageFragment = new MessageFragment();
 

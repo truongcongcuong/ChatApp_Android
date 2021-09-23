@@ -41,7 +41,7 @@ public class ContactFragment extends Fragment {
 
     private RecyclerView rcv_contact_list;
     private FriendListAdapter adapter;
-    private SharedPreferences sharedPreferencesToken;
+    private String token;
     private Gson gson;
     private List<FriendDTO> list;
 
@@ -73,7 +73,8 @@ public class ContactFragment extends Fragment {
         gson = new Gson();
         GetNewAccessToken getNewAccessToken = new GetNewAccessToken(getActivity().getApplicationContext());
         getNewAccessToken.sendGetNewTokenRequest();
-        sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
     }
 
     @Override
@@ -89,7 +90,6 @@ public class ContactFragment extends Fragment {
 
     private void updateListFriends() {
         list = new ArrayList<>();
-        String token = sharedPreferencesToken.getString("access-token", null);
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST,
                 response -> {
                     try {

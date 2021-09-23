@@ -82,11 +82,10 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_below="@id/image_of_room_detail"
-                    android:layout_alignRight="@id/image_of_room_detail"
+                    android:layout_alignEnd="@id/image_of_room_detail"
                     android:layout_marginTop="-20dp"
                     android:layout_marginEnd="20dp"
-                    android:background="@null"
-                    android:padding="1dp" />
+                    android:background="@null" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -112,8 +111,7 @@
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:layout_marginStart="10dp"
-                        android:background="@null"
-                        android:padding="1dp" />
+                        android:background="@null" />
                 </LinearLayout>
 
             </RelativeLayout>

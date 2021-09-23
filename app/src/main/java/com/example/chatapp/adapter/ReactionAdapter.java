@@ -68,8 +68,10 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        holder.setIsRecyclable(false);
 
         Reaction reaction = list.get(position);
+        holder.image_reaction_item.setBackgroundResource(R.drawable.background_circle_image);
         switch (reaction.getType()) {
             case "HAHA":
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_haha);

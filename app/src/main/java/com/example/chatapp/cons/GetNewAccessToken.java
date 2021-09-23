@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -18,7 +17,6 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GetNewAccessToken {
 
@@ -50,13 +48,13 @@ public class GetNewAccessToken {
                 },
                 error -> {
                     NetworkResponse response = error.networkResponse;
-                    if (error instanceof ServerError && error != null) {
+                    if (error instanceof ServerError) {
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                             JSONObject object = new JSONObject(res);
                             SharedPreferences sharedPreferencesStatus = context.getSharedPreferences("status", Context.MODE_PRIVATE);
                             SharedPreferences.Editor editorStatus = sharedPreferencesStatus.edit();
-                            editorStatus.putBoolean("status-code",false).apply();
+                            editorStatus.putBoolean("status-code", false).apply();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -64,7 +62,7 @@ public class GetNewAccessToken {
                     }
                 }) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
                 String rfCookie = sharedPreferencesToken.getString("refresh-token", null);
                 HashMap<String, String> map = new HashMap<>();

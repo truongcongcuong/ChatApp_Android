@@ -1,15 +1,14 @@
 package com.example.chatapp.ui.signup;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.android.volley.AuthFailureError;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,10 +16,9 @@ import com.android.volley.ServerError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.chatapp.cons.Constant;
 import com.example.chatapp.R;
+import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserSignUpDTO;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,10 +28,13 @@ import java.util.Map;
 
 
 public class SignUpActivity extends AppCompatActivity {
-    EditText edt_sign_up_re_enter_password,edt_sign_up_name,edt_sign_up_phone_number,edt_sign_up_enter_password;
-    ImageButton ibt_sign_up_next_step1,ibt_sign_up_back;
-    TextView txt_sign_up_error_response;
-
+    private EditText edt_sign_up_re_enter_password;
+    private EditText edt_sign_up_name;
+    private EditText edt_sign_up_phone_number;
+    private EditText edt_sign_up_enter_password;
+    private ImageButton ibt_sign_up_next_step1;
+    private ImageButton ibt_sign_up_back;
+    private TextView txt_sign_up_error_response;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +51,8 @@ public class SignUpActivity extends AppCompatActivity {
         ibt_sign_up_back = findViewById(R.id.ibt_sign_up_back);
 
 
-        ibt_sign_up_next_step1.setOnClickListener(v->{
-            if(!edt_sign_up_enter_password.getText().toString().equals(edt_sign_up_re_enter_password.getText().toString())){
+        ibt_sign_up_next_step1.setOnClickListener(v -> {
+            if (!edt_sign_up_enter_password.getText().toString().equals(edt_sign_up_re_enter_password.getText().toString())) {
                 txt_sign_up_error_response.setText(R.string.check_password);
                 return;
             }
@@ -63,7 +64,7 @@ public class SignUpActivity extends AppCompatActivity {
             sendSignUpUserToServer(user);
         });
 
-        ibt_sign_up_back.setOnClickListener(v->{
+        ibt_sign_up_back.setOnClickListener(v -> {
             finish();
         });
     }
@@ -76,7 +77,7 @@ public class SignUpActivity extends AppCompatActivity {
                         user.setId((object.getString("id")));
                         Intent intent = new Intent(SignUpActivity.this, SignUpStep2Activity.class);
                         Bundle bundle = new Bundle();
-                        bundle.putSerializable("user",user);
+                        bundle.putSerializable("user", user);
                         intent.putExtras(bundle);
                         startActivity(intent);
                     } catch (JSONException e) {
@@ -84,7 +85,7 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 }, error -> {
             NetworkResponse response = error.networkResponse;
-            if(error instanceof ServerError && error != null){
+            if (error instanceof ServerError && error != null) {
                 try {
                     String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                     JSONObject object = new JSONObject(res);
@@ -94,14 +95,14 @@ public class SignUpActivity extends AppCompatActivity {
                 }
 
             }
-        }){
+        }) {
             @Nullable
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String,String> map = new HashMap<>();
-                map.put("displayName",user.getDisplayName());
-                map.put("password",user.getPassword());
-                map.put("phoneNumber",user.getPhoneNumber());
+            protected Map<String, String> getParams() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("displayName", user.getDisplayName());
+                map.put("password", user.getPassword());
+                map.put("phoneNumber", user.getPhoneNumber());
                 return map;
             }
         };

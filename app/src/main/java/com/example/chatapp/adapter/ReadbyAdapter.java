@@ -26,7 +26,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
     private List<ReadByDto> list;
     private final Context context;
     private MessageDto messageDto;
-    private final int max = 1;
+    private final int max = 10;
 
     public ReadbyAdapter(MessageDto messageDto, Context context) {
         this.messageDto = messageDto;
@@ -48,16 +48,28 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        holder.setIsRecyclable(false);
+
         ReadByDto readBy = list.get(position);
 
         // hiện ảnh của người xem dùng thư viện Glide
-        Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                .placeholder(R.drawable.image_placeholer)
-                .centerCrop().circleCrop().into(holder.readby_image);
+        if (position < max - 1) {
+            holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+            Glide.with(context).load(readBy.getReadByUser().getImageUrl())
+                    .placeholder(R.drawable.image_placeholer)
+                    .centerCrop().circleCrop().into(holder.readby_image);
+        }
 
-        if (position == list.size() - 2 && position >= max) {
-            holder.readby_image.setAlpha(0.3f);
-            holder.readby_more.setText(String.format("%s%d", "+", (list.size() - max - 2)));
+        if (position == max - 1) {
+            int remain = list.size() - max;
+            holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+            Glide.with(context).load(readBy.getReadByUser().getImageUrl())
+                    .placeholder(R.drawable.image_placeholer)
+                    .centerCrop().circleCrop().into(holder.readby_image);
+            if (remain > 0) {
+                holder.readby_image.setAlpha(0.3f);
+                holder.readby_more.setText(String.format("+%d", remain));
+            }
         }
 
         // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
@@ -81,7 +93,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return list.size() - max;
+        return Math.min(list.size(), max);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

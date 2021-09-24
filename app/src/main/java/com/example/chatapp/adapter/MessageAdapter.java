@@ -81,9 +81,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void updateReadToMessage(ReadByReceiver readByReceiver) {
         for (MessageDto m : list) {
-            // cập nhật readby cho new message
+            // cập nhật readby mới cho message
+            List<ReadByDto> readbyes = m.getReadbyes();
             if (m.getId().equals(readByReceiver.getMessageId())) {
-                List<ReadByDto> readbyes = m.getReadbyes();
                 if (readbyes == null)
                     readbyes = new ArrayList<>();
                 ReadByDto readByDto = new ReadByDto();
@@ -94,25 +94,37 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                 m.setReadbyes(readbyes);
                 Log.i("message readed", m.toString());
+
+                try {
+                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(list.indexOf(m));
+                    if (holder != null) {
+                        holder.setIsRecyclable(true);
+                        Activity activity = (Activity) context;
+                        activity.runOnUiThread(this::notifyDataSetChanged);
+                        holder.setIsRecyclable(false);
+                    }
+                } catch (Exception ignored) {
+
+                }
             }
-            // cập nhật readby cho tin nhắn cũ
-            if (m.getId().equals(readByReceiver.getOldMessageId()) && !m.getId().equals(readByReceiver.getMessageId())) {
-                List<ReadByDto> readbyes = m.getReadbyes();
-                if (readbyes != null) {
-                    Log.i("------read before", m.getReadbyes().toString());
+            // xóa readby cũ cho message
+            if (!m.getId().equals(readByReceiver.getMessageId())) {
+                if (readbyes != null && !readbyes.isEmpty()) {
                     readbyes.removeIf(x -> x.getReadByUser().getId().equals(readByReceiver.getReadByUser().getId()));
                     readbyes.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
+                    m.setReadbyes(readbyes);
                 }
+                try {
+                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(list.indexOf(m));
+                    if (holder != null) {
+                        holder.setIsRecyclable(true);
+                        Activity activity = (Activity) context;
+                        activity.runOnUiThread(this::notifyDataSetChanged);
+                        holder.setIsRecyclable(false);
+                    }
+                } catch (Exception ignored) {
 
-                m.setReadbyes(readbyes);
-                Log.i("------read after", m.getReadbyes().toString());
-            }
-            RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(list.indexOf(m));
-            if (holder != null) {
-                holder.setIsRecyclable(true);
-                Activity activity = (Activity) context;
-                activity.runOnUiThread(this::notifyDataSetChanged);
-                holder.setIsRecyclable(false);
+                }
             }
         }
     }
@@ -141,16 +153,18 @@ public class MessageAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         MessageDto messageDto = list.get(position);
         if (messageDto != null) {
-            // khi cuộn nhanh thì nội dung của item sẽ cập nhật nhiều lần dẫn đến sai
-            // set recyable=false để khi cuộn không cập nhật item
-            // khi nào cần cập nhật thì set=true
-            holder.setIsRecyclable(false);
             switch (getItemViewType(position)) {
                 case ITEM_SEND:
                     SenderViewHolder senderViewHolder = (SenderViewHolder) holder;
                     switch (messageDto.getType()) {
                         case "TEXT":
                             senderViewHolder.senderMessage.setText(messageDto.getContent());
+                            senderViewHolder.senderMessage.setPadding(
+                                    senderViewHolder.senderMessage.getPaddingLeft(),
+                                    senderViewHolder.senderMessage.getPaddingTop(),
+                                    senderViewHolder.senderMessage.getPaddingRight(),
+                                    10
+                            );
                             break;
                         case "IMAGE":
                             Glide.with(context).load(messageDto.getContent())
@@ -175,27 +189,27 @@ public class MessageAdapter extends RecyclerView.Adapter {
 //                            mp.setLooping(true);
 //                            senderViewHolder.contentVideo.start();
 //                            });
-
                             break;
                     }
                     senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+                    // hiện danh sách người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
+
+                        // nhiều người đã xem tin nhắn
+                        if (messageDto.getReadbyes().size() > 1) {
+                            senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
+                            senderViewHolder.rcv_read_many.setAdapter(readbyAdapter);
+                        }
+                        // chỉ có một người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() == 1) {
                             senderViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_one.setAdapter(readbyAdapter);
                         }
-                        if (messageDto.getReadbyes().size() > 1) {
-                            senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
-                            senderViewHolder.rcv_read_many.setAdapter(readbyAdapter);
-                            if (senderViewHolder.rcv_read_one.getAdapter() != null) {
-                                ReadbyAdapter empty = new ReadbyAdapter(null, context);
-                                senderViewHolder.rcv_read_one.setAdapter(empty);
-                            }
-                        }
                     }
+                    // hiện danh sách cảm xúc
                     if (messageDto.getReactions() != null) {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
@@ -214,14 +228,31 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     break;
                 case ITEM_RECEIVER:
                     ReceiverViewHolder receiverViewHolder = (ReceiverViewHolder) holder;
+                    // chỉ hiện ảnh của tin nhắn cuối cùng theo user id
                     if (messageDto.getSender() != null) {
-                        Glide.with(context).load(messageDto.getSender().getImageUrl())
-                                .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
-                                .into(receiverViewHolder.senderImage);
+                        if (position == 0 || position == list.size() - 1) {
+                            Glide.with(context).load(messageDto.getSender().getImageUrl())
+                                    .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                    .into(receiverViewHolder.senderImage);
+                            receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
+                        } else {
+                            if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
+                                Glide.with(context).load(messageDto.getSender().getImageUrl())
+                                        .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                        .into(receiverViewHolder.senderImage);
+                                receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
+                            }
+                        }
                     }
                     switch (messageDto.getType()) {
                         case "TEXT":
                             receiverViewHolder.senderMessage.setText(messageDto.getContent());
+                            receiverViewHolder.senderMessage.setPadding(
+                                    receiverViewHolder.senderMessage.getPaddingLeft(),
+                                    receiverViewHolder.senderMessage.getPaddingTop(),
+                                    receiverViewHolder.senderMessage.getPaddingRight(),
+                                    10
+                            );
                             break;
                         case "IMAGE":
                             Glide.with(context).load(messageDto.getContent())
@@ -246,27 +277,27 @@ public class MessageAdapter extends RecyclerView.Adapter {
 //                            mp.setLooping(true);
 //                            senderViewHolder.contentVideo.start();
 //                            });
-
                             break;
                     }
                     receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+                    // hiện danh sách những người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
+
+                        // nhiều người đã xem tin nhắn
+                        if (messageDto.getReadbyes().size() > 1) {
+                            receiverViewHolder.rcv_read_many.setLayoutManager(layoutManager);
+                            receiverViewHolder.rcv_read_many.setAdapter(readbyAdapter);
+                        }
+                        // chỉ có một người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() == 1) {
                             receiverViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_one.setAdapter(readbyAdapter);
                         }
-                        if (messageDto.getReadbyes().size() > 1) {
-                            receiverViewHolder.rcv_read_many.setLayoutManager(layoutManager);
-                            receiverViewHolder.rcv_read_many.setAdapter(readbyAdapter);
-                            if (receiverViewHolder.rcv_read_one.getAdapter() != null) {
-                                ReadbyAdapter empty = new ReadbyAdapter(null, context);
-                                receiverViewHolder.rcv_read_one.setAdapter(empty);
-                            }
-                        }
                     }
+                    // hiện danh sách cảm xúc
                     if (messageDto.getReactions() != null) {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
@@ -285,10 +316,15 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     break;
             }
         }
+        // khi cuộn nhanh thì nội dung của item sẽ cập nhật nhiều lần dẫn đến sai
+        // set recyable=false để khi cuộn không cập nhật item
+        // khi nào cần cập nhật thì set=true
+        holder.setIsRecyclable(false);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private boolean showReactionCreateDialog(MessageDto messageDto) {
+        Log.d("message of userid", messageDto.getSender().getId());
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.reaction_dialog_create);
 

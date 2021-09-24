@@ -156,7 +156,7 @@ public class MessageFragment extends Fragment {
                     if (d1 == null || d2 == null)
                         return 0;
                     return d2.compareTo(d1);
-                } catch (ParseException e) {
+                } catch (ParseException | NullPointerException e) {
                     e.printStackTrace();
                     return 0;
                 }

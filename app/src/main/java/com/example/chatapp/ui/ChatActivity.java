@@ -410,7 +410,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
-        finish();
+//        finish();
     }
 
     @Override

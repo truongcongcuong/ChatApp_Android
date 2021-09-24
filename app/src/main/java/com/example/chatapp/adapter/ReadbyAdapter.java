@@ -50,45 +50,47 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
         StrictMode.setThreadPolicy(policy);
         holder.setIsRecyclable(false);
 
-        ReadByDto readBy = list.get(position);
+        if (!list.isEmpty() && position < list.size()) {
+            ReadByDto readBy = list.get(position);
 
-        // hiện ảnh của người xem dùng thư viện Glide
-        if (position < max - 1) {
-            holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
-            Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
-                    .centerCrop().circleCrop().into(holder.readby_image);
-        }
-
-        if (position == max - 1) {
-            int remain = list.size() - max;
-            holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
-            Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
-                    .centerCrop().circleCrop().into(holder.readby_image);
-            if (remain > 0) {
-                holder.readby_image.setAlpha(0.3f);
-                holder.readby_more.setText(String.format("+%d", remain));
+            // hiện ảnh của người xem dùng thư viện Glide
+            if (position < max - 1) {
+                holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+                Glide.with(context).load(readBy.getReadByUser().getImageUrl())
+                        .placeholder(R.drawable.image_placeholer)
+                        .centerCrop().circleCrop().into(holder.readby_image);
             }
-        }
 
-        // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
-        holder.itemView.setOnClickListener(v -> {
-            final Dialog dialog = new Dialog(context);
-            dialog.setContentView(R.layout.readby_dialog);
+            if (position == max - 1) {
+                int remain = list.size() - max;
+                holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+                Glide.with(context).load(readBy.getReadByUser().getImageUrl())
+                        .placeholder(R.drawable.image_placeholer)
+                        .centerCrop().circleCrop().into(holder.readby_image);
+                if (remain > 0) {
+                    holder.readby_image.setAlpha(0.3f);
+                    holder.readby_more.setText(String.format("+%d", remain));
+                }
+            }
 
-            ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
-            TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
+            // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
+            holder.itemView.setOnClickListener(v -> {
+                final Dialog dialog = new Dialog(context);
+                dialog.setContentView(R.layout.readby_dialog);
 
-            ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, messageDto.getReadbyes());
-            listView.setAdapter(arrayAdapter);
-            listView.setOnItemClickListener((parent, view, pos, itemId) -> {
+                ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
+                TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
 
+                ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, messageDto.getReadbyes());
+                listView.setAdapter(arrayAdapter);
+                listView.setOnItemClickListener((parent, view, pos, itemId) -> {
+
+                });
+                titleOfDialog.setText("Những người đã xem");
+                dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+                dialog.show();
             });
-            titleOfDialog.setText("Những người đã xem");
-            dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
-            dialog.show();
-        });
+        }
     }
 
     @Override

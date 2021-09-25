@@ -153,6 +153,17 @@ public class MessageAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         MessageDto messageDto = list.get(position);
         if (messageDto != null) {
+            if (position == 0) {
+                /*
+                nếu là tin nhắn cuối cùng thì set padding top
+                 */
+                holder.itemView.setPadding(
+                        holder.itemView.getPaddingLeft(),
+                        30,
+                        holder.itemView.getPaddingRight(),
+                        holder.itemView.getPaddingBottom()
+                );
+            }
             switch (getItemViewType(position)) {
                 case ITEM_SEND:
                     SenderViewHolder senderViewHolder = (SenderViewHolder) holder;
@@ -200,12 +211,14 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                         // nhiều người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() > 1) {
-                            senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
+                            if (senderViewHolder.rcv_read_many.getLayoutManager() == null)
+                                senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_many.setAdapter(readbyAdapter);
                         }
                         // chỉ có một người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() == 1) {
-                            senderViewHolder.rcv_read_one.setLayoutManager(layoutManager);
+                            if (senderViewHolder.rcv_read_one.getLayoutManager() == null)
+                                senderViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_one.setAdapter(readbyAdapter);
                         }
                     }
@@ -214,7 +227,8 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
-                        senderViewHolder.send_rcv_reaction.setLayoutManager(layoutManager);
+                        if (senderViewHolder.send_rcv_reaction.getLayoutManager() == null)
+                            senderViewHolder.send_rcv_reaction.setLayoutManager(layoutManager);
                         senderViewHolder.send_rcv_reaction.setAdapter(reactionAdapter);
 
                         if (!messageDto.getReactions().isEmpty()) {
@@ -230,7 +244,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     ReceiverViewHolder receiverViewHolder = (ReceiverViewHolder) holder;
                     // chỉ hiện ảnh của tin nhắn cuối cùng theo user id
                     if (messageDto.getSender() != null) {
-                        if (position == 0 || position == list.size() - 1) {
+                        if (position == list.size() - 1) {
                             Glide.with(context).load(messageDto.getSender().getImageUrl())
                                     .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
                                     .into(receiverViewHolder.senderImage);
@@ -288,12 +302,14 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                         // nhiều người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() > 1) {
-                            receiverViewHolder.rcv_read_many.setLayoutManager(layoutManager);
+                            if (receiverViewHolder.rcv_read_many.getLayoutManager() == null)
+                                receiverViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_many.setAdapter(readbyAdapter);
                         }
                         // chỉ có một người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() == 1) {
-                            receiverViewHolder.rcv_read_one.setLayoutManager(layoutManager);
+                            if (receiverViewHolder.rcv_read_one.getLayoutManager() == null)
+                                receiverViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_one.setAdapter(readbyAdapter);
                         }
                     }
@@ -302,7 +318,8 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
-                        receiverViewHolder.receiver_rcv_reaction.setLayoutManager(layoutManager);
+                        if (receiverViewHolder.receiver_rcv_reaction.getLayoutManager() == null)
+                            receiverViewHolder.receiver_rcv_reaction.setLayoutManager(layoutManager);
                         receiverViewHolder.receiver_rcv_reaction.setAdapter(reactionAdapter);
 
                         if (!messageDto.getReactions().isEmpty()) {

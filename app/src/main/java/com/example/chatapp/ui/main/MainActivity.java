@@ -1,11 +1,11 @@
 package com.example.chatapp.ui.main;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private Gson gson;
     private UserSummaryDTO user;
 
+    @SuppressLint("CheckResult")
     @Override
     @RequiresApi(api = Build.VERSION_CODES.N)
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, messageDto.getSender().getDisplayName() + " " + messageDto.getContent(), Toast.LENGTH_SHORT).show();
+                            Log.d("message receiver", messageDto.getSender().getDisplayName() + " " + messageDto.getContent());
                             messageFragment.setNewMessage(messageDto);
                         }
                     });

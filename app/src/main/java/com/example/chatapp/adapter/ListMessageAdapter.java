@@ -2,10 +2,12 @@ package com.example.chatapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +22,10 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.ChatActivity;
 import com.example.chatapp.utils.TimeAgo;
+import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -29,10 +33,16 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     private final Context context;
     private List<InboxDto> list;
     private final int maxMessageSizeDisplay = 5;
+    private final Gson gson;
+    private final UserSummaryDTO user;
 
     public ListMessageAdapter(Context context, List<InboxDto> dtos) {
         this.context = context;
         this.list = dtos;
+        gson = new Gson();
+        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        String userJson = sharedPreferencesUser.getString("user-info", null);
+        user = gson.fromJson(userJson, UserSummaryDTO.class);
     }
 
     @NonNull
@@ -67,24 +77,45 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         if (lastMessage != null) {
             holder.txt_lim_last_message.setText(lastMessage.getContent());
             holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
+            String content;
             if (inboxDto.getRoom().getType().equalsIgnoreCase("GROUP")) {
-                String content = lastMessage.getSender().getDisplayName() + ": " + lastMessage.getContent();
-                holder.txt_lim_last_message.setText(content);
-            } else
-                holder.txt_lim_last_message.setText(lastMessage.getContent());
+                content = lastMessage.getSender().getDisplayName() + ": " + lastMessage.getContent();
+            } else {
+                content = lastMessage.getContent();
+            }
+            if (user.getId().equals(lastMessage.getSender().getId()))
+                content = "Bạn: " + lastMessage.getContent();
+            holder.txt_lim_last_message.setText(content);
         }
         holder.txt_lim_display_name.setText(displayName);
-        inboxDto.setCountNewMessage(6L);
+//        inboxDto.setCountNewMessage(6L);
+        /*
+        số tin nhắn chưa đọc lớn hơn 0
+         */
         if (inboxDto.getCountNewMessage() != null && inboxDto.getCountNewMessage() > 0) {
             holder.txt_lim_unread_message.setPadding(18, 7, 18, 7);
             holder.txt_lim_unread_message.setBackgroundResource(R.drawable.background_unreadmessage);
-            holder.txt_lim_unread_message.setText(inboxDto.getCountNewMessage() < 5
-                    ? inboxDto.getCountNewMessage().toString() : maxMessageSizeDisplay + "+");
+            if (inboxDto.getCountNewMessage() <= maxMessageSizeDisplay)
+                holder.txt_lim_unread_message.setText(inboxDto.getCountNewMessage().toString());
+            else
+                holder.txt_lim_unread_message.setText(maxMessageSizeDisplay + "+");
             holder.txt_lim_last_message.setTypeface(null, Typeface.BOLD);
             holder.txt_lim_time_last_message.setTypeface(null, Typeface.BOLD);
+        } else {
+            /*
+            xóa text về rỗng khi đã đọc tin nhắn
+             */
+            holder.txt_lim_unread_message.setPadding(0, 0, 0, 0);
+            holder.txt_lim_unread_message.setText("");
         }
 
         holder.itemView.setOnClickListener(v -> {
+            /*
+            khi click vào inbox để xem tin nhắn thì set số tin nhắn mới về 0
+             */
+            inboxDto.setCountNewMessage(0L);
+            list.set(position, inboxDto);
+            Log.d("counttt", list.get(position).getCountNewMessage() + "");
             Intent intent = new Intent(context, ChatActivity.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("dto", inboxDto);

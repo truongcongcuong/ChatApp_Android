@@ -25,21 +25,26 @@
             android:padding="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"></ImageView>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/txt_list_contact_display_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
+            android:ellipsize="end"
             android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingEnd="5dp"
             android:text="Truong Cong Cuong"
             android:textSize="20dp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/img_list_contact_avt"
-            app:layout_constraintLeft_toRightOf="@+id/img_list_contact_avt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/img_list_contact_avt"
+
             app:layout_constraintTop_toTopOf="@+id/img_list_contact_avt"
-            app:layout_constraintVertical_bias="0.0"></TextView>
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/txt_list_contact_create_at"

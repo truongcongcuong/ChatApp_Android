@@ -23,6 +23,7 @@ import com.example.chatapp.adapter.ListMessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.UserSummaryDTO;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -47,6 +48,7 @@ public class MessageFragment extends Fragment {
     private ListMessageAdapter adapter;
     private List<InboxDto> list;
     private Gson gson;
+    private UserSummaryDTO user;
     private String token;
     private int page = 0;
     private int size = 20;
@@ -85,18 +87,66 @@ public class MessageFragment extends Fragment {
 
         SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
+
+        SharedPreferences sharedPreferencesUser = getActivity().getSharedPreferences("user", Context.MODE_PRIVATE);
+        String userJson = sharedPreferencesUser.getString("user-info", null);
+        user = gson.fromJson(userJson, UserSummaryDTO.class);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void setNewMessage(MessageDto newMessage) {
+        boolean inboxIsExists = false;
         messageDto = newMessage;
         for (InboxDto inboxDto : list) {
             if (messageDto != null && inboxDto.getRoom().getId().equals(messageDto.getRoomId())) {
                 inboxDto.setLastMessage(messageDto);
+                /*
+                nếu người gửi của message trùng với người dùng hiện tại thì không tăng số tin nhắn mới
+                 */
+                if (!user.getId().equals(messageDto.getSender().getId()))
+                    inboxDto.setCountNewMessage(inboxDto.getCountNewMessage() + 1);
+                inboxIsExists = true;
             }
         }
-        sortTimeLastMessage();
-        adapter.notifyDataSetChanged();
+        /*
+        tin nhắn mới đến nhưng mà trong list chưa có inbox của message này nên phải
+        lấy inbox này từ server sau đó thêm vào list
+         */
+        if (!inboxIsExists) {
+            StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "/ofRoomId/" + messageDto.getRoomId(),
+                    response -> {
+                        try {
+                            String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                            InboxDto inboxDto = gson.fromJson(res, InboxDto.class);
+                            list.add(inboxDto);
+                            sortTimeLastMessage();
+                            adapter.notifyDataSetChanged();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.i("", error.toString())) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("Authorization", "Bearer " + token);
+                    return map;
+                }
+            };
+
+            RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+            requestQueue.add(request);
+        } else {
+            sortTimeLastMessage();
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter != null)
+            adapter.notifyDataSetChanged();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

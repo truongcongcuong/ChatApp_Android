@@ -9,6 +9,7 @@ public class Constant {
     public static final String API_FRIEND_LIST = "http://10.0.3.2:8080/api/friends";
     public static final String API_CHAT_TO = "http://10.0.3.2:8080/chat";
     public static final String API_ME = "http://10.0.3.2:8080/api/user/me";
+    public static final String API_USER = "http://10.0.3.2:8080/api/user/";
     public static final String API_MESSAGE = "http://10.0.3.2:8080/api/messages/";
     public static final String WEB_SOCKET = "ws://10.0.3.2:8080/ws/websocket";
     public static final String API_ROOM = "http://10.0.3.2:8080/api/rooms/";
@@ -21,6 +22,7 @@ public class Constant {
 //    public static final String API_FRIEND_LIST = "http://10.0.2.2:8080/api/friends";
 //    public static final String API_CHAT_TO = "http://10.0.2.2:8080/chat";
 //    public static final String API_ME = "http://10.0.2.2:8080/api/user/me";
+//    public static final String API_USER = "http://10.0.2.2:8080/api/user/";
 //    public static final String API_MESSAGE = "http://10.0.2.2:8080/api/messages/";
 //    public static final String WEB_SOCKET= "ws://10.0.2.2:8080/ws/websocket";
 //    public static final String API_ROOM= "http://10.0.2.2:8080/api/rooms/";

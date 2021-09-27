@@ -101,12 +101,16 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
                 holder.txt_lim_unread_message.setText(maxMessageSizeDisplay + "+");
             holder.txt_lim_last_message.setTypeface(null, Typeface.BOLD);
             holder.txt_lim_time_last_message.setTypeface(null, Typeface.BOLD);
+            holder.txt_lim_display_name.setTypeface(null, Typeface.BOLD);
         } else {
             /*
             xóa text về rỗng khi đã đọc tin nhắn
              */
             holder.txt_lim_unread_message.setPadding(0, 0, 0, 0);
             holder.txt_lim_unread_message.setText("");
+            holder.txt_lim_display_name.setTypeface(null, Typeface.NORMAL);
+            holder.txt_lim_last_message.setTypeface(null, Typeface.NORMAL);
+            holder.txt_lim_time_last_message.setTypeface(null, Typeface.NORMAL);
         }
 
         holder.itemView.setOnClickListener(v -> {

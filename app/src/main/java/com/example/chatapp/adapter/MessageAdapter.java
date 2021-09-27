@@ -80,7 +80,8 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void updateReadToMessage(ReadByReceiver readByReceiver) {
-        for (MessageDto m : list) {
+        for (int i = 0; i < list.size(); i++) {
+            MessageDto m = list.get(i);
             // cập nhật readby mới cho message
             List<ReadByDto> readbyes = m.getReadbyes();
             if (m.getId().equals(readByReceiver.getMessageId())) {
@@ -96,7 +97,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 Log.i("message readed", m.toString());
 
                 try {
-                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(list.indexOf(m));
+                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
                     if (holder != null) {
                         holder.setIsRecyclable(true);
                         Activity activity = (Activity) context;
@@ -111,11 +112,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
             if (!m.getId().equals(readByReceiver.getMessageId())) {
                 if (readbyes != null && !readbyes.isEmpty()) {
                     readbyes.removeIf(x -> x.getReadByUser().getId().equals(readByReceiver.getReadByUser().getId()));
-                    readbyes.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
+//                    readbyes.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
                     m.setReadbyes(readbyes);
                 }
                 try {
-                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(list.indexOf(m));
+                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
                     if (holder != null) {
                         holder.setIsRecyclable(true);
                         Activity activity = (Activity) context;
@@ -125,6 +126,30 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 } catch (Exception ignored) {
 
                 }
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void deleteOldRead(String userId) {
+        for (int i = 0; i < list.size(); i++) {
+            MessageDto m = list.get(i);
+            List<ReadByDto> readbyes = m.getReadbyes();
+            // xóa readby cũ cho message
+            if (readbyes != null && !readbyes.isEmpty()) {
+                readbyes.removeIf(x -> x.getReadByUser().getId().equals(userId));
+                m.setReadbyes(readbyes);
+            }
+            try {
+                RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
+                if (holder != null) {
+                    holder.setIsRecyclable(true);
+                    Activity activity = (Activity) context;
+                    activity.runOnUiThread(this::notifyDataSetChanged);
+                    holder.setIsRecyclable(false);
+                }
+            } catch (Exception ignored) {
+
             }
         }
     }

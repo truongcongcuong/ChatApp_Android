@@ -98,6 +98,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private static final int PICK_IMAGE = 1;
     private static final int VIEW_ROOM_DETAIL = 2;
     private StompClient stompClient;
+    private boolean isFirstTimeRun = true;
 
     @SuppressLint("CheckResult")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -215,6 +216,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 .subscribe(x -> {
                     Log.i("chat activ subcri mess", x.getPayload());
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
+                    adapter.deleteOldRead(messageDto.getSender().getId());
                     updateMessageRealTime(messageDto);
                 }, throwable -> {
                     Log.i("chat activ subcri erro", throwable.getMessage());
@@ -373,12 +375,15 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                             List<MessageDto> list = gson.fromJson(array.toString(), listType);
                             if (!list.isEmpty()) {
                                 adapter.updateList(list);
+                                if (isFirstTimeRun) {
+                                    sendReadMessageNotification();
+                                    isFirstTimeRun = false;
+                                }
                                 if (page == 0) {
                                     rcv_chat_list.scrollToPosition(list.size() - 1);
                                 } else {
                                     rcv_chat_list.scrollToPosition(size + (last - first) - 1);
                                 }
-                                sendReadMessageNotification();
                             }
                         } catch (JSONException | UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -398,15 +403,18 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateMessageRealTime(MessageDto messageDto) {
         this.adapter.updateMessage(messageDto);
+        if (!messageDto.getSender().getId().equals(user.getId())) {
+            sendReadMessageNotification();
+        }
         ChatActivity.this.runOnUiThread(new Runnable() {
             public void run() {
                 rcv_chat_list.getLayoutManager()
                         .smoothScrollToPosition(rcv_chat_list,
                                 new RecyclerView.State(),
                                 rcv_chat_list.getAdapter().getItemCount());
-                sendReadMessageNotification();
             }
         });
     }

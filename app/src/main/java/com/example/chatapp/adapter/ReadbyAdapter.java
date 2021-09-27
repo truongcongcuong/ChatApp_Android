@@ -2,6 +2,8 @@ package com.example.chatapp.adapter;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,12 +13,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReadByDto;
+import com.example.chatapp.dto.UserSummaryDTO;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +32,10 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
     private final Context context;
     private MessageDto messageDto;
     private final int max = 10;
+    private UserSummaryDTO user;
+    private Gson gson;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public ReadbyAdapter(MessageDto messageDto, Context context) {
         this.messageDto = messageDto;
         if (messageDto != null)
@@ -35,6 +43,10 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
         else
             this.list = new ArrayList<>();
         this.context = context;
+        gson = new Gson();
+        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
+        list.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
     }
 
     @NonNull

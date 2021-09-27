@@ -17,9 +17,8 @@
         android:paddingStart="4dp"
         android:singleLine="true"
         android:text="Những người đã xem"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textColor="#666666"
+        android:textSize="16sp" />
 
     <View
         android:id="@+id/view4"

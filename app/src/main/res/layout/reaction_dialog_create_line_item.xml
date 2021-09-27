@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/image_reaction_dialog_create_item"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:visibility="visible" />
 
 </LinearLayout>

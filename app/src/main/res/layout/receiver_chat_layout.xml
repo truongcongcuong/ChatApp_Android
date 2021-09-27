@@ -64,9 +64,8 @@
                 <TextView
                     android:id="@+id/receiver_message_time"
                     android:layout_width="wrap_content"
-                    android:layout_height="20dp"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:minWidth="120dp"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
                     android:textSize="12sp" />

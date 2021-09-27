@@ -143,7 +143,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
             View view = LayoutInflater.from(context).inflate(R.layout.sender_chat_layout, parent, false);
             return new SenderViewHolder(view);
         } else {
-            View view = LayoutInflater.from(context).inflate(R.layout.reciever_chat_layout, parent, false);
+            View view = LayoutInflater.from(context).inflate(R.layout.receiver_chat_layout, parent, false);
             return new ReceiverViewHolder(view);
         }
     }
@@ -167,6 +167,18 @@ public class MessageAdapter extends RecyclerView.Adapter {
             switch (getItemViewType(position)) {
                 case ITEM_SEND:
                     SenderViewHolder senderViewHolder = (SenderViewHolder) holder;
+                    /*
+                    chỉ hiện thời gian ở tin nhắn cuối cùng
+                     */
+                    if (position == list.size() - 1) {
+                        senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+                    } else {
+                        if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
+                            senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+                        } else {
+                            senderViewHolder.timeOfMessage.setHeight(0);
+                        }
+                    }
                     switch (messageDto.getType()) {
                         case "TEXT":
                             senderViewHolder.senderMessage.setText(messageDto.getContent());
@@ -176,6 +188,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     senderViewHolder.senderMessage.getPaddingRight(),
                                     10
                             );
+                            senderViewHolder.senderMessage.setMinEms(2);
                             break;
                         case "IMAGE":
                             Glide.with(context).load(messageDto.getContent())
@@ -202,7 +215,6 @@ public class MessageAdapter extends RecyclerView.Adapter {
 //                            });
                             break;
                     }
-                    senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                     // hiện danh sách người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
@@ -242,19 +254,26 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     break;
                 case ITEM_RECEIVER:
                     ReceiverViewHolder receiverViewHolder = (ReceiverViewHolder) holder;
-                    // chỉ hiện ảnh của tin nhắn cuối cùng theo user id
+                    /*
+                     chỉ hiện ảnh của tin nhắn cuối cùng theo user id
+                     , chỉ hiện thời gian của tin nhắn cuối cùng
+                     */
                     if (messageDto.getSender() != null) {
                         if (position == list.size() - 1) {
                             Glide.with(context).load(messageDto.getSender().getImageUrl())
                                     .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
                                     .into(receiverViewHolder.senderImage);
                             receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
+                            receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                         } else {
                             if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
                                 Glide.with(context).load(messageDto.getSender().getImageUrl())
                                         .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
                                         .into(receiverViewHolder.senderImage);
                                 receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
+                                receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+                            } else {
+                                receiverViewHolder.timeOfMessage.setHeight(0);
                             }
                         }
                     }
@@ -267,6 +286,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     receiverViewHolder.senderMessage.getPaddingRight(),
                                     10
                             );
+                            receiverViewHolder.senderMessage.setMinEms(2);
                             break;
                         case "IMAGE":
                             Glide.with(context).load(messageDto.getContent())
@@ -293,7 +313,6 @@ public class MessageAdapter extends RecyclerView.Adapter {
 //                            });
                             break;
                     }
-                    receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                     // hiện danh sách những người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);

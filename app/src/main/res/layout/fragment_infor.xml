@@ -63,6 +63,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/txt_infor_update"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/txt_info_name"
@@ -70,7 +71,7 @@
                 android:layout_marginStart="0dp"
                 android:layout_marginTop="13dp"
                 android:text="Xem trang cá nhân"
-                android:textColor="@color/white"
+                android:textColor="@color/color_send"
                 android:textSize="16sp" />
         </RelativeLayout>
 

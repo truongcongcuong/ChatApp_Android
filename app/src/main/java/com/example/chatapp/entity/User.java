@@ -23,6 +23,7 @@ public class User implements Serializable {
     private String verificationCode;
     private String imageUrl;
 
+
     private String roles;
 
     @Override

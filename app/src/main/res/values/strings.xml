@@ -44,8 +44,19 @@
     <string name="phonebook_friend">Phonebook friend</string>
     <string name="all_contact">All contacts</string>
     <string name="refresh">Refresh</string>
-
-
-
+    <string name="update_infor">Update Information</string>
+    <string name="name">Name</string>
+    <string name="username">Username</string>
+    <string name="birthday">Birthday</string>
+    <string name="mobile">Mobile</string>
+    <string name="test_text">Hello World</string>
+    <string name="view_avatar">View avatar</string>
+    <string name="take_photo">Take photo</string>
+    <string name="choose_from_gallery">Choose from Gallery</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="edit_profile_display_name">Enter your display name</string>
+    <string name="edit_profile_username">Enter your username</string>
+    <string name="error_dialog_title">Error...</string>
+    <string name="cancel_button">Cancel</string>
 
 </resources>

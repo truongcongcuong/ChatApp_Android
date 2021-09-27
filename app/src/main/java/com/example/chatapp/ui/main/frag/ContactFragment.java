@@ -1,6 +1,7 @@
 package com.example.chatapp.ui.main.frag;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +23,7 @@ import com.example.chatapp.adapter.FriendListAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.FriendDTO;
+import com.example.chatapp.ui.TestNewFeatureActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -44,6 +47,7 @@ public class ContactFragment extends Fragment {
     private String token;
     private Gson gson;
     private List<FriendDTO> list;
+    ConstraintLayout ctl_contact_phone_book_friend;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -83,6 +87,11 @@ public class ContactFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_contact, container, false);
         rcv_contact_list = view.findViewById(R.id.rcv_contact_list);
+        ctl_contact_phone_book_friend = view.findViewById(R.id.ctl_contact_phone_book_friend);
+        ctl_contact_phone_book_friend.setOnClickListener(v->{
+            Intent intent = new Intent(getActivity(), TestNewFeatureActivity.class);
+            startActivity(intent);
+        });
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         updateListFriends();
         return view;

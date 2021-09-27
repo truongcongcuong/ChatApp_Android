@@ -26,6 +26,7 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.InfoActivity;
+import com.example.chatapp.ui.ViewInformationActivity;
 import com.google.gson.Gson;
 
 import org.json.JSONObject;
@@ -38,7 +39,7 @@ import java.util.Map;
 
 public class InforFragment extends Fragment {
     private TextView txt_info_error;
-    private TextView txt_info_name;
+    private TextView txt_info_name,txt_infor_update;
     private Button btn_info_signout;
     private ImageView image_info_image;
     private Gson gson;
@@ -78,6 +79,7 @@ public class InforFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_infor, container, false);
 
         txt_info_error = view.findViewById(R.id.txt_info_error);
+        txt_infor_update = view.findViewById(R.id.txt_infor_update);
         txt_info_error.setTextColor(getActivity().getResources().getColor(R.color.red));
         btn_info_signout = view.findViewById(R.id.btn_info_signout);
         txt_info_name = view.findViewById(R.id.txt_info_name);
@@ -97,6 +99,10 @@ public class InforFragment extends Fragment {
             getActivity().finish();
         });
         getUserInfo();
+        txt_infor_update.setOnClickListener(v->{
+            Intent intent = new Intent(getContext(), ViewInformationActivity.class);
+            getContext().startActivity(intent);
+        });
 
         return view;
     }

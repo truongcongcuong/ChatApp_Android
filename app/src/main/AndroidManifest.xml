@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -18,10 +20,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp">
+        <activity android:name=".ui.UpdateInformationActivity"></activity>
+        <activity android:name=".ui.ViewInformationActivity" />
+        <activity android:name=".ui.TestNewFeatureActivity" />
         <activity
             android:name=".ui.MemberActivity"
-            android:theme="@style/Theme.AppCompat.Dialog" />
-        <!-- <activity android:name=".ui.RoomDetailActivity" /> -->
+            android:theme="@style/Theme.AppCompat.Dialog" /> <!-- <activity android:name=".ui.RoomDetailActivity" /> -->
         <activity
             android:name=".ui.RoomDetailActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />

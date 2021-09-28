@@ -25,7 +25,6 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.HomePageActivity;
-import com.example.chatapp.ui.InfoActivity;
 import com.example.chatapp.ui.ViewInformationActivity;
 import com.google.gson.Gson;
 
@@ -101,7 +100,7 @@ public class InforFragment extends Fragment {
         getUserInfo();
         txt_infor_update.setOnClickListener(v->{
             Intent intent = new Intent(getContext(), ViewInformationActivity.class);
-            getContext().startActivity(intent);
+            startActivity(intent);
         });
 
         return view;
@@ -111,10 +110,6 @@ public class InforFragment extends Fragment {
         SharedPreferences sharedPreferencesUser = getActivity().getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         txt_info_name.setText(user.getDisplayName());
-        txt_info_name.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), InfoActivity.class);
-            startActivity(intent);
-        });
         Glide.with(this).load(user.getImageUrl())
                 .centerCrop().circleCrop().into(image_info_image);
     }

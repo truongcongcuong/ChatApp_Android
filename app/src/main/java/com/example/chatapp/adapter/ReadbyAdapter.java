@@ -32,21 +32,24 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
     private final Context context;
     private MessageDto messageDto;
     private final int max = 10;
-    private UserSummaryDTO user;
-    private Gson gson;
+    private final UserSummaryDTO user;
+    private final Gson gson;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ReadbyAdapter(MessageDto messageDto, Context context) {
         this.messageDto = messageDto;
         if (messageDto != null)
-            this.list = messageDto.getReadbyes();
+            this.list = new ArrayList<>(messageDto.getReadbyes());
         else
             this.list = new ArrayList<>();
         this.context = context;
         gson = new Gson();
         SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
-        list.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
+        /*
+        xóa reaction của người dùng hiện tại, không hiện lên
+         */
+//        list.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
     }
 
     @NonNull
@@ -93,7 +96,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
                 ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
                 TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
 
-                ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, messageDto.getReadbyes());
+                ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, list);
                 listView.setAdapter(arrayAdapter);
                 listView.setOnItemClickListener((parent, view, pos, itemId) -> {
 

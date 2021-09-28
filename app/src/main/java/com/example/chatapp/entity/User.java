@@ -2,15 +2,18 @@ package com.example.chatapp.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class User implements Serializable {
 
     private String id;
@@ -22,23 +25,5 @@ public class User implements Serializable {
     private String email;
     private String verificationCode;
     private String imageUrl;
-
-
     private String roles;
-
-    @Override
-    public String toString() {
-        return "{" +
-                "id='" + id + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", birthday=" + birthday +
-                ", password='" + password + '\'' +
-                ", gender='" + gender + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", email='" + email + '\'' +
-                ", verificationCode='" + verificationCode + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", roles='" + roles + '\'' +
-                '}';
-    }
 }

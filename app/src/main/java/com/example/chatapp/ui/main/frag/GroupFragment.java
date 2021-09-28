@@ -23,6 +23,7 @@ import com.example.chatapp.adapter.ListMessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.enumvalue.RoomType;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -48,7 +49,7 @@ public class GroupFragment extends Fragment {
     private String token;
     private int page = 0;
     private int size = 20;
-    private final String type = "GROUP";
+    private final String type = RoomType.GROUP.toString();
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";

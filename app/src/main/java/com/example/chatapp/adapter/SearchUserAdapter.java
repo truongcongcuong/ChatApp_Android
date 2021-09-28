@@ -30,9 +30,6 @@ import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.ChatActivity;
 import com.google.gson.Gson;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -89,8 +86,7 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
                         response -> {
                             try {
                                 String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                                JSONObject object = new JSONObject(res);
-                                InboxDto dto = gson.fromJson(object.toString(), InboxDto.class);
+                                InboxDto dto = gson.fromJson(res, InboxDto.class);
 
                                 Intent intent = new Intent(context, ChatActivity.class);
                                 Bundle bundle = new Bundle();
@@ -98,7 +94,7 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
                                 intent.putExtras(bundle);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 context.startActivity(intent);
-                            } catch (JSONException | UnsupportedEncodingException e) {
+                            } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
                         },

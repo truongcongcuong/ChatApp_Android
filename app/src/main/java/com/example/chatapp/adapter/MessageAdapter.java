@@ -29,10 +29,13 @@ import com.example.chatapp.dto.ReadByDto;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.Reaction;
+import com.example.chatapp.enumvalue.MessageType;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MessageAdapter extends RecyclerView.Adapter {
 
@@ -40,6 +43,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
     private final List<MessageDto> list;
     private static final int ITEM_SEND = 1;
     private static final int ITEM_RECEIVER = 2;
+    private static final int ITEM_SYSTEM = 3;
     private final Gson gson;
     private UserSummaryDTO user;
     private RecyclerView recyclerView;
@@ -53,7 +57,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         list = messageDtos;
     }
 
-    // cap nhat reaction realtime
+    // khi nhận được reaction notification thì cập nhật reaction vào message
     public void updateReactionToMessage(ReactionReceiver receiver) {
         for (MessageDto m : list) {
             if (m.getId().equals(receiver.getMessageId())) {
@@ -67,6 +71,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                 m.setReactions(reactions);
 
+                /*
+                tìm holder tại vị trí message đó, set recyclable=true để cập nhật lại reaction
+                sau đó set lại recyclable=false để khi cuộn dữ liệu không bị sai
+                 */
                 RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(list.indexOf(m));
                 if (holder != null) {
                     holder.setIsRecyclable(true);
@@ -82,20 +90,24 @@ public class MessageAdapter extends RecyclerView.Adapter {
     public void updateReadToMessage(ReadByReceiver readByReceiver) {
         for (int i = 0; i < list.size(); i++) {
             MessageDto m = list.get(i);
-            // cập nhật readby mới cho message
-            List<ReadByDto> readbyes = m.getReadbyes();
+
+            // cập nhật read tracking mới cho message
+            Set<ReadByDto> readbyes = m.getReadbyes();
             if (m.getId().equals(readByReceiver.getMessageId())) {
                 if (readbyes == null)
-                    readbyes = new ArrayList<>();
+                    readbyes = new HashSet<>();
                 ReadByDto readByDto = new ReadByDto();
                 readByDto.setReadAt(readByReceiver.getReadAt());
                 readByDto.setReadByUser(readByReceiver.getReadByUser());
-                if (!readbyes.contains(readByDto))
-                    readbyes.add(readByDto);
+                readbyes.add(readByDto);
 
                 m.setReadbyes(readbyes);
                 Log.i("message readed", m.toString());
 
+                /*
+                tìm holder tại vị trí message, bật recyclable sau đó cập nhật read tracking
+                sau đó tắt recyclable
+                 */
                 try {
                     RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
                     if (holder != null) {
@@ -108,11 +120,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                 }
             }
-            // xóa readby cũ cho message
+            // xóa read tracking cũ cho message
             if (!m.getId().equals(readByReceiver.getMessageId())) {
                 if (readbyes != null && !readbyes.isEmpty()) {
                     readbyes.removeIf(x -> x.getReadByUser().getId().equals(readByReceiver.getReadByUser().getId()));
-//                    readbyes.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
                     m.setReadbyes(readbyes);
                 }
                 try {
@@ -130,11 +141,14 @@ public class MessageAdapter extends RecyclerView.Adapter {
         }
     }
 
+    /*
+    xóa readTracking cũ
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void deleteOldRead(String userId) {
+    public void deleteOldReadTracking(String userId) {
         for (int i = 0; i < list.size(); i++) {
             MessageDto m = list.get(i);
-            List<ReadByDto> readbyes = m.getReadbyes();
+            Set<ReadByDto> readbyes = m.getReadbyes();
             // xóa readby cũ cho message
             if (readbyes != null && !readbyes.isEmpty()) {
                 readbyes.removeIf(x -> x.getReadByUser().getId().equals(userId));
@@ -155,6 +169,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
     }
 
 
+    /*
+    lấy recycler view hiện đang dùng bởi adapter
+     */
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -167,9 +184,12 @@ public class MessageAdapter extends RecyclerView.Adapter {
         if (viewType == ITEM_SEND) {
             View view = LayoutInflater.from(context).inflate(R.layout.sender_chat_layout, parent, false);
             return new SenderViewHolder(view);
-        } else {
+        } else if (viewType == ITEM_RECEIVER) {
             View view = LayoutInflater.from(context).inflate(R.layout.receiver_chat_layout, parent, false);
             return new ReceiverViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(context).inflate(R.layout.system_message_chat_layout, parent, false);
+            return new SystemViewHolder(view);
         }
     }
 
@@ -205,21 +225,26 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         }
                     }
                     switch (messageDto.getType()) {
-                        case "TEXT":
+                        case TEXT:
                             senderViewHolder.senderMessage.setText(messageDto.getContent());
+                            // set padding bottom cho text message
                             senderViewHolder.senderMessage.setPadding(
                                     senderViewHolder.senderMessage.getPaddingLeft(),
                                     senderViewHolder.senderMessage.getPaddingTop(),
                                     senderViewHolder.senderMessage.getPaddingRight(),
                                     10
                             );
+                            // set chiều rộng tối thiếu cho textview
                             senderViewHolder.senderMessage.setMinEms(2);
                             break;
-                        case "IMAGE":
+                        case IMAGE:
                             Glide.with(context).load(messageDto.getContent())
                                     .into(senderViewHolder.contentImage);
                             break;
-                        case "VIDEO":
+                        case VIDEO:
+                            /*
+                            set chiều dài và chiều rộng cho video view
+                             */
                             ViewGroup.LayoutParams params = senderViewHolder.contentVideo.getLayoutParams();
                             params.width = 1080;
                             params.height = 720;
@@ -242,6 +267,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     }
                     // hiện danh sách người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
+                        messageDto.getReadbyes().removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
@@ -264,10 +290,14 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
+
                         if (senderViewHolder.send_rcv_reaction.getLayoutManager() == null)
                             senderViewHolder.send_rcv_reaction.setLayoutManager(layoutManager);
                         senderViewHolder.send_rcv_reaction.setAdapter(reactionAdapter);
 
+                        /*
+                        nếu danh sách reaction khác rỗng thì set margin left và right
+                         */
                         if (!messageDto.getReactions().isEmpty()) {
                             LinearLayout.LayoutParams marginLayoutParams = new LinearLayout.LayoutParams(senderViewHolder.send_rcv_reaction.getLayoutParams());
                             marginLayoutParams.setMargins(25, 0, 20, 0);
@@ -291,7 +321,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
                             receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                         } else {
-                            if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
+                            if (list.get(position + 1).getSender() == null) {
+                                Glide.with(context).load(messageDto.getSender().getImageUrl())
+                                        .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                        .into(receiverViewHolder.senderImage);
+                            } else if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
                                 Glide.with(context).load(messageDto.getSender().getImageUrl())
                                         .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
                                         .into(receiverViewHolder.senderImage);
@@ -303,7 +337,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         }
                     }
                     switch (messageDto.getType()) {
-                        case "TEXT":
+                        case TEXT:
                             receiverViewHolder.senderMessage.setText(messageDto.getContent());
                             receiverViewHolder.senderMessage.setPadding(
                                     receiverViewHolder.senderMessage.getPaddingLeft(),
@@ -313,11 +347,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             );
                             receiverViewHolder.senderMessage.setMinEms(2);
                             break;
-                        case "IMAGE":
+                        case IMAGE:
                             Glide.with(context).load(messageDto.getContent())
                                     .into(receiverViewHolder.contentImage);
                             break;
-                        case "VIDEO":
+                        case VIDEO:
                             ViewGroup.LayoutParams params = receiverViewHolder.contentVideo.getLayoutParams();
                             params.width = 1080;
                             params.height = 720;
@@ -340,6 +374,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     }
                     // hiện danh sách những người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
+                        messageDto.getReadbyes().removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
@@ -362,6 +397,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
+
                         if (receiverViewHolder.receiver_rcv_reaction.getLayoutManager() == null)
                             receiverViewHolder.receiver_rcv_reaction.setLayoutManager(layoutManager);
                         receiverViewHolder.receiver_rcv_reaction.setAdapter(reactionAdapter);
@@ -374,6 +410,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         }
                     }
                     receiverViewHolder.messageLayout.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
+                    break;
+                case ITEM_SYSTEM:
+                    SystemViewHolder systemViewHolder = (SystemViewHolder) holder;
+                    systemViewHolder.system_message_time.setText(messageDto.getCreateAt());
+                    systemViewHolder.system_message_content.setText(messageDto.getContent());
                     break;
             }
         }
@@ -418,11 +459,16 @@ public class MessageAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         MessageDto message = list.get(position);
+        if (message != null && message.getType().equals(MessageType.SYSTEM))
+            return ITEM_SYSTEM;
         if (message != null && message.getSender() != null && message.getSender().getId().equalsIgnoreCase(user.getId()))
             return ITEM_SEND;
         return ITEM_RECEIVER;
     }
 
+    /**
+     * holder tin nhắn gửi
+     */
     static class SenderViewHolder extends RecyclerView.ViewHolder {
 
         TextView senderMessage;
@@ -457,6 +503,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
         }
     }
 
+    /**
+     * holder tin nhắn nhận
+     */
     static class ReceiverViewHolder extends RecyclerView.ViewHolder {
 
         TextView senderMessage;
@@ -490,6 +539,21 @@ public class MessageAdapter extends RecyclerView.Adapter {
             contentVideo.setLayoutParams(params);
             contentVideo.requestLayout();
 
+        }
+    }
+
+    /**
+     * holder tin nhắn của hệ thống
+     */
+    static class SystemViewHolder extends RecyclerView.ViewHolder {
+
+        TextView system_message_time;
+        TextView system_message_content;
+
+        public SystemViewHolder(@NonNull View itemView) {
+            super(itemView);
+            system_message_time = itemView.findViewById(R.id.system_message_time);
+            system_message_content = itemView.findViewById(R.id.system_message_content);
         }
     }
 

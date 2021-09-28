@@ -1,9 +1,12 @@
 package com.example.chatapp.dto;
 
 import com.example.chatapp.entity.Reaction;
+import com.example.chatapp.enumvalue.MessageStatus;
+import com.example.chatapp.enumvalue.MessageType;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import lombok.Data;
 
@@ -13,11 +16,12 @@ public class MessageDto implements Serializable {
     private String roomId;
     private UserProfileDto sender;
     private String createAt;
-    private String type;
+    private MessageType type;
     private String content;
-    private Boolean pin;
-    private Boolean deleted;
-    private String status;
+    private boolean pin;
+    private boolean deleted;
+    private MessageStatus status;
     private List<Reaction> reactions;
-    private List<ReadByDto> readbyes;
+    private Set<ReadByDto> readbyes;
+    private MessageDto reply;
 }

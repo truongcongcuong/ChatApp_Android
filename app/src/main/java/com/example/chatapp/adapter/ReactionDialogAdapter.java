@@ -1,6 +1,5 @@
 package com.example.chatapp.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,9 +25,10 @@ public class ReactionDialogAdapter extends ArrayAdapter<ReactionDto> {
     }
 
     @Override
-    @SuppressLint("ViewHolder")
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = LayoutInflater.from(context).inflate(R.layout.reaction_dialog_line_item, parent, false);
+        View view = convertView;
+        if (view == null)
+            view = LayoutInflater.from(context).inflate(R.layout.reaction_dialog_line_item, parent, false);
 
         ImageView imageOfUser = view.findViewById(R.id.image_reaction_dialog_item);
         TextView displayName = view.findViewById(R.id.txt_reaction_dialog_displayname);
@@ -43,22 +43,22 @@ public class ReactionDialogAdapter extends ArrayAdapter<ReactionDto> {
 
         displayName.setText(reactionDto.getReactByUser().getDisplayName());
         switch (reactionDto.getType()) {
-            case "HAHA":
+            case HAHA:
                 reaction_type.setImageResource(R.drawable.ic_reaction_haha);
                 break;
-            case "SAD":
+            case SAD:
                 reaction_type.setImageResource(R.drawable.ic_reaction_sad);
                 break;
-            case "LOVE":
+            case LOVE:
                 reaction_type.setImageResource(R.drawable.ic_reaction_love);
                 break;
-            case "WOW":
+            case WOW:
                 reaction_type.setImageResource(R.drawable.ic_reaction_wow);
                 break;
-            case "ANGRY":
+            case ANGRY:
                 reaction_type.setImageResource(R.drawable.ic_reaction_angry);
                 break;
-            case "LIKE":
+            case LIKE:
                 reaction_type.setImageResource(R.drawable.ic_reaction_like);
                 break;
         }

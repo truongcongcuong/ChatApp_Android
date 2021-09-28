@@ -29,6 +29,7 @@ public class ReadbyDialogAdapter extends ArrayAdapter<ReadByDto> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = LayoutInflater.from(context).inflate(R.layout.readby_dialog_line_item, parent, false);
+
         ImageView imageOfUser = view.findViewById(R.id.image_readby_dialog_item);
         TextView displayName = view.findViewById(R.id.txt_readby_dialog_displayname);
         TextView readAt = view.findViewById(R.id.txt_readby_dialog_read_at);
@@ -41,7 +42,7 @@ public class ReadbyDialogAdapter extends ArrayAdapter<ReadByDto> {
                 .into(imageOfUser);
 
         displayName.setText(readBy.getReadByUser().getDisplayName());
-        readAt.setText("Đã xem: " + readBy.getReadAt());
+        readAt.setText(String.format("Đã xem: ", readBy.getReadAt()));
 
         return view;
     }

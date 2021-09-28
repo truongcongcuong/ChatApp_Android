@@ -1,6 +1,5 @@
 package com.example.chatapp.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -40,19 +39,25 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         MemberDto memberDto = new MemberDto();
+        /*
+        kiểm tra xem ngừi dùng hiện tại có phải admin của room hay không
+         */
         boolean find = false;
-        for (MemberDto m : members) {
-            if (m.getUser().getId().equals(user.getId()) && !find) {
-                currentUserIsAdmin = m.isAdmin();
-                memberDto = m;
+        int i = 0;
+        do {
+            MemberDto mem = members.get(i);
+            if (mem.getUser().getId().equals(user.getId())) {
+                currentUserIsAdmin = mem.isAdmin();
+                memberDto = mem;
                 find = true;
             }
+            i++;
         }
+        while (!find && i < members.size());
         members.removeIf(x -> x.getUser().getId().equals(user.getId()));
         members.add(0, memberDto);
     }
 
-    @SuppressLint("ViewHolder")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;

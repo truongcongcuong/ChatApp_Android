@@ -3,7 +3,6 @@ package com.example.chatapp.adapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
@@ -45,9 +43,11 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
     private final Context context;
     private MessageDto messageDto;
     private final String token;
+    /*
+    chỉ hiện tối đa max reaction, nếu số reaction lớn hơn max thì hiện dấu cộng ở ảnh cuối
+     */
     private final int max = 3;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public ReactionAdapter(MessageDto messageDto, Context context) {
         this.messageDto = messageDto;
         if (messageDto != null)
@@ -94,6 +94,9 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
             }
         }
 
+        /*
+        click vào một item để xem danh sách đầy đủ
+         */
         holder.itemView.setOnClickListener(v -> {
             StringRequest request = new StringRequest(Request.Method.GET, Constant.API_MESSAGE + "react/" + messageDto.getId(),
                     response -> {
@@ -125,22 +128,22 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
     private void bindData(@NonNull ViewHolder holder, Reaction reaction) {
         holder.image_reaction_item.setBackgroundResource(R.drawable.background_circle_image);
         switch (reaction.getType()) {
-            case "HAHA":
+            case HAHA:
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_haha);
                 break;
-            case "SAD":
+            case SAD:
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_sad);
                 break;
-            case "LOVE":
+            case LOVE:
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_love);
                 break;
-            case "WOW":
+            case WOW:
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_wow);
                 break;
-            case "ANGRY":
+            case ANGRY:
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_angry);
                 break;
-            case "LIKE":
+            case LIKE:
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_like);
                 break;
         }

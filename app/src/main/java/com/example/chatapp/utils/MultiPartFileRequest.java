@@ -7,6 +7,7 @@ import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.example.chatapp.enumvalue.MessageType;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.Consts;
@@ -32,6 +33,13 @@ public class MultiPartFileRequest<T> extends Request<T> {
     private final List<File> mFileParts;
     private MultipartEntityBuilder mBuilder;
     private final Response.Listener<T> mListener;
+    private final List<String> images = List.of("jpg", "jpeg", "png", "gif", "bmp");
+    private final List<String> videos = List.of(
+            "mp4", //MP4
+            "mpg", "mp2", "mpeg", "mpeg", "mpv", // MPEG-1
+            "m2v", // MPEG-2
+            "3gp", "3g2" // 3gp
+    );
 
     public MultiPartFileRequest(String url,
                                 Map<String, String> stringParts,
@@ -61,7 +69,17 @@ public class MultiPartFileRequest<T> extends Request<T> {
 
         Log.e("Size", "Size: " + mFileParts.size());
         for (File file : mFileParts) {
-            ContentType imageContentType = ContentType.create(FilenameUtils.getExtension(file.getName()));//MULTIPART_FORM_DATA;
+            ContentType imageContentType;
+            /*
+            set type cho file IMAGE, VIDEO, FILE
+             */
+            if (images.contains(FilenameUtils.getExtension(file.getName()).toLowerCase())) {
+                imageContentType = ContentType.create(MessageType.IMAGE.toString());
+            } else if (videos.contains(FilenameUtils.getExtension(file.getName()).toLowerCase())) {
+                imageContentType = ContentType.create(MessageType.VIDEO.toString());
+            } else {
+                imageContentType = ContentType.create(MessageType.FILE.toString());
+            }
             mBuilder.addBinaryBody("files", file, imageContentType, file.getName());
         }
     }
@@ -101,7 +119,6 @@ public class MultiPartFileRequest<T> extends Request<T> {
     @Override
     protected void deliverResponse(T response) {
         mListener.onResponse(response);
-
     }
 
 }

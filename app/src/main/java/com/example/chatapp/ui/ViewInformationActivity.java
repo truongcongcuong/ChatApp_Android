@@ -1,5 +1,6 @@
 package com.example.chatapp.ui;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
@@ -8,9 +9,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -20,8 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.ServerError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -31,12 +39,19 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.entity.User;
+import com.example.chatapp.utils.MultiPartFileRequest;
+import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -55,7 +70,8 @@ public class ViewInformationActivity extends AppCompatActivity {
     User user;
     Gson gson;
     UserDetailDTO userDetailDTO;
-    public static final int GalleryPick = 1;
+    static final int REQUEST_GALLERY = 1;
+    static final int REQUEST_IMAGE_CAPTURE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,14 +121,18 @@ public class ViewInformationActivity extends AppCompatActivity {
 //            txt_change_avt_view.setBackgroundColor(getResources().getColor(R.color.gray));
             Toast.makeText(this,"Action View photo active",Toast.LENGTH_LONG).show();
         });
-        txt_change_avt_take_photo.setOnClickListener(v-> {
+        txt_change_avt_from_gallery.setOnClickListener(v-> {
             Toast.makeText(this, "Action take photo active", Toast.LENGTH_LONG).show();
             Intent galleryIntent = new Intent();
             galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
             galleryIntent.setType("image/*");
-            startActivityForResult(galleryIntent,GalleryPick);
+            startActivityForResult(galleryIntent,REQUEST_GALLERY);
         });
-        txt_change_avt_from_gallery.setOnClickListener(v-> Toast.makeText(this,"Action take photo from gallery active",Toast.LENGTH_LONG).show());
+        txt_change_avt_take_photo.setOnClickListener(v-> {
+            Toast.makeText(this,"Action take photo from gallery active",Toast.LENGTH_LONG).show();
+            Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(takePhotoIntent,REQUEST_IMAGE_CAPTURE);
+        });
 
 
         dialog.show();
@@ -175,5 +195,84 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
                 .into(img_update_infor_avt);
 
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.e("test 110,","errrr");
+        List<File> files = new ArrayList<>();
+        switch (requestCode){
+            case 0:
+                if(resultCode == RESULT_OK){
+                    Bundle extras = data.getExtras();
+                    Bitmap selectedImage = (Bitmap) extras.get("data");
+                    Log.e("uri camera",selectedImage.toString());
+                    Glide.with(this).load(selectedImage)
+                            .centerCrop().circleCrop().into(img_update_infor_avt);
+                    files.add(new File(PathUtil.getPath(this,getImageUri(this,selectedImage))));
+                }
+                break;
+            case 1:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = data.getData();
+                    Glide.with(this).load(selectedImage)
+                            .centerCrop().circleCrop().into(img_update_infor_avt);
+                    Log.e("gallery","done");
+                    files.add(new File(PathUtil.getPath(this,selectedImage)));
+                }
+                break;
+        }
+        uploadMultiFiles(files);
+    }
+
+    private void uploadMultiFiles(List<File> files) {
+        MultiPartFileRequest<String> restApiMultiPartRequest =
+                new MultiPartFileRequest<String>(Request.Method.PUT,Constant.API_USER+"me/changeImage",
+                        new HashMap<>(), // danh sách request param
+                        files,
+                        response -> {
+                            Log.i("upload succ", "success");
+                        },
+                        error -> {
+                            Log.i("upload error", "error");
+                            NetworkResponse response = error.networkResponse;
+                            if (error instanceof ServerError && error != null) {
+                                try {
+                                    String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                                    JSONObject object = new JSONObject(res);
+                                    Log.e("400 : ",res.toString());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }) {
+
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + token);
+                        return map;
+                    }
+
+                    @Override
+                    protected Map<String, String> getParams() {
+                        Map<String, String> params = new HashMap<String, String>();
+                        return params;
+                    }
+                };
+
+//        restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
+        Volley.newRequestQueue(this).add(restApiMultiPartRequest);
+    }
+
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 }

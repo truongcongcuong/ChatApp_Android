@@ -6,9 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,6 +35,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.dto.UserUpdateDTO;
 import com.fasterxml.jackson.databind.util.JSONPObject;
@@ -39,6 +44,7 @@ import com.google.gson.JsonObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -71,6 +77,9 @@ public class UpdateInformationActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         userDetailDTO = (UserDetailDTO) bundle.getSerializable("user");
+
+        GetNewAccessToken getNewAccessToken = new GetNewAccessToken(this);
+        getNewAccessToken.sendGetNewTokenRequest();
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
@@ -135,7 +144,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
                     .username(edt_edit_profile_username.getText().toString())
                     .build();
             Log.e("user builder : ", dto.toString());
-            updateInfoObject(dto);
+            updateInfo(dto);
         });
 
         ibt_edit_profile_back.setOnClickListener(v->finish());
@@ -178,68 +187,9 @@ public class UpdateInformationActivity extends AppCompatActivity {
             @Nullable
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Log.e("er: ",birthday.toString());
                 HashMap<String, String> map = new HashMap<>();
                 map.put("displayName", dto.getDisplayName());
-                map.put("dateOfBirth",birthday.toString());
-                map.put("email", dto.getEmail());
-                map.put("gender", dto.getGender());
-                map.put("username", dto.getUsername());
-                return map;
-            }
-        };
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(request);
-    }
-
-    private void updateInfoObject(UserUpdateDTO dto) {
-        Map<String,Object> map = new HashMap<>();
-        map.put("displayName", dto.getDisplayName());
-        map.put("dateOfBirth",birthday.toString());
-        map.put("email", dto.getEmail());
-        map.put("gender", dto.getGender());
-        map.put("username", dto.getUsername());
-        JSONObject parameters = new JSONObject(map);
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, Constant.API_USER+"me",parameters,
-                response -> {
-                    try {
-                        String res = URLDecoder.decode(URLEncoder.encode(String.valueOf(response), "iso8859-1"), "UTF-8");
-                        JSONObject object = new JSONObject(res);
-                        Log.e("update infor : ", res.toString());
-                    } catch (JSONException | UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                },
-                error -> {
-                    NetworkResponse response = error.networkResponse;
-                    if (error instanceof ServerError && error != null) {
-                        try {
-                            String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                            JSONObject object = new JSONObject(res);
-                            Log.e("eror : ",res.toString());
-                            showAlertDialogError(res.toString());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
-                return map;
-            }
-
-            @Nullable
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Log.e("er: ",birthday.toString());
-                HashMap<String, String> map = new HashMap<>();
-                map.put("displayName", dto.getDisplayName());
-                map.put("dateOfBirth",birthday.toString());
+                map.put("dateOfBirth",dto.getDateOfBirth());
                 map.put("email", dto.getEmail());
                 map.put("gender", dto.getGender());
                 map.put("username", dto.getUsername());
@@ -261,4 +211,6 @@ public class UpdateInformationActivity extends AppCompatActivity {
                 .create();
         dialog.show();
     }
+
+
 }

@@ -33,12 +33,12 @@ public class MultiPartFileRequest<T> extends Request<T> {
     private MultipartEntityBuilder mBuilder;
     private final Response.Listener<T> mListener;
 
-    public MultiPartFileRequest(String url,
+    public MultiPartFileRequest(int method ,String url,
                                 Map<String, String> stringParts,
                                 List<File> mFileParts,
                                 Response.Listener<T> listener,
                                 Response.ErrorListener errorListener) {
-        super(Method.POST, url, errorListener);
+        super(method,url, errorListener);
         mListener = listener;
         mStringParts = stringParts;
         this.mFileParts = mFileParts;

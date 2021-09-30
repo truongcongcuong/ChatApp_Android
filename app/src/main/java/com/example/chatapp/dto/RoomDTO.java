@@ -1,5 +1,7 @@
 package com.example.chatapp.dto;
 
+import com.example.chatapp.enumvalue.RoomType;
+
 import java.io.Serializable;
 import java.util.Set;
 
@@ -10,7 +12,7 @@ public class RoomDTO implements Serializable {
     private String id;
     private String name;
     private String imageUrl;
-    private String type;
+    private RoomType type;
     private UserProfileDto to;
     private String createAt;
     private Set<MemberDto> members;

@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/readby_image"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
         android:foregroundGravity="center_vertical|center_horizontal"
         android:padding="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -18,8 +18,8 @@
 
     <TextView
         android:id="@+id/readby_more"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
         android:gravity="center_horizontal|center_vertical"
         android:textColor="@color/white"
         android:textSize="14sp"

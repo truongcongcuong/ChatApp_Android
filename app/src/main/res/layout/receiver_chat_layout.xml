@@ -4,15 +4,15 @@
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:paddingStart="5dp"
-    android:paddingEnd="5dp"
-    android:paddingBottom="5dp">
+    android:paddingEnd="4dp">
 
 
     <ImageView
         android:id="@+id/receiver_sender_image"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:background="@drawable/background_circle_image"
+        android:layout_alignBottom="@id/receiver_relative_message"
+        android:layout_marginBottom="5dp"
         android:padding="1dp" />
 
     <RelativeLayout
@@ -35,7 +35,6 @@
             android:paddingRight="5dp"
             android:paddingBottom="5dp">
 
-
             <TextView
                 android:id="@+id/receiver_message_content"
                 android:layout_width="wrap_content"
@@ -50,14 +49,12 @@
                 android:id="@+id/receiver_message_content_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:adjustViewBounds="true" />
 
             <VideoView
                 android:id="@+id/receiver_message_content_video"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_marginBottom="5dp" />
+                android:layout_height="0dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -69,7 +66,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:minWidth="120dp"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
                     android:textSize="12sp" />
@@ -80,7 +76,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0dp"
                     android:layout_marginEnd="0dp"
-                    android:layoutDirection="rtl">
+                    android:layoutDirection="rtl"
+                    android:textDirection="ltr">
 
                 </androidx.recyclerview.widget.RecyclerView>
             </LinearLayout>
@@ -91,8 +88,8 @@
 
     <RelativeLayout
         android:id="@+id/receiver_relative_read_one"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
         android:layout_alignBottom="@id/receiver_relative_message"
         android:layout_alignParentEnd="true"
         android:foregroundGravity="bottom"

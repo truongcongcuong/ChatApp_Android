@@ -1,5 +1,6 @@
 package com.example.chatapp.dto;
 
+import com.example.chatapp.enumvalue.OnlineStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
@@ -28,6 +29,6 @@ public class UserDetailDTO implements Serializable {
     @JsonIgnore
     private String roles;
 
-    private String onlineStatus;
+    private OnlineStatus onlineStatus;
     private String lastOnline;
 }

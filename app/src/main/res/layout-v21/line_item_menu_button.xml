@@ -4,13 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
-    android:padding="5dp">
+    android:layout_margin="5dp">
 
     <ImageView
         android:id="@+id/imv_item_menu_button"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
@@ -25,7 +24,10 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="20dp"
+        android:ellipsize="end"
         android:gravity="center_vertical"
+        android:maxLines="1"
+        android:paddingEnd="5dp"
         android:text="name"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/imv_item_menu_button"

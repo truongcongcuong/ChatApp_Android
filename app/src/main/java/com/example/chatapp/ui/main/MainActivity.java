@@ -1,14 +1,15 @@
 package com.example.chatapp.ui.main;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -31,12 +32,22 @@ public class MainActivity extends AppCompatActivity {
     private Gson gson;
     private UserSummaryDTO user;
 
+    @SuppressLint("CheckResult")
     @Override
     @RequiresApi(api = Build.VERSION_CODES.N)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportActionBar().hide();
+//        getSupportActionBar().hide();
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+//            actionBar.setDisplayHomeAsUpEnabled(true);
+//            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.title_bar_gray)));
+            actionBar.setTitle("");
+            actionBar.show();
+        }
+
 
         bnv_menu = findViewById(R.id.bnv_bot);
         gson = new Gson();
@@ -55,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, messageDto.getSender().getDisplayName() + " " + messageDto.getContent(), Toast.LENGTH_SHORT).show();
+                            Log.d("message receiver", messageDto.getSender().getDisplayName() + " " + messageDto.getContent());
                             messageFragment.setNewMessage(messageDto);
                         }
                     });
@@ -96,6 +107,12 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("resume", "main activity resume");
+    }
 
     private void loadFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

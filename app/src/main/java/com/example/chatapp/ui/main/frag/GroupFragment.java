@@ -19,10 +19,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
-import com.example.chatapp.adapter.GroupAdapter;
+import com.example.chatapp.adapter.ListMessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.enumvalue.RoomType;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -42,13 +43,13 @@ import java.util.Map;
 public class GroupFragment extends Fragment {
 
     private RecyclerView rcv_list_group;
-    private GroupAdapter adapter;
+    private ListMessageAdapter adapter;
     private List<InboxDto> list;
     private Gson gson;
     private String token;
     private int page = 0;
     private int size = 20;
-    private final String type = "GROUP";
+    private final String type = RoomType.GROUP.toString();
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -89,12 +90,12 @@ public class GroupFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_group, container, false);
         rcv_list_group = view.findViewById(R.id.rcv_list_group);
         rcv_list_group.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        updateListString();
+        updateListInboxGroup();
         return view;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void updateListString() {
+    private void updateListInboxGroup() {
         list = new ArrayList<>();
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size + "&type=" + type,
                 response -> {
@@ -107,7 +108,7 @@ public class GroupFragment extends Fragment {
                         }.getType();
                         list = gson.fromJson(array.toString(), listType);
 
-                        this.adapter = new GroupAdapter(getActivity().getApplicationContext(), list);
+                        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), list);
                         this.rcv_list_group.setAdapter(adapter);
 
                     } catch (JSONException | UnsupportedEncodingException e) {

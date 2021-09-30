@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -32,6 +33,7 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.RoomDTO;
+import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
@@ -112,7 +114,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                 .name("Kho lưu trữ")
                 .build());
 
-        if (inboxDto != null && inboxDto.getRoom().getType().equals("ONE")) {
+        if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.ONE)) {
             Glide.with(RoomDetailActivity.this)
                     .load(inboxDto.getRoom().getTo().getImageUrl())
                     .centerCrop().circleCrop()
@@ -135,7 +137,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .name("Xem trang cá nhân")
                     .build());
         }
-        if (inboxDto != null && inboxDto.getRoom().getType().equals("GROUP")) {
+        if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             Glide.with(RoomDetailActivity.this)
                     .load(inboxDto.getRoom().getImageUrl())
                     .centerCrop().circleCrop()
@@ -334,6 +336,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     }
 
     private void uploadMultiFiles(List<File> files) {
+        RoomDTO room = inboxDto.getRoom();
         MultiPartFileRequest<String> restApiMultiPartRequest =
                 new MultiPartFileRequest<String>(Request.Method.POST,Constant.API_ROOM + "changeImage/" + inboxDto.getRoom().getId(),
                         new HashMap<>(), // danh sách request param
@@ -346,6 +349,15 @@ public class RoomDetailActivity extends AppCompatActivity {
                                 List<String> urls = new Gson().fromJson(res, listType);
                                 for (String url : urls) {
                                     Log.d("", url);
+                                }
+                                if (!urls.isEmpty()) {
+                                    room.setImageUrl(urls.get(0));
+                                    inboxDto.setRoom(room);
+                                    Glide.with(RoomDetailActivity.this)
+                                            .load(inboxDto.getRoom().getImageUrl())
+                                            .centerCrop().circleCrop()
+                                            .placeholder(R.drawable.image_placeholer)
+                                            .into(imageOfRoom);
                                 }
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
@@ -369,7 +381,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                     }
                 };
 
-//        restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
+        restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
         Volley.newRequestQueue(this).add(restApiMultiPartRequest);
     }
 

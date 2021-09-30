@@ -1,5 +1,7 @@
 package com.example.chatapp.dto;
 
+import com.example.chatapp.enumvalue.OnlineStatus;
+
 import java.io.Serializable;
 
 import lombok.Data;
@@ -11,7 +13,7 @@ public class UserProfileDto implements Serializable {
     private String id;
     private String displayName;
     private String imageUrl;
-    private String onlineStatus;
+    private OnlineStatus onlineStatus;
     private String lastOnline;
 
 }

@@ -3,7 +3,6 @@ package com.example.chatapp.adapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
@@ -45,8 +43,11 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
     private final Context context;
     private MessageDto messageDto;
     private final String token;
+    /*
+    chỉ hiện tối đa max reaction, nếu số reaction lớn hơn max thì hiện dấu cộng ở ảnh cuối
+     */
+    private final int max = 3;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public ReactionAdapter(MessageDto messageDto, Context context) {
         this.messageDto = messageDto;
         if (messageDto != null)
@@ -71,29 +72,31 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
         StrictMode.setThreadPolicy(policy);
         holder.setIsRecyclable(false);
 
-        Reaction reaction = list.get(position);
-        holder.image_reaction_item.setBackgroundResource(R.drawable.background_circle_image);
-        switch (reaction.getType()) {
-            case "HAHA":
-                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_haha);
-                break;
-            case "SAD":
-                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_sad);
-                break;
-            case "LOVE":
-                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_love);
-                break;
-            case "WOW":
-                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_wow);
-                break;
-            case "ANGRY":
-                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_angry);
-                break;
-            case "LIKE":
-                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_like);
-                break;
+        if (!list.isEmpty() && position < list.size()) {
+            Reaction reaction = list.get(position);
+            if (position < max) {
+                bindData(holder, reaction);
+            }
+
+            if (position == 0) {
+                int remain = list.size() - max;
+                bindData(holder, reaction);
+                if (remain > 0) {
+                    holder.image_reaction_item.setAlpha(0.3f);
+                    holder.txt_reaction_more.setText(String.format("+%d", remain));
+                    holder.txt_reaction_more.setPadding(
+                            5,
+                            holder.txt_reaction_more.getPaddingTop(),
+                            holder.txt_reaction_more.getPaddingRight(),
+                            holder.txt_reaction_more.getPaddingBottom()
+                    );
+                }
+            }
         }
 
+        /*
+        click vào một item để xem danh sách đầy đủ
+         */
         holder.itemView.setOnClickListener(v -> {
             StringRequest request = new StringRequest(Request.Method.GET, Constant.API_MESSAGE + "react/" + messageDto.getId(),
                     response -> {
@@ -122,6 +125,30 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
         });
     }
 
+    private void bindData(@NonNull ViewHolder holder, Reaction reaction) {
+        holder.image_reaction_item.setBackgroundResource(R.drawable.background_circle_image);
+        switch (reaction.getType()) {
+            case HAHA:
+                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_haha);
+                break;
+            case SAD:
+                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_sad);
+                break;
+            case LOVE:
+                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_love);
+                break;
+            case WOW:
+                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_wow);
+                break;
+            case ANGRY:
+                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_angry);
+                break;
+            case LIKE:
+                holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_like);
+                break;
+        }
+    }
+
     private void showDialogListReaction(List<ReactionDto> reactionDtos) {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.reaction_dialog);
@@ -140,15 +167,17 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return Math.min(list.size(), max);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView image_reaction_item;
+        TextView txt_reaction_more;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             image_reaction_item = itemView.findViewById(R.id.image_reaction_item);
+            txt_reaction_more = itemView.findViewById(R.id.txt_reaction_more);
         }
     }
 

@@ -89,14 +89,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.4" />
+        app:layout_constraintGuide_begin="165dp" />
 
     <TextView
         android:id="@+id/txt_on_load_members"
-        android:layout_width="228dp"
-        android:layout_height="102dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingLeft="30dp"
+        android:paddingLeft="10dp"
         android:paddingTop="10dp"
         android:text="Mai Kien Cuong \nTruong Cong Cuong \nNguyen Cong Thanh Dat \nLuu Tuan Kha"
         android:textColor="@color/gray"

@@ -48,7 +48,7 @@ public class TimeAgo {
                 return monthFormatt.format(d2);
             if (i == 2 && temp == 1)
                 return "hôm qua";
-            if ((i == 2 && temp > 7) || calendar1.get(Calendar.DAY_OF_MONTH) - calendar2.get(Calendar.DAY_OF_MONTH) > 0)
+            if ((i == 2 && temp > 7) || calendar1.get(Calendar.DAY_OF_MONTH) - calendar2.get(Calendar.DAY_OF_MONTH) > 7)
                 return monthFormatt.format(d2);
             if (temp > 0) {
                 res.append(temp)

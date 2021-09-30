@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +30,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -47,6 +49,9 @@ import com.example.chatapp.dto.ReactionReceiver;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.enumvalue.MessageType;
+import com.example.chatapp.enumvalue.RoomType;
+import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -97,6 +102,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private static final int PICK_IMAGE = 1;
     private static final int VIEW_ROOM_DETAIL = 2;
     private StompClient stompClient;
+    private boolean isFirstTimeRun = true;
 
     @SuppressLint("CheckResult")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -107,6 +113,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         setContentView(R.layout.activity_chat);
         getSupportActionBar().hide();
 
+        // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)
                 .sensitivity(1f)
@@ -139,19 +146,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         GetNewAccessToken getNewAccessToken = new GetNewAccessToken(this);
         getNewAccessToken.sendGetNewTokenRequest();
 
-        String displayName = "";
-        String url = "";
-        if (inboxDto.getRoom().getType().equalsIgnoreCase("GROUP")) {
-            displayName = inboxDto.getRoom().getName();
-            url = inboxDto.getRoom().getImageUrl();
-        } else {
-            displayName = inboxDto.getRoom().getTo().getDisplayName();
-            url = inboxDto.getRoom().getTo().getImageUrl();
-        }
-        txt_chat_user_name.setText(displayName);
-
-        Glide.with(this).load(url).placeholder(R.drawable.image_placeholer)
-                .centerCrop().circleCrop().into(img_chat_user_avt);
+        showImageAndDisplayName(inboxDto);
 
         SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
@@ -161,7 +156,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         access_token = sharedPreferencesToken.getString("access-token", null);
         Log.d("accessssss", access_token);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ChatActivity.this);
+        MyLinerLayoutManager linearLayoutManager = new MyLinerLayoutManager(ChatActivity.this);
         linearLayoutManager.setStackFromEnd(true);
         rcv_chat_list.setLayoutManager(linearLayoutManager);
 
@@ -225,6 +220,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 .subscribe(x -> {
                     Log.i("chat activ subcri mess", x.getPayload());
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
+                    adapter.deleteOldReadTracking(messageDto.getSender().getId());
                     updateMessageRealTime(messageDto);
                 }, throwable -> {
                     Log.i("chat activ subcri erro", throwable.getMessage());
@@ -251,12 +247,13 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         ibt_chat_send_message.setOnClickListener(v -> {
             String message = edt_chat_message_send.getText().toString();
             if (!TextUtils.isEmpty(message)) {
-                sendTextMessage(message);
+                checkInboxBeforeSendTextMessage(message);
                 edt_chat_message_send.setText("");
             }
         });
 
         btn_room_detail.setOnClickListener(v -> {
+            Log.d("", inboxDto.toString());
             Intent intent = new Intent(ChatActivity.this, RoomDetailActivity.class);
             intent.putExtra("dto", inboxDto);
             startActivityForResult(intent, VIEW_ROOM_DETAIL);
@@ -269,20 +266,44 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         updateList();
     }
 
+    private void showImageAndDisplayName(InboxDto inboxDto) {
+        String displayName = "";
+        String url = "";
+        if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+            displayName = inboxDto.getRoom().getName();
+            url = inboxDto.getRoom().getImageUrl();
+        } else {
+            displayName = inboxDto.getRoom().getTo().getDisplayName();
+            url = inboxDto.getRoom().getTo().getImageUrl();
+        }
+        txt_chat_user_name.setText(displayName);
+
+        Glide.with(this).load(url).placeholder(R.drawable.image_placeholer)
+                .centerCrop().circleCrop().into(img_chat_user_avt);
+    }
+
     // nếu cuộn quá size/3 item thì hiện nút bấm để xuống cuối
     private void visibleOrGoneButtonScrollToBottom() {
-        if ((rcv_chat_list.getAdapter().getItemCount() - last) > (size / 3)) {
+        if (rcv_chat_list.getAdapter() != null && (rcv_chat_list.getAdapter().getItemCount() - last) > (size / 3)) {
             btnScrollToBottom.setVisibility(View.VISIBLE);
         } else
             btnScrollToBottom.setVisibility(View.GONE);
     }
 
     @SuppressLint("CheckResult")
+    private void checkInboxBeforeSendTextMessage(String message) {
+        if (inboxDto.getId() == null) {
+            createInboxAndSendTextMessage(inboxDto.getRoom().getTo().getId(), message);
+        } else {
+            sendTextMessage(message);
+        }
+    }
+
     private void sendTextMessage(String message) {
         MessageSendToServer messageSendToServer = new MessageSendToServer();
         messageSendToServer.setContent(message);
         messageSendToServer.setRoomId(inboxDto.getRoom().getId());
-        messageSendToServer.setType("TEXT");
+        messageSendToServer.setType(MessageType.TEXT);
         Log.e("send : ", Json.encode(messageSendToServer));
 
         stompClient
@@ -290,6 +311,33 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 .subscribe(() -> {
 
                 });
+    }
+
+    /*
+    hai người chưa có room chung nên phải tạo room và inbox trước khi gửi tin nhắn đầu tiên
+     */
+    private void createInboxAndSendTextMessage(String toUserId, String message) {
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_INBOX + "/with/" + toUserId,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                        inboxDto = gson.fromJson(res, InboxDto.class);
+                        sendTextMessage(message);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.i("chat activ send mes err", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + access_token);
+                return map;
+            }
+        };
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(request);
     }
 
     @SuppressLint("CheckResult")
@@ -319,42 +367,55 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 
     private void updateList() {
         Log.e("url : ", Constant.API_CHAT + inboxDto.getId());
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + inboxDto.getId() + "?size=" + size + "&page=" + page,
-                response -> {
-                    try {
-                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        JSONObject object = new JSONObject(res);
-                        JSONArray array = (JSONArray) object.get("content");
+        if (inboxDto != null && inboxDto.getId() != null) {
+            StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + inboxDto.getId() + "?size=" + size + "&page=" + page,
+                    response -> {
+                        try {
+                            String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                            JSONObject object = new JSONObject(res);
+                            JSONArray array = (JSONArray) object.get("content");
 
-                        Type listType = new TypeToken<List<MessageDto>>() {
-                        }.getType();
-                        List<MessageDto> list = gson.fromJson(array.toString(), listType);
-                        if (!list.isEmpty()) {
-                            adapter.updateList(list);
-                            if (page == 0) {
-                                rcv_chat_list.scrollToPosition(list.size() - 1);
-                            } else {
-                                rcv_chat_list.scrollToPosition(size + (last - first) - 1);
+                            Type listType = new TypeToken<List<MessageDto>>() {
+                            }.getType();
+                            List<MessageDto> list = gson.fromJson(array.toString(), listType);
+                            if (!list.isEmpty()) {
+                                adapter.updateList(list);
+                                if (isFirstTimeRun) {
+                                    new Thread(() -> {
+                                        try {
+                                            Thread.sleep(1000);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                        sendReadMessageNotification();
+                                    }).start();
+                                    isFirstTimeRun = false;
+                                }
+                                if (page == 0) {
+                                    rcv_chat_list.scrollToPosition(list.size() - 1);
+                                } else {
+                                    rcv_chat_list.scrollToPosition(size + (last - first) - 1);
+                                }
                             }
-                            sendReadMessageNotification();
+                        } catch (JSONException | UnsupportedEncodingException e) {
+                            e.printStackTrace();
                         }
-                    } catch (JSONException | UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                },
-                error -> Log.i("chat activ get mess er", error.toString())) {
-            @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + access_token);
-                return map;
-            }
-        };
+                    },
+                    error -> Log.i("chat activ get mess er", error.toString())) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("Authorization", "Bearer " + access_token);
+                    return map;
+                }
+            };
 
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(request);
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            requestQueue.add(request);
+        }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateMessageRealTime(MessageDto messageDto) {
         this.adapter.updateMessage(messageDto);
         ChatActivity.this.runOnUiThread(new Runnable() {
@@ -365,7 +426,16 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                                 rcv_chat_list.getAdapter().getItemCount());
             }
         });
-        sendReadMessageNotification();
+        new Thread(() -> {
+            if (!messageDto.getSender().getId().equals(user.getId())) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                sendReadMessageNotification();
+            }
+        }).start();
     }
 
     @Override
@@ -392,6 +462,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 files.add(file);
             }
             Toast.makeText(this, "file đã chọn " + files.toString(), Toast.LENGTH_SHORT).show();
+            sendFilesMessages(files);
         } else {
             // chưa có hình ảnh nào được chọn
         }
@@ -400,17 +471,62 @@ public class ChatActivity extends AppCompatActivity implements SendData {
             if (bundle != null) {
                 InboxDto inboxDto = (InboxDto) bundle.getSerializable("dto");
                 this.inboxDto = inboxDto;
-                txt_chat_user_name.setText(inboxDto.getRoom().getName());
+                showImageAndDisplayName(inboxDto);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /*
+    gửi tin nhắn file, hình ảnh, video
+     */
+    private void sendFilesMessages(List<File> files) {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("roomId", inboxDto.getRoom().getId());
+        MultiPartFileRequest<String> restApiMultiPartRequest =
+                new MultiPartFileRequest<String>("http://10.0.2.2:8080/api/chat/file",
+                        params, // danh sách request param
+                        files,
+                        response -> {
+                            try {
+                                String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                                Type listType = new TypeToken<List<String>>() {
+                                }.getType();
+                                List<String> urls = new Gson().fromJson(res, listType);
+                                for (String url : urls) {
+                                    Log.d("", url);
+                                }
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        },
+                        error -> {
+                            Log.i("upload error", error.toString());
+                        }) {
+
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + access_token);
+                        return map;
+                    }
+
+                    @Override
+                    protected Map<String, String> getParams() {
+                        Map<String, String> params = new HashMap<String, String>();
+                        return params;
+                    }
+                };
+
+        restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
+        Volley.newRequestQueue(this).add(restApiMultiPartRequest);
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
-        finish();
+//        finish();
     }
 
     @Override
@@ -447,5 +563,25 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                         Log.d("unsubscribe reaction", "ok");
                     }
                 });*/
+    }
+
+    static class MyLinerLayoutManager extends LinearLayoutManager {
+
+        @Override
+        public boolean supportsPredictiveItemAnimations() {
+            return false;
+        }
+
+        public MyLinerLayoutManager(Context context) {
+            super(context);
+        }
+
+        public MyLinerLayoutManager(Context context, int orientation, boolean reverseLayout) {
+            super(context, orientation, reverseLayout);
+        }
+
+        public MyLinerLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+        }
     }
 }

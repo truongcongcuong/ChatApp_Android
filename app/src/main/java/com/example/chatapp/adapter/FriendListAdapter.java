@@ -27,15 +27,16 @@ import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.ui.ChatActivity;
 import com.google.gson.Gson;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.SneakyThrows;
 
 public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.ViewHolder> {
 
@@ -43,6 +44,8 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
     private final Context context;
     private final Gson gson;
     private final String token;
+    private final SimpleDateFormat sdfFull;
+    private final SimpleDateFormat sdfYMD;
 
     public FriendListAdapter(List<FriendDTO> list, Context context) {
         this.list = list;
@@ -50,15 +53,18 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         gson = new Gson();
         SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
+        sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdfYMD = new SimpleDateFormat("yyyy-MM-dd");
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.friend_list_adapter_layout, parent, false);
-        return new ViewHolder(this, view);
+        return new ViewHolder(view);
     }
 
+    @SneakyThrows
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -71,37 +77,40 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
                 .centerCrop().circleCrop().into(holder.img_list_contact_avt);
 
         holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());
-        holder.txt_list_contact_create_at.setText("Bạn bè từ " + friend.getCreateAt().substring(0, 10));
+        Date dateCreate = sdfFull.parse(friend.getCreateAt());
+        holder.txt_list_contact_create_at.setText(String.format("%s%s", "Bạn bè từ ", sdfYMD.format(dateCreate)));
         holder.itemView.setOnClickListener(v -> getInboxWith(friend.getFriend().getId()));
     }
 
     @Override
     public int getItemCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        FriendListAdapter friendListAdapter;
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView img_list_contact_avt;
         TextView txt_list_contact_display_name;
         TextView txt_list_contact_create_at;
 
-        public ViewHolder(FriendListAdapter friendListAdapter, @NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.friendListAdapter = friendListAdapter;
             txt_list_contact_display_name = itemView.findViewById(R.id.txt_list_contact_display_name);
             img_list_contact_avt = itemView.findViewById(R.id.img_list_contact_avt);
             txt_list_contact_create_at = itemView.findViewById(R.id.txt_list_contact_create_at);
         }
     }
 
+    /**
+     * Click vào một bạn bè để mở activity chat
+     */
     private void getInboxWith(String anotherUserId) {
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "/with/" + anotherUserId,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        JSONObject object = new JSONObject(res);
-                        InboxDto dto = gson.fromJson(object.toString(), InboxDto.class);
+                        InboxDto dto = gson.fromJson(res, InboxDto.class);
 
                         Intent intent = new Intent(context, ChatActivity.class);
                         Bundle bundle = new Bundle();
@@ -109,7 +118,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
                         intent.putExtras(bundle);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
-                    } catch (JSONException | UnsupportedEncodingException e) {
+                    } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 },

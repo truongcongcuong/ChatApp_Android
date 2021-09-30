@@ -47,7 +47,7 @@ public class ContactFragment extends Fragment {
     private String token;
     private Gson gson;
     private List<FriendDTO> list;
-    ConstraintLayout ctl_contact_phone_book_friend;
+    private ConstraintLayout ctl_contact_phone_book_friend;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";

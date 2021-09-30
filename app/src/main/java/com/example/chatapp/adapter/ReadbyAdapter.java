@@ -2,6 +2,8 @@ package com.example.chatapp.adapter;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,12 +13,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReadByDto;
+import com.example.chatapp.dto.UserSummaryDTO;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +32,24 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
     private final Context context;
     private MessageDto messageDto;
     private final int max = 10;
+    private final UserSummaryDTO user;
+    private final Gson gson;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public ReadbyAdapter(MessageDto messageDto, Context context) {
         this.messageDto = messageDto;
         if (messageDto != null)
-            this.list = messageDto.getReadbyes();
+            this.list = new ArrayList<>(messageDto.getReadbyes());
         else
             this.list = new ArrayList<>();
         this.context = context;
+        gson = new Gson();
+        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
+        /*
+        xóa reaction của người dùng hiện tại, không hiện lên
+         */
+//        list.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
     }
 
     @NonNull
@@ -50,45 +65,47 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
         StrictMode.setThreadPolicy(policy);
         holder.setIsRecyclable(false);
 
-        ReadByDto readBy = list.get(position);
+        if (!list.isEmpty() && position < list.size()) {
+            ReadByDto readBy = list.get(position);
 
-        // hiện ảnh của người xem dùng thư viện Glide
-        if (position < max - 1) {
-            holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
-            Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
-                    .centerCrop().circleCrop().into(holder.readby_image);
-        }
-
-        if (position == max - 1) {
-            int remain = list.size() - max;
-            holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
-            Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
-                    .centerCrop().circleCrop().into(holder.readby_image);
-            if (remain > 0) {
-                holder.readby_image.setAlpha(0.3f);
-                holder.readby_more.setText(String.format("+%d", remain));
+            // hiện ảnh của người xem dùng thư viện Glide
+            if (position < max - 1) {
+                holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+                Glide.with(context).load(readBy.getReadByUser().getImageUrl())
+                        .placeholder(R.drawable.image_placeholer)
+                        .centerCrop().circleCrop().into(holder.readby_image);
             }
-        }
 
-        // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
-        holder.itemView.setOnClickListener(v -> {
-            final Dialog dialog = new Dialog(context);
-            dialog.setContentView(R.layout.readby_dialog);
+            if (position == max - 1) {
+                int remain = list.size() - max;
+                holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+                Glide.with(context).load(readBy.getReadByUser().getImageUrl())
+                        .placeholder(R.drawable.image_placeholer)
+                        .centerCrop().circleCrop().into(holder.readby_image);
+                if (remain > 0) {
+                    holder.readby_image.setAlpha(0.3f);
+                    holder.readby_more.setText(String.format("+%d", remain));
+                }
+            }
 
-            ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
-            TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
+            // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
+            holder.itemView.setOnClickListener(v -> {
+                final Dialog dialog = new Dialog(context);
+                dialog.setContentView(R.layout.readby_dialog);
 
-            ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, messageDto.getReadbyes());
-            listView.setAdapter(arrayAdapter);
-            listView.setOnItemClickListener((parent, view, pos, itemId) -> {
+                ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
+                TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
 
+                ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, list);
+                listView.setAdapter(arrayAdapter);
+                listView.setOnItemClickListener((parent, view, pos, itemId) -> {
+
+                });
+                titleOfDialog.setText("Những người đã xem");
+                dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+                dialog.show();
             });
-            titleOfDialog.setText("Những người đã xem");
-            dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
-            dialog.show();
-        });
+        }
     }
 
     @Override

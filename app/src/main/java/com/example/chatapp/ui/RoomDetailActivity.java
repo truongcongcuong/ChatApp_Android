@@ -338,7 +338,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     private void uploadMultiFiles(List<File> files) {
         RoomDTO room = inboxDto.getRoom();
         MultiPartFileRequest<String> restApiMultiPartRequest =
-                new MultiPartFileRequest<String>(Constant.API_ROOM + "changeImage/" + room.getId(),
+                new MultiPartFileRequest<String>(Request.Method.POST,Constant.API_ROOM + "changeImage/" + inboxDto.getRoom().getId(),
                         new HashMap<>(), // danh sách request param
                         files,
                         response -> {

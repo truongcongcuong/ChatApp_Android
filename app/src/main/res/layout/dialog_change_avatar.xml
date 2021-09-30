@@ -30,7 +30,7 @@
                android:text="@string/view_avatar"
                android:textSize="25dp"
                android:textColor="@color/black"
-               android:drawablePadding="20dp"
+               android:drawablePadding="18dp"
                android:drawableLeft="@drawable/ic_outline_remove_red_eye_24"
                >
            </TextView>
@@ -43,7 +43,7 @@
                android:text="@string/take_photo"
                android:textSize="25dp"
                android:textColor="@color/black"
-               android:drawablePadding="20dp"
+               android:drawablePadding="18dp"
                android:drawableLeft="@drawable/ic_outline_camera_alt_24"
                >
            </TextView>
@@ -53,10 +53,10 @@
                android:paddingTop="10dp"
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
-               android:text="@string/view_avatar"
+               android:text="@string/choose_from_gallery"
                android:textSize="25dp"
                android:textColor="@color/black"
-               android:drawablePadding="20dp"
+               android:drawablePadding="18dp"
                android:drawableLeft="@drawable/ic_outline_image_24"
                >
            </TextView>

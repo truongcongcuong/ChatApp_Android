@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.ui.ChangePasswordActivity;
 import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.ViewInformationActivity;
 import com.google.gson.Gson;
@@ -38,7 +39,7 @@ import java.util.Map;
 
 public class InforFragment extends Fragment {
     private TextView txt_info_error;
-    private TextView txt_info_name,txt_infor_update;
+    private TextView txt_info_name,txt_infor_update,txt_frg_infor_change_password;
     private Button btn_info_signout;
     private ImageView image_info_image;
     private Gson gson;
@@ -83,6 +84,7 @@ public class InforFragment extends Fragment {
         btn_info_signout = view.findViewById(R.id.btn_info_signout);
         txt_info_name = view.findViewById(R.id.txt_info_name);
         image_info_image = view.findViewById(R.id.image_info_image);
+        txt_frg_infor_change_password = view.findViewById(R.id.txt_frg_infor_change_password);
 
         btn_info_signout.setOnClickListener(v -> {
             callSignout();
@@ -100,6 +102,11 @@ public class InforFragment extends Fragment {
         getUserInfo();
         txt_infor_update.setOnClickListener(v->{
             Intent intent = new Intent(getContext(), ViewInformationActivity.class);
+            startActivity(intent);
+        });
+
+        txt_frg_infor_change_password.setOnClickListener(v->{
+            Intent intent = new Intent(getContext(), ChangePasswordActivity.class);
             startActivity(intent);
         });
 

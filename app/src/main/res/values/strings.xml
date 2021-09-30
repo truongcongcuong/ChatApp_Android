@@ -26,7 +26,13 @@
     <string name="phone_number">Enter your phone number</string>
     <string name="email">Enter your email</string>
     <string name="enter_password">Enter your password</string>
-    <string name="re_enter_password">Re-enter your password</string>
+    <string name="pls_enter_password">Please enter your password</string>
+    <string name="enter_new_password">Enter your new password</string>
+    <string name="pls_enter_new_password">Please enter your new password</string>
+    <string name="enter_old_password">Enter your current password</string>
+    <string name="pls_enter_old_password">Please enter your current password</string>
+    <string name="re_enter_password">Re-enter your new password</string>
+    <string name="pls_re_enter_password">Please re-enter your new password</string>
     <string name="check_password">These passwords don\'t match. Try again?</string>
     <string name="check_password_empty">Please enter your password...</string>
     <string name="check_email_empty">Please enter your email...</string>
@@ -58,5 +64,8 @@
     <string name="edit_profile_username">Enter your username</string>
     <string name="error_dialog_title">Error...</string>
     <string name="cancel_button">Cancel</string>
+    <string name="change_password">Change password</string>
+    <string name="change_password_detail_8_char">Password must be 8 characters or more.</string>
+    <string name="change_password_detail_not_same_old_password">Password must not be the same as your old password.</string>
 
 </resources>

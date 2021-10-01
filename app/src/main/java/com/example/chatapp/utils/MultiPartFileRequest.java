@@ -41,12 +41,12 @@ public class MultiPartFileRequest<T> extends Request<T> {
             "3gp", "3g2" // 3gp
     );
 
-    public MultiPartFileRequest(String url,
+    public MultiPartFileRequest(int method ,String url,
                                 Map<String, String> stringParts,
                                 List<File> mFileParts,
                                 Response.Listener<T> listener,
                                 Response.ErrorListener errorListener) {
-        super(Method.POST, url, errorListener);
+        super(method,url, errorListener);
         mListener = listener;
         mStringParts = stringParts;
         this.mFileParts = mFileParts;

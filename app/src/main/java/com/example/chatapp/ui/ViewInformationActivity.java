@@ -1,9 +1,5 @@
 package com.example.chatapp.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.NestedScrollView;
-
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -45,23 +44,22 @@ import java.util.List;
 import java.util.Map;
 
 public class ViewInformationActivity extends AppCompatActivity {
-    ImageButton ibt_update_infor_back;
-    ImageView img_update_infor_avt;
-    Button btn_update_infor;
-    ListView lsv_update_infor;
-    List<MenuItem> items;
-    NestedScrollView nsv_update_infor;
-    String userToString,token;
-    User user;
-    Gson gson;
-    UserDetailDTO userDetailDTO;
+    private ImageButton ibt_update_infor_back;
+    private ImageView img_update_infor_avt;
+    private Button btn_update_infor;
+    private ListView lsv_update_infor;
+    private List<MenuItem> items;
+    private NestedScrollView nsv_update_infor;
+    private String userToString, token;
+    private User user;
+    private Gson gson;
+    private UserDetailDTO userDetailDTO;
     public static final int GalleryPick = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information);
-        getSupportActionBar().hide();
 
         lsv_update_infor = findViewById(R.id.lsv_update_infor);
         ibt_update_infor_back = findViewById(R.id.ibt_update_infor_back);
@@ -78,13 +76,13 @@ public class ViewInformationActivity extends AppCompatActivity {
         token = sharedPreferencesToken.getString("access-token", null);
 
         getInformationDetail();
-        ibt_update_infor_back.setOnClickListener(v-> finish());
-        img_update_infor_avt.setOnClickListener(v-> showDialogChangeAvt());
-        btn_update_infor.setOnClickListener(v->{
+        ibt_update_infor_back.setOnClickListener(v -> finish());
+        img_update_infor_avt.setOnClickListener(v -> showDialogChangeAvt());
+        btn_update_infor.setOnClickListener(v -> {
             Intent intent = new Intent(ViewInformationActivity.this, UpdateInformationActivity.class);
             Bundle bundle = new Bundle();
-            bundle.putSerializable("user",userDetailDTO);
-            Log.e("user bundle :",userDetailDTO.toString());
+            bundle.putSerializable("user", userDetailDTO);
+            Log.e("user bundle :", userDetailDTO.toString());
             intent.putExtras(bundle);
             startActivity(intent);
         });
@@ -101,38 +99,38 @@ public class ViewInformationActivity extends AppCompatActivity {
         TextView txt_change_avt_take_photo = dialog.findViewById(R.id.txt_change_avt_take_photo);
         TextView txt_change_avt_from_gallery = dialog.findViewById(R.id.txt_change_avt_from_gallery);
 
-        txt_change_avt_view.setOnClickListener(v-> {
+        txt_change_avt_view.setOnClickListener(v -> {
 //            txt_change_avt_view.setBackgroundColor(getResources().getColor(R.color.gray));
-            Toast.makeText(this,"Action View photo active",Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Action View photo active", Toast.LENGTH_LONG).show();
         });
-        txt_change_avt_take_photo.setOnClickListener(v-> {
+        txt_change_avt_take_photo.setOnClickListener(v -> {
             Toast.makeText(this, "Action take photo active", Toast.LENGTH_LONG).show();
             Intent galleryIntent = new Intent();
             galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
             galleryIntent.setType("image/*");
-            startActivityForResult(galleryIntent,GalleryPick);
+            startActivityForResult(galleryIntent, GalleryPick);
         });
-        txt_change_avt_from_gallery.setOnClickListener(v-> Toast.makeText(this,"Action take photo from gallery active",Toast.LENGTH_LONG).show());
+        txt_change_avt_from_gallery.setOnClickListener(v -> Toast.makeText(this, "Action take photo from gallery active", Toast.LENGTH_LONG).show());
 
 
         dialog.show();
     }
 
     private void getInformationDetail() {
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_USER +"me",
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_USER + "me",
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
-                        this.userDetailDTO = gson.fromJson(String.valueOf(object),UserDetailDTO.class);
+                        this.userDetailDTO = gson.fromJson(String.valueOf(object), UserDetailDTO.class);
                     } catch (UnsupportedEncodingException | JSONException e) {
                         e.printStackTrace();
                     }
                     updateItems();
                 },
                 error -> {
-                    Log.e("Error information : ",error.toString());
-                }){
+                    Log.e("Error information : ", error.toString());
+                }) {
 
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -168,7 +166,7 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .key(getResources().getString(R.string.mobile))
                 .name(userDetailDTO.getPhoneNumber())
                 .build());
-        MenuInformationAdapter adapter = new MenuInformationAdapter(this,items,R.layout.line_item_menu_button);
+        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button);
         lsv_update_infor.setAdapter(adapter);
         Glide.with(this)
                 .load(userDetailDTO.getImageUrl())

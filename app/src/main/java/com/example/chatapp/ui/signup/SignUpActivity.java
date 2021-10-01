@@ -40,7 +40,6 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-        getSupportActionBar().hide();
 
         edt_sign_up_re_enter_password = findViewById(R.id.edt_sign_up_re_enter_password);
         edt_sign_up_name = findViewById(R.id.edt_sign_up_name);

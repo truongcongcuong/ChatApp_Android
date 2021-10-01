@@ -26,7 +26,6 @@ public class HomePageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-        getSupportActionBar().hide();
 
         btn_home_page_language_vietnamese = findViewById(R.id.btn_home_page_language_vietnamese);
         btn_home_page_sign_in = findViewById(R.id.btn_home_page_sign_in);

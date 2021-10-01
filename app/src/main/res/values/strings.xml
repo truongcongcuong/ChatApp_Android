@@ -64,5 +64,6 @@
     <string name="confirm_abort_create_group">Bạn có muốn hủy việc tạo nhóm này?</string>
     <string name="continue_create_group">Tiếp tục tạo nhóm</string>
     <string name="abort_create_group">Hủy</string>
+    <string name="creating_room_message_dialog">Đang tạo nhóm. Vui lòng đợi ...</string>
 
 </resources>

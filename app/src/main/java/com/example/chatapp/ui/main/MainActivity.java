@@ -62,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         messageFragment = new MessageFragment();
-        contactFragment = new ContactFragment();
-        groupFragment = new GroupFragment();
-        recentFragment = new RecentFragment();
-        inforFragment = new InforFragment();
+//        contactFragment = new ContactFragment();
+//        groupFragment = new GroupFragment();
+//        recentFragment = new RecentFragment();
+//        inforFragment = new InforFragment();
 
         // connect to websocket
         WebsocketClient.getInstance().connect(user.getId(), user.getAccessToken());
@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d("message receiver", messageDto.getSender().getDisplayName() + " " + messageDto.getContent());
                             messageFragment.setNewMessage(messageDto);
                         }
                     });
@@ -192,14 +191,23 @@ public class MainActivity extends AppCompatActivity {
         public Fragment createFragment(int position) {
             if (position == 0)
                 return messageFragment;
-            else if (position == 1)
+            else if (position == 1) {
+                if (contactFragment == null)
+                    contactFragment = new ContactFragment();
                 return contactFragment;
-            else if (position == 2)
+            } else if (position == 2) {
+                if (groupFragment == null)
+                    groupFragment = new GroupFragment();
                 return groupFragment;
-            else if (position == 3)
+            } else if (position == 3) {
+                if (recentFragment == null)
+                    recentFragment = new RecentFragment();
                 return recentFragment;
-            else
+            } else {
+                if (inforFragment == null)
+                    inforFragment = new InforFragment();
                 return inforFragment;
+            }
         }
 
         @Override

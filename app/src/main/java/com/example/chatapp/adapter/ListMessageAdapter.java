@@ -110,22 +110,26 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             holder.txt_lim_last_message.setText(lastMessage.getContent());
             holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
             String content;
-            if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+            if (lastMessage.getSender() != null) {
+                if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
                 /*
                 chat group thì hiện tên người gửi cộng nội dung tin nhắn
                  */
-                content = lastMessage.getSender().getDisplayName() + ": " + lastMessage.getContent();
-            } else {
+                    content = lastMessage.getSender().getDisplayName() + ": " + lastMessage.getContent();
+                } else {
                 /*
                 chat one thì hiện mình nội dung tin nhắn
                  */
+                    content = lastMessage.getContent();
+                }
+                /*
+                nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
+                 */
+                if (user.getId().equals(lastMessage.getSender().getId()))
+                    content = "Bạn: " + lastMessage.getContent();
+            } else {
                 content = lastMessage.getContent();
             }
-            /*
-            nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
-             */
-            if (user.getId().equals(lastMessage.getSender().getId()))
-                content = "Bạn: " + lastMessage.getContent();
             holder.txt_lim_last_message.setText(content);
         }
         holder.txt_lim_display_name.setText(displayName);

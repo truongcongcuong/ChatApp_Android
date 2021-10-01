@@ -41,7 +41,6 @@ import com.example.chatapp.adapter.MessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.cons.SendData;
-import com.example.chatapp.cons.WebsocketClient;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
@@ -51,6 +50,7 @@ import com.example.chatapp.dto.ReadBySend;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.RoomType;
+import com.example.chatapp.utils.FileUtil;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
@@ -69,14 +69,20 @@ import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.functions.Action;
 import io.vertx.core.json.Json;
 import lombok.SneakyThrows;
+import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
+import ua.naiksoftware.stomp.dto.StompCommand;
+import ua.naiksoftware.stomp.dto.StompHeader;
+import ua.naiksoftware.stomp.dto.StompMessage;
 
 public class ChatActivity extends AppCompatActivity implements SendData {
 
@@ -111,7 +117,6 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        getSupportActionBar().hide();
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -214,7 +219,17 @@ public class ChatActivity extends AppCompatActivity implements SendData {
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
         });
 
-        stompClient = WebsocketClient.getInstance().getStompClient();
+//        stompClient = WebsocketClient.getInstance().getStompClient();
+        stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, Constant.WEB_SOCKET);
+        List<StompHeader> headers = new ArrayList<>();
+        headers.add(new StompHeader("userId", user.getId()));
+        headers.add(new StompHeader("access_token", access_token));
+
+        Log.i("userId", user.getId());
+        Log.i("access_token", access_token);
+
+        stompClient.connect(headers);
+
         stompClient
                 .topic("/users/queue/messages")
                 .subscribe(x -> {
@@ -295,15 +310,15 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         if (inboxDto.getId() == null) {
             createInboxAndSendTextMessage(inboxDto.getRoom().getTo().getId(), message);
         } else {
-            sendTextMessage(message);
+            sendMessage(message, MessageType.TEXT);
         }
     }
 
-    private void sendTextMessage(String message) {
+    private void sendMessage(String message, MessageType type) {
         MessageSendToServer messageSendToServer = new MessageSendToServer();
         messageSendToServer.setContent(message);
         messageSendToServer.setRoomId(inboxDto.getRoom().getId());
-        messageSendToServer.setType(MessageType.TEXT);
+        messageSendToServer.setType(type);
         Log.e("send : ", Json.encode(messageSendToServer));
 
         stompClient
@@ -322,7 +337,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         inboxDto = gson.fromJson(res, InboxDto.class);
-                        sendTextMessage(message);
+                        sendMessage(message, MessageType.TEXT);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -383,7 +398,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                                 if (isFirstTimeRun) {
                                     new Thread(() -> {
                                         try {
-                                            Thread.sleep(1000);
+                                            Thread.sleep(1500);
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
                                         }
@@ -429,7 +444,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         new Thread(() -> {
             if (!messageDto.getSender().getId().equals(user.getId())) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -484,7 +499,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         Map<String, String> params = new HashMap<String, String>();
         params.put("roomId", inboxDto.getRoom().getId());
         MultiPartFileRequest<String> restApiMultiPartRequest =
-                new MultiPartFileRequest<String>("http://10.0.2.2:8080/api/chat/file",
+                new MultiPartFileRequest<String>(Constant.API_FILE,
                         params, // danh sách request param
                         files,
                         response -> {
@@ -494,7 +509,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                                 }.getType();
                                 List<String> urls = new Gson().fromJson(res, listType);
                                 for (String url : urls) {
-                                    Log.d("", url);
+                                    sendMessage(url, FileUtil.getMessageType(url));
                                 }
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
@@ -529,10 +544,14 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 //        finish();
     }
 
+    /*
+    unsubscribe websocket khi đóng activity
+     */
+    @SuppressLint("CheckResult")
     @Override
     public void finish() {
         super.finish();
-        /*stompClient
+        stompClient
                 .send(new StompMessage(StompCommand.UNSUBSCRIBE,
                         Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/read"))),
                         null))
@@ -562,7 +581,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                     public void run() throws Exception {
                         Log.d("unsubscribe reaction", "ok");
                     }
-                });*/
+                });
     }
 
     static class MyLinerLayoutManager extends LinearLayoutManager {

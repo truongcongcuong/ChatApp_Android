@@ -499,7 +499,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         Map<String, String> params = new HashMap<String, String>();
         params.put("roomId", inboxDto.getRoom().getId());
         MultiPartFileRequest<String> restApiMultiPartRequest =
-                new MultiPartFileRequest<String>(Constant.API_FILE,
+                new MultiPartFileRequest<String>(Request.Method.POST, Constant.API_FILE,
                         params, // danh sách request param
                         files,
                         response -> {

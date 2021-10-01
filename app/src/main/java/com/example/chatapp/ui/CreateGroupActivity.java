@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -124,6 +125,8 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         toolbar = findViewById(R.id.tlb_create_group_activity);
         toolbar.setTitle(R.string.unname_group);
         toolbar.setSubtitle(R.string.no_member);
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
         sdfYMD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -506,6 +509,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
             files.add(imageGroupFile);
             MultiPartFileRequest<String> restApiMultiPartRequest =
                     new MultiPartFileRequest<String>(
+                            Request.Method.POST,
                             Constant.API_FILE,
                             new HashMap<>(), // danh sách request param
                             files,

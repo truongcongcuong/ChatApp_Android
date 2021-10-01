@@ -192,6 +192,11 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         notifyDataSetChanged();
     }
 
+    public void setList(List<InboxDto> list) {
+        this.list = list;
+        notifyDataSetChanged();
+    }
+
     /*
     cập nhật khi có tin nhắn mới
      */

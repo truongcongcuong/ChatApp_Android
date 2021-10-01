@@ -89,6 +89,11 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         return list.size();
     }
 
+    public void setList(List<FriendDTO> list) {
+        this.list = list;
+        notifyDataSetChanged();
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView img_list_contact_avt;
         TextView txt_list_contact_display_name;

@@ -2,6 +2,7 @@ package com.example.chatapp.ui.main;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.tlb_main_activity);
+        toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
         bnv_menu = findViewById(R.id.bnv_bot);
@@ -99,16 +101,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(final int position) {
                 mCurrentPosition = position;
-                if (position == 0)
+                if (position == 0) {
+                    setTitle(R.string.title_message);
                     bnv_menu.getMenu().findItem(R.id.navigation_message).setChecked(true);
-                else if (position == 1)
+                } else if (position == 1) {
+                    setTitle(R.string.title_contact);
                     bnv_menu.getMenu().findItem(R.id.navigation_contact).setChecked(true);
-                else if (position == 2)
+                } else if (position == 2) {
+                    setTitle(R.string.title_group);
                     bnv_menu.getMenu().findItem(R.id.navigation_group).setChecked(true);
-                else if (position == 3)
+                } else if (position == 3) {
+                    setTitle(R.string.title_recent);
                     bnv_menu.getMenu().findItem(R.id.navigation_recent).setChecked(true);
-                else
+                } else {
+                    setTitle(R.string.title_more);
                     bnv_menu.getMenu().findItem(R.id.navigation_info).setChecked(true);
+                }
             }
 
             @Override

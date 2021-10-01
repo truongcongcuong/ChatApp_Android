@@ -269,7 +269,7 @@ public class MessageFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.search_user_fragment_message, menu);
+        inflater.inflate(R.menu.menu_message_fragment, menu);
         MenuItem menuItem = menu.findItem(R.id.search_user_fragment_message);
 
         View actionView = menuItem.getActionView();
@@ -308,7 +308,7 @@ public class MessageFragment extends Fragment {
                 View view = getActivity().findViewById(item.getItemId());
 
                 final PopupMenu popupMenu = new PopupMenu(getActivity().getApplicationContext(), view);
-                popupMenu.getMenuInflater().inflate(R.menu.popup, popupMenu.getMenu());
+                popupMenu.getMenuInflater().inflate(R.menu.popup_menu_message_fragment, popupMenu.getMenu());
 
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -359,12 +359,12 @@ public class MessageFragment extends Fragment {
                 if (!newText.isEmpty()) {
                     search(newText);
                 } else {
-                    try {
-                        searchUserResult.clear();
-                        searchUserAdapter.setList(searchUserResult);
-                    } catch (Exception e) {
-                        searchUserAdapter = new SearchUserAdapter(getActivity().getApplicationContext(), null);
-                    }
+//                    try {
+//                        searchUserResult.clear();
+//                        searchUserAdapter.setList(searchUserResult);
+//                    } catch (Exception e) {
+//                        searchUserAdapter = new SearchUserAdapter(getActivity().getApplicationContext(), null);
+//                    }
                 }
 
                 return false;
@@ -393,11 +393,11 @@ public class MessageFragment extends Fragment {
                 /*
                 sự kiện mở rộng search view
                  */
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
-                if (rcv_list_message.getLayoutManager() == null)
-                    rcv_list_message.setLayoutManager(layoutManager);
-                rcv_list_message.setAdapter(searchUserAdapter);
-                searchUserAdapter.setList(searchUserResult);
+//                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+//                if (rcv_list_message.getLayoutManager() == null)
+//                    rcv_list_message.setLayoutManager(layoutManager);
+//                rcv_list_message.setAdapter(searchUserAdapter);
+//                searchUserAdapter.setList(searchUserResult);
                 return true;
             }
         };

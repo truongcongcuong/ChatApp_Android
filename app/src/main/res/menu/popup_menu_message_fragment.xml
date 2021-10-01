@@ -8,7 +8,7 @@
         app:showAsAction="ifRoom|withText" />
 
     <item
-        android:title="add menu item here"
+        android:title="Tìm bạn"
         android:visible="true"
         app:showAsAction="ifRoom|withText" />
 

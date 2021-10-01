@@ -4,8 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.MainActivity"
-    android:background="@color/gray">
+    android:background="@color/gray"
+    tools:context=".ui.main.MainActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tlb_main_activity"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginTop="0dp"
+        android:background="@color/purple_200"/>
 
 
     <!--<androidx.constraintlayout.widget.ConstraintLayout
@@ -45,30 +52,36 @@
 -->
 
 
-    <FrameLayout
-        android:id="@+id/fla_content"
+    <!--    <FrameLayout-->
+    <!--        android:id="@+id/fla_content"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:layout_above="@+id/bnv_bot"-->
+    <!--        app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
+
+    <!--    </FrameLayout>-->
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bnv_bot"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-    </FrameLayout>
-
+        android:layout_below="@+id/tlb_main_activity"
+        android:background="@color/background_material_light" />
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bnv_bot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:background="?android:attr/windowBackground"
-        app:itemBackground="@color/bg_app"
         android:foreground="?attr/selectableItemBackground"
+        app:itemBackground="@color/bg_app"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white"
-        android:layout_alignParentBottom="true"
-        app:menu="@menu/navigation"></com.google.android.material.bottomnavigation.BottomNavigationView>
-
+        app:menu="@menu/navigation" />
 
 
 </RelativeLayout>

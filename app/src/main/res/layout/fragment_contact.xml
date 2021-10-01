@@ -9,8 +9,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="match_parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/tlb_contact_frag"
@@ -28,36 +27,34 @@
                     android:id="@+id/ibt_contact_add_friend"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
-                    android:layout_marginLeft="-50dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="-50dp"
                     android:layout_marginBottom="5dp"
-                    android:layout_alignParentRight="true"
-                    android:src="@drawable/ic_baseline_person_add_alt_24"
-                    android:background="@android:color/transparent">
-                </ImageButton>
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_baseline_person_add_alt_24"/>
 
-               <ImageButton
-                   android:id="@+id/ibt_contact_search"
-                   android:layout_width="45dp"
-                   android:layout_height="45dp"
-                   android:layout_marginRight="-50dp"
-                   android:layout_marginBottom="5dp"
-                   android:layout_alignParentLeft="true"
-                   android:src="@drawable/ic_baseline_search_24"
-                   android:background="@android:color/transparent">
-               </ImageButton>
+                <ImageButton
+                    android:id="@+id/ibt_contact_search"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginEnd="-50dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_baseline_search_24"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
+                    android:layout_marginLeft="55dp"
+                    android:layout_marginRight="55dp"
+                    android:layout_toStartOf="@id/ibt_contact_add_friend"
+                    android:layout_toEndOf="@+id/ibt_contact_search"
                     android:gravity="center_vertical"
                     android:hint="@string/search"
                     android:textColor="@color/white"
                     android:textColorHint="@color/gray"
-                    android:textSize="20dp"
-                    android:layout_marginLeft="55dp"
-                    android:layout_marginRight="55dp"
-                    android:layout_toRightOf="@+id/ibt_contact_search"
-                    android:layout_toLeftOf="@id/ibt_contact_add_friend"></TextView>
+                    android:textSize="20dp"/>
             </RelativeLayout>
 
         </androidx.appcompat.widget.Toolbar>
@@ -90,16 +87,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/friend_request"
+                    android:layout_marginStart="20dp"
                     android:gravity="center_vertical"
+                    android:text="@string/friend_request"
                     android:textColor="@color/black"
                     android:textSize="18dp"
                     app:layout_constraintBottom_toBottomOf="@+id/img_contact_friend_request"
                     app:layout_constraintStart_toEndOf="@+id/img_contact_friend_request"
-                    app:layout_constraintTop_toTopOf="@+id/img_contact_friend_request"
-                    android:layout_marginLeft="20dp"
-                    >
-                </TextView>
+                    app:layout_constraintTop_toTopOf="@+id/img_contact_friend_request"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
@@ -111,9 +106,9 @@
             android:layout_marginTop="0dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/ctl_contact_phone_book_friend"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/ctl_contact_phone_book_friend">
+                android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/img_contact_phonebook_friend"
@@ -131,16 +126,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/phonebook_friend"
+                    android:layout_marginStart="20dp"
                     android:gravity="center_vertical"
+                    android:text="@string/phonebook_friend"
                     android:textColor="@color/black"
                     android:textSize="18dp"
                     app:layout_constraintBottom_toBottomOf="@+id/img_contact_phonebook_friend"
                     app:layout_constraintStart_toEndOf="@+id/img_contact_phonebook_friend"
-                    app:layout_constraintTop_toTopOf="@+id/img_contact_phonebook_friend"
-                    android:layout_marginLeft="20dp"
-                    >
-                </TextView>
+                    app:layout_constraintTop_toTopOf="@+id/img_contact_phonebook_friend"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
@@ -148,8 +141,8 @@
             android:id="@+id/cav_contact_all"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/cav_contact_phonebook_friend">
+            android:layout_below="@+id/cav_contact_phonebook_friend"
+            android:layout_marginTop="10dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -161,27 +154,26 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
                     android:gravity="center_vertical"
                     android:text="@string/all_contact"
                     android:textColor="@color/black"
                     android:textSize="16dp"
                     app:layout_constraintBottom_toBottomOf="@id/btn_contact_refresh"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/btn_contact_refresh"></TextView>
+                    app:layout_constraintTop_toTopOf="@+id/btn_contact_refresh"/>
 
                 <Button
                     android:id="@+id/btn_contact_refresh"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginEnd="10dp"
                     android:text="@string/refresh"
                     android:textColor="@color/color_send"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"></Button>
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
@@ -190,8 +182,8 @@
             android:id="@+id/rcv_contact_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/cav_contact_all">
-        </androidx.recyclerview.widget.RecyclerView>
+            android:background="@color/background_material_light"
+            android:layout_below="@+id/cav_contact_all"/>
     </RelativeLayout>
 
 

@@ -3,13 +3,9 @@ package com.example.chatapp.ui;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,7 +16,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.AuthFailureError;
@@ -30,7 +25,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.ServerError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
@@ -38,24 +32,20 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.dto.UserUpdateDTO;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.vertx.core.json.Json;
 import lombok.SneakyThrows;
 
 public class UpdateInformationActivity extends AppCompatActivity {
@@ -71,11 +61,14 @@ public class UpdateInformationActivity extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener onDateSetListener;
     private String token;
     private Date birthday;
+    private Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information2);
+
+        gson = new Gson();
 
         Bundle bundle = getIntent().getExtras();
         userDetailDTO = (UserDetailDTO) bundle.getSerializable("user");
@@ -154,7 +147,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
 
     }
 
-    private void updateInfo(UserUpdateDTO dto) {
+    /*private void updateInfo(UserUpdateDTO dto) {
         StringRequest request = new StringRequest(Request.Method.PUT, Constant.API_USER + "me",
                 response -> {
                     try {
@@ -197,6 +190,49 @@ public class UpdateInformationActivity extends AppCompatActivity {
                 map.put("username", dto.getUsername());
                 return map;
             }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(request);
+    }*/
+
+    private void updateInfo(UserUpdateDTO dto) {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(gson.toJson(dto));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, Constant.API_USER + "me",
+                jsonObject,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response.toString(), "iso8859-1"), "UTF-8");
+                        Log.e("update infor : ", res);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                    NetworkResponse response = error.networkResponse;
+                    if (error instanceof ServerError && error != null) {
+                        try {
+                            String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                            Log.e("eror : ", res);
+                            showAlertDialogError(res);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+
         };
 
         RequestQueue queue = Volley.newRequestQueue(this);

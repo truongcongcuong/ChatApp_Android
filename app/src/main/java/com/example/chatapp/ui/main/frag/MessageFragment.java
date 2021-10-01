@@ -1,7 +1,9 @@
 package com.example.chatapp.ui.main.frag;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +24,7 @@ import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -33,6 +38,7 @@ import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.ui.CreateGroupActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -61,6 +67,11 @@ public class MessageFragment extends Fragment {
     private SearchUserAdapter searchUserAdapter;
     private List<UserProfileDto> searchUserResult;
 
+    /*
+    kéo để làm mới
+     */
+    private SwipeRefreshLayout refreshLayout;
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -83,7 +94,7 @@ public class MessageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         /*
-        enable manu trên action bar
+        enable menu trên action bar
          */
         setHasOptionsMenu(true);
 
@@ -129,14 +140,33 @@ public class MessageFragment extends Fragment {
         this.rcv_list_message.setAdapter(adapter);
         updateListInbox();
 
+        /*
+        sự kiện kéo để làm mới
+         */
+        refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout.setOnRefreshListener(() -> {
+            page = 0;
+            refreshListInbox();
+        });
+
         rcv_list_message.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+                /*LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (linearLayoutManager != null) {
+                    *//*
+                    chỉ enable khi ở đầu của recyclerview
+                     *//*
+                    refreshLayout.setEnabled(linearLayoutManager.findFirstCompletelyVisibleItemPosition() > 0);
+                }*/
+                /*
+                nếu cuộn xuống cuối recyclerview thì load thêm data
+                 */
                 if (!recyclerView.canScrollVertically(1)) {
                     loadMoreData();
                 }
+                super.onScrolled(recyclerView, dx, dy);
             }
 
             @Override
@@ -156,6 +186,40 @@ public class MessageFragment extends Fragment {
             }
         });
         return view;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void refreshListInbox() {
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                        JSONObject object = new JSONObject(res);
+                        JSONArray array = (JSONArray) object.get("content");
+
+                        Type listType = new TypeToken<List<InboxDto>>() {
+                        }.getType();
+                        List<InboxDto> list = gson.fromJson(array.toString(), listType);
+                        if (!list.isEmpty()) {
+                            adapter = new ListMessageAdapter(getActivity().getApplicationContext(), list);
+                            this.rcv_list_message.setAdapter(adapter);
+
+                        }
+                        refreshLayout.setRefreshing(false);
+                    } catch (JSONException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.i("mesage fragment error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+        requestQueue.add(request);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -202,16 +266,31 @@ public class MessageFragment extends Fragment {
     /**
      * menu search user
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.search_user_fragment_message, menu);
         MenuItem menuItem = menu.findItem(R.id.search_user_fragment_message);
 
-        SearchView searchView = (SearchView) menuItem.getActionView();
+        View actionView = menuItem.getActionView();
+
+        SearchView searchView = (SearchView) actionView;
         searchView.setQueryHint("Search user...");
         searchView.setIconifiedByDefault(false);
         searchView.setFocusable(true);
         searchView.requestFocus();
+
+        int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
+        View searchPlate = searchView.findViewById(searchPlateId);
+        searchPlate.setBackgroundResource(R.drawable.search_view_background);
+        ViewGroup.LayoutParams params = searchPlate.getLayoutParams();
+        params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        searchPlate.setLayoutParams(params);
+
+        int searchIcon = searchView.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
+        ImageView magImage = searchView.findViewById(searchIcon);
+        magImage.setVisibility(View.GONE);
+        magImage.setImageDrawable(null);
 
         /*
         tìm icon close và edit text của search view
@@ -220,6 +299,34 @@ public class MessageFragment extends Fragment {
         int editTextId = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
         View closeIcon = searchView.findViewById(closeIconId);
         EditText editText = searchView.findViewById(editTextId);
+        editText.setHintTextColor(Color.WHITE);
+        editText.setPadding(50, 0, 50, 0);
+
+        menu.findItem(R.id.submenu_fragment_message).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                View view = getActivity().findViewById(item.getItemId());
+
+                final PopupMenu popupMenu = new PopupMenu(getActivity().getApplicationContext(), view);
+                popupMenu.getMenuInflater().inflate(R.menu.popup, popupMenu.getMenu());
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.action_create_group:
+                                Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
+                                getActivity().startActivity(intent);
+                                break;
+                        }
+                        return true;
+                    }
+                });
+                popupMenu.show();
+
+                return true;
+            }
+        });
 
         /*
         sự kiện click icon close trên search view

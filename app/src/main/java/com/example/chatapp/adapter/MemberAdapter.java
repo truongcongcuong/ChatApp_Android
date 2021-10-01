@@ -3,6 +3,7 @@ package com.example.chatapp.adapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,9 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
         while (!find && i < members.size());
         members.removeIf(x -> x.getUser().getId().equals(user.getId()));
         members.add(0, memberDto);
+
+        Log.d("isAdmin", currentUserIsAdmin + "");
+        Log.d("currentmember", memberDto.toString());
     }
 
     @Override

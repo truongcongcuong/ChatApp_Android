@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipChildren="false"
-    android:paddingStart="5dp"
+    android:paddingStart="4dp"
     android:paddingEnd="4dp">
 
 
@@ -82,8 +82,8 @@
 
     <RelativeLayout
         android:id="@+id/send_rcv_readby_one"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
         android:layout_alignBottom="@+id/send_relative_message"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="4dp"

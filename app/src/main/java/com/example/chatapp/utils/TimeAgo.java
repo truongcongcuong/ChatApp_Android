@@ -25,7 +25,8 @@ public class TimeAgo {
 
     public static String getTime(String date1) {
 
-        Date d1 = new Date(new Date().getTime() + 7 * 3600 * 1000);
+//        Date d1 = new Date(new Date().getTime() + 7 * 3600 * 1000);
+        Date d1 = new Date();
         Date d2 = new Date();
 
         try {

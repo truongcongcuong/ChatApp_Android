@@ -12,6 +12,13 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+
+        <!-- Customize your theme here. -->
+        <!-- chiều cao thanh toolbar-->
+        <item name="actionBarSize">50dp</item>
+
+        <!-- set màu cho mũi tên quay lại trên thanh toolbar-->
+        <item name="colorControlNormal">@color/white</item>
     </style>
 
     <style name="Theme.ChatApp.SlidrActivityTheme">

@@ -62,7 +62,8 @@ public class ContactFragment extends Fragment {
     private String token;
     private Gson gson;
     private List<FriendDTO> list;
-    private ConstraintLayout ctl_contact_phone_book_friend, ctl_contact_friend_request;
+    private ConstraintLayout ctl_contact_friend_request;
+    private ConstraintLayout ctl_contact_phone_book_friend;
     private Button btn_contact_refresh;
     private List<FriendDTO> searchFriend;
 
@@ -122,6 +123,8 @@ public class ContactFragment extends Fragment {
             startActivity(intent);
         });
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+        this.adapter = new FriendListAdapter(list, getActivity().getApplicationContext());
+        this.rcv_contact_list.setAdapter(adapter);
 
         btn_contact_refresh.setOnClickListener(v -> updateListFriends());
 
@@ -142,8 +145,9 @@ public class ContactFragment extends Fragment {
                         }.getType();
                         list = gson.fromJson(array.toString(), listType);
 
-                        this.adapter = new FriendListAdapter(list, getActivity().getApplicationContext());
-                        this.rcv_contact_list.setAdapter(adapter);
+                        adapter.setList(list);
+//                        this.adapter = new FriendListAdapter(list, getActivity().getApplicationContext());
+//                        this.rcv_contact_list.setAdapter(adapter);
                     } catch (UnsupportedEncodingException | JSONException e) {
                         e.printStackTrace();
                     }
@@ -177,7 +181,7 @@ public class ContactFragment extends Fragment {
 
         int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
         View searchPlate = searchView.findViewById(searchPlateId);
-        searchPlate.setBackgroundResource(R.drawable.search_view_background);
+        searchPlate.setBackgroundResource(R.drawable.search_view_background_light);
         ViewGroup.LayoutParams params = searchPlate.getLayoutParams();
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         searchPlate.setLayoutParams(params);

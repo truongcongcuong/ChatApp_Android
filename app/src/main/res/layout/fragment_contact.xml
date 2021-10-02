@@ -42,11 +42,11 @@
                     android:layout_marginStart="20dp"
                     android:gravity="center_vertical"
                     android:text="@string/friend_request"
-                    android:textColor="@color/black"
-                    android:textSize="18dp"
+                    android:textColor="#666666"
+                    android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="@+id/img_contact_friend_request"
                     app:layout_constraintStart_toEndOf="@+id/img_contact_friend_request"
-                    app:layout_constraintTop_toTopOf="@+id/img_contact_friend_request"/>
+                    app:layout_constraintTop_toTopOf="@+id/img_contact_friend_request" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
@@ -81,11 +81,11 @@
                     android:layout_marginStart="20dp"
                     android:gravity="center_vertical"
                     android:text="@string/phonebook_friend"
-                    android:textColor="@color/black"
-                    android:textSize="18dp"
+                    android:textColor="#666666"
+                    android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="@+id/img_contact_phonebook_friend"
                     app:layout_constraintStart_toEndOf="@+id/img_contact_phonebook_friend"
-                    app:layout_constraintTop_toTopOf="@+id/img_contact_phonebook_friend"/>
+                    app:layout_constraintTop_toTopOf="@+id/img_contact_phonebook_friend" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
@@ -94,14 +94,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/cav_contact_phonebook_friend"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="4dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp">
+                android:layout_gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"

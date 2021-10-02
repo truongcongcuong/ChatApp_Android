@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipChildren="false"
-    android:paddingStart="5dp"
+    android:paddingStart="4dp"
     android:paddingEnd="4dp">
 
 
@@ -12,7 +12,6 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_alignBottom="@id/receiver_relative_message"
-        android:layout_marginBottom="5dp"
         android:padding="1dp" />
 
     <RelativeLayout
@@ -27,7 +26,7 @@
             android:id="@+id/blank"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
+            android:layout_marginStart="4dp"
             android:background="@drawable/background_message_receiver"
             android:orientation="vertical"
             android:paddingLeft="5dp"

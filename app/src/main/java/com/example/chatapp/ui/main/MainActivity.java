@@ -92,6 +92,10 @@ public class MainActivity extends AppCompatActivity {
         pagerAdapter = new ScreenSlidePagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
         viewPager.setPageTransformer(new ZoomOutPageTransformer());
+        /*
+        sửa lỗi mất list inbox ở message fragment khi từ fragment thứ 3 chuyển qua
+         */
+        viewPager.setOffscreenPageLimit(NUM_PAGES);
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
 

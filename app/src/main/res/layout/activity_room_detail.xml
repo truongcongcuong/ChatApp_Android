@@ -80,7 +80,7 @@
                 <ImageButton
                     android:id="@+id/ibt_change_image_of_room"
                     android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_height="20dp"
                     android:layout_below="@id/image_of_room_detail"
                     android:layout_alignEnd="@id/image_of_room_detail"
                     android:layout_marginTop="-20dp"

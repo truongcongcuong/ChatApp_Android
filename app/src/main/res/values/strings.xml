@@ -64,6 +64,13 @@
     <string name="edit_profile_username">Enter your username</string>
     <string name="error_dialog_title">Error...</string>
     <string name="cancel_button">Cancel</string>
+    <string name="unname_group">Nhóm chưa đặt tên</string>
+    <string name="no_member">Chưa có thành viên.</string>
+    <string name="find_by_name_or_phone">Tìm tên hoặc số điện thoại</string>
+    <string name="confirm_abort_create_group">Bạn có muốn hủy việc tạo nhóm này?</string>
+    <string name="continue_create_group">Tiếp tục tạo nhóm</string>
+    <string name="abort_create_group">Hủy</string>
+    <string name="creating_room_message_dialog">Đang tạo nhóm. Vui lòng đợi ...</string>
     <string name="change_password">Change password</string>
     <string name="change_password_detail_8_char">Password must be 8 characters or more.</string>
     <string name="change_password_detail_not_same_old_password">Password must not be the same as your old password.</string>

@@ -2,7 +2,7 @@ package com.example.chatapp.dto;
 
 import com.example.chatapp.enumvalue.RoomType;
 
-import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -10,15 +10,14 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 @Builder
-public class RoomDTO implements Serializable {
+@AllArgsConstructor
+public class RoomCreateDto {
     private String id;
     private String name;
-    private String imageUrl;
+    private Date createAt;
     private RoomType type;
-    private UserProfileDto to;
-    private String createAt;
-    private Set<MemberDto> members;
-    private UserProfileDto createByUser;
+    private Set<MemberCreateDto> members;
+    private String createByUserId;
+    private String imageUrl;
 }

@@ -1,38 +1,32 @@
 package com.example.chatapp.ui.signup;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
-import com.example.chatapp.cons.Constant;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.example.chatapp.R;
 import com.example.chatapp.cons.SendData;
 import com.example.chatapp.dto.UserSignUpDTO;
 import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.signup.frag.SignupEnterEmailFragment;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class SignUpStep2Activity extends AppCompatActivity implements SendData {
-    ImageButton ibt_sign_up_back_step2,ibt_sign_up_next_step2;
-    int screen =1;
-    UserSignUpDTO user;
+    private ImageButton ibt_sign_up_back_step2;
+    private ImageButton ibt_sign_up_next_step2;
+    private int screen = 1;
+    private UserSignUpDTO user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().hide();
         setContentView(R.layout.activity_sign_up_step2);
+
         Fragment fragment = new SignupEnterEmailFragment();
 
         ibt_sign_up_next_step2 = findViewById(R.id.ibt_sign_up_next_step2);
@@ -44,14 +38,14 @@ public class SignUpStep2Activity extends AppCompatActivity implements SendData {
 
         loadFragment(fragment);
 
-        ibt_sign_up_back_step2.setOnClickListener(v->{
-                finish();
+        ibt_sign_up_back_step2.setOnClickListener(v -> {
+            finish();
         });
     }
 
     private void loadFragment(Fragment fragment) {
         Bundle bundle = new Bundle();
-        bundle.putSerializable("user",user);
+        bundle.putSerializable("user", user);
         getIntent().putExtras(bundle);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.flo_sign_up, fragment);
@@ -61,14 +55,14 @@ public class SignUpStep2Activity extends AppCompatActivity implements SendData {
 
     @Override
     public void SendingData(String o) {
-       String s = (String) o;
-        if(s.equals("sign-up-success"))
+        String s = (String) o;
+        if (s.equals("sign-up-success"))
             showDialogSignupSuccess(SignUpStep2Activity.this);
 
     }
 
 
-    private void showDialogSignupSuccess(Context c){
+    private void showDialogSignupSuccess(Context c) {
         AlertDialog alertDialog = new AlertDialog.Builder(c)
                 .setTitle(R.string.success_text)
                 .setMessage(R.string.sign_up_success)

@@ -1,18 +1,11 @@
 package com.example.chatapp.ui;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,6 +16,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -30,7 +25,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.ServerError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
@@ -38,42 +32,43 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.dto.UserUpdateDTO;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.vertx.core.json.Json;
 import lombok.SneakyThrows;
 
 public class UpdateInformationActivity extends AppCompatActivity {
-    ImageButton ibt_edit_profile_back;
-    ImageView img_edit_profile_avt;
-    EditText edt_edit_profile_display_name,edt_edit_profile_birthday,edt_edit_profile_username;
-    RadioButton rbt_edit_profile_gender_male,rbt_edit_profile_gender_female;
-    Button btn_edit_profile_save;
-    UserDetailDTO userDetailDTO;
-    DatePickerDialog.OnDateSetListener onDateSetListener;
-    String token;
-    Date birthday;
+    private ImageButton ibt_edit_profile_back;
+    private ImageView img_edit_profile_avt;
+    private EditText edt_edit_profile_display_name;
+    private EditText edt_edit_profile_birthday;
+    private EditText edt_edit_profile_username;
+    private RadioButton rbt_edit_profile_gender_male;
+    private RadioButton rbt_edit_profile_gender_female;
+    private Button btn_edit_profile_save;
+    private UserDetailDTO userDetailDTO;
+    private DatePickerDialog.OnDateSetListener onDateSetListener;
+    private String token;
+    private Date birthday;
+    private Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information2);
-        getSupportActionBar().hide();
+
+        gson = new Gson();
 
         Bundle bundle = getIntent().getExtras();
         userDetailDTO = (UserDetailDTO) bundle.getSerializable("user");
@@ -98,15 +93,15 @@ public class UpdateInformationActivity extends AppCompatActivity {
 
         edt_edit_profile_birthday.setText(userDetailDTO.getDateOfBirth());
         edt_edit_profile_display_name.setText(userDetailDTO.getDisplayName());
-        if(userDetailDTO.getGender().equalsIgnoreCase("female"))
+        if (userDetailDTO.getGender().equalsIgnoreCase("female"))
             rbt_edit_profile_gender_female.setChecked(true);
-        else rbt_edit_profile_gender_male.setChecked(true);
+        else
+            rbt_edit_profile_gender_male.setChecked(true);
 
-        if(userDetailDTO.getUsername()!=null || !TextUtils.isEmpty(userDetailDTO.getUsername()))
+        if (userDetailDTO.getUsername() != null || !TextUtils.isEmpty(userDetailDTO.getUsername()))
             edt_edit_profile_username.setText(userDetailDTO.getUsername());
 
-
-        edt_edit_profile_birthday.setOnClickListener(v->{
+        edt_edit_profile_birthday.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
@@ -115,7 +110,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
             DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                     android.R.style.Theme_Holo_Light_Dialog_MinWidth,
                     onDateSetListener,
-                    year,month,date);
+                    year, month, date);
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             datePickerDialog.show();
         });
@@ -125,15 +120,15 @@ public class UpdateInformationActivity extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                birthday = sdf.parse(year+"-"+month+"-"+dayOfMonth);
-                Log.e("birthday : ",birthday.toString());
-                edt_edit_profile_birthday.setText(year+"-"+month+"-"+dayOfMonth);
+                birthday = sdf.parse(year + "-" + month + "-" + dayOfMonth);
+                Log.e("birthday : ", birthday.toString());
+                edt_edit_profile_birthday.setText(year + "-" + month + "-" + dayOfMonth);
             }
         };
 
-        btn_edit_profile_save.setOnClickListener(v->{
+        btn_edit_profile_save.setOnClickListener(v -> {
             String gender;
-            if(rbt_edit_profile_gender_male.isChecked())
+            if (rbt_edit_profile_gender_male.isChecked())
                 gender = rbt_edit_profile_gender_male.getText().toString();
             else gender = rbt_edit_profile_gender_female.getText().toString();
             UserUpdateDTO dto = UserUpdateDTO.builder()
@@ -147,13 +142,13 @@ public class UpdateInformationActivity extends AppCompatActivity {
             updateInfo(dto);
         });
 
-        ibt_edit_profile_back.setOnClickListener(v->finish());
+        ibt_edit_profile_back.setOnClickListener(v -> finish());
 
 
     }
 
-    private void updateInfo(UserUpdateDTO dto) {
-        StringRequest request = new StringRequest(Request.Method.PUT, Constant.API_USER+"me",
+    /*private void updateInfo(UserUpdateDTO dto) {
+        StringRequest request = new StringRequest(Request.Method.PUT, Constant.API_USER + "me",
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
@@ -171,15 +166,15 @@ public class UpdateInformationActivity extends AppCompatActivity {
                     if (error instanceof ServerError && error != null) {
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                            JSONObject object = new JSONObject(res);
-                            Log.e("eror : ",res.toString());
-                            showAlertDialogError(res.toString());
+//                            JSONObject object = new JSONObject(res);
+                            Log.e("eror : ", res);
+                            showAlertDialogError(res);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
 
                     }
-                }){
+                }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> map = new HashMap<>();
@@ -202,20 +197,58 @@ public class UpdateInformationActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
-    }
+    }*/
 
+    private void updateInfo(UserUpdateDTO dto) {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(gson.toJson(dto));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, Constant.API_USER + "me",
+                jsonObject,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response.toString(), "iso8859-1"), "UTF-8");
+                        Log.e("update infor : ", res);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                    NetworkResponse response = error.networkResponse;
+                    if (error instanceof ServerError && error != null) {
+                        try {
+                            String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                            Log.e("eror : ", res);
+                            showAlertDialogError(res);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(request);
+    }
 
 
     private void showAlertDialogError(String toString) {
-        AlertDialog dialog = new  AlertDialog.Builder(this).
+        AlertDialog dialog = new AlertDialog.Builder(this).
                 setTitle(getString(R.string.error_dialog_title))
                 .setMessage(toString)
-                .setNegativeButton(R.string.confirm_button,null)
+                .setNegativeButton(R.string.confirm_button, null)
                 .create();
         dialog.show();
     }
-
-
-
-
 }

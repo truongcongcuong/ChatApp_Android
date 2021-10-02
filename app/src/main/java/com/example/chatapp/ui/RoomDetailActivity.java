@@ -76,7 +76,6 @@ public class RoomDetailActivity extends AppCompatActivity {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_detail);
-        getSupportActionBar().hide();
 
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)

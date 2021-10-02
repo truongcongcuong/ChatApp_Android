@@ -52,7 +52,6 @@ public class MemberActivity extends AppCompatActivity {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member);
-        getSupportActionBar().hide();
 
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)

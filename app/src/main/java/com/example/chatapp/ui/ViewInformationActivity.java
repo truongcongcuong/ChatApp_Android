@@ -1,16 +1,10 @@
 package com.example.chatapp.ui;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.NestedScrollView;
-
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -23,6 +17,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -42,16 +40,13 @@ import com.example.chatapp.entity.User;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -62,24 +57,23 @@ import java.util.Map;
 import io.vertx.core.json.Json;
 
 public class ViewInformationActivity extends AppCompatActivity {
-    ImageButton ibt_update_infor_back;
-    ImageView img_update_infor_avt;
-    Button btn_update_infor;
-    ListView lsv_update_infor;
-    List<MenuItem> items;
-    NestedScrollView nsv_update_infor;
-    String userToString,token;
-    User user;
-    Gson gson;
-    UserDetailDTO userDetailDTO;
-    static final int REQUEST_GALLERY = 1;
-    static final int REQUEST_IMAGE_CAPTURE = 0;
+    private ImageButton ibt_update_infor_back;
+    private ImageView img_update_infor_avt;
+    private Button btn_update_infor;
+    private ListView lsv_update_infor;
+    private List<MenuItem> items;
+    private NestedScrollView nsv_update_infor;
+    private String userToString, token;
+    private User user;
+    private Gson gson;
+    private UserDetailDTO userDetailDTO;
+    private static final int REQUEST_GALLERY = 1;
+    private static final int REQUEST_IMAGE_CAPTURE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information);
-        getSupportActionBar().hide();
 
         lsv_update_infor = findViewById(R.id.lsv_update_infor);
         ibt_update_infor_back = findViewById(R.id.ibt_update_infor_back);
@@ -96,13 +90,13 @@ public class ViewInformationActivity extends AppCompatActivity {
         token = sharedPreferencesToken.getString("access-token", null);
 
         getInformationDetail();
-        ibt_update_infor_back.setOnClickListener(v-> finish());
-        img_update_infor_avt.setOnClickListener(v-> showDialogChangeAvt());
-        btn_update_infor.setOnClickListener(v->{
+        ibt_update_infor_back.setOnClickListener(v -> finish());
+        img_update_infor_avt.setOnClickListener(v -> showDialogChangeAvt());
+        btn_update_infor.setOnClickListener(v -> {
             Intent intent = new Intent(ViewInformationActivity.this, UpdateInformationActivity.class);
             Bundle bundle = new Bundle();
-            bundle.putSerializable("user",userDetailDTO);
-            Log.e("user bundle :",userDetailDTO.toString());
+            bundle.putSerializable("user", userDetailDTO);
+            Log.e("user bundle :", userDetailDTO.toString());
             intent.putExtras(bundle);
             startActivity(intent);
         });
@@ -119,21 +113,21 @@ public class ViewInformationActivity extends AppCompatActivity {
         TextView txt_change_avt_take_photo = dialog.findViewById(R.id.txt_change_avt_take_photo);
         TextView txt_change_avt_from_gallery = dialog.findViewById(R.id.txt_change_avt_from_gallery);
 
-        txt_change_avt_view.setOnClickListener(v-> {
+        txt_change_avt_view.setOnClickListener(v -> {
 //            txt_change_avt_view.setBackgroundColor(getResources().getColor(R.color.gray));
-            Toast.makeText(this,"Action View photo active",Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Action View photo active", Toast.LENGTH_LONG).show();
         });
-        txt_change_avt_from_gallery.setOnClickListener(v-> {
+        txt_change_avt_from_gallery.setOnClickListener(v -> {
             Toast.makeText(this, "Action take photo active", Toast.LENGTH_LONG).show();
             Intent galleryIntent = new Intent();
             galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
             galleryIntent.setType("image/*");
-            startActivityForResult(galleryIntent,REQUEST_GALLERY);
+            startActivityForResult(galleryIntent, REQUEST_GALLERY);
         });
-        txt_change_avt_take_photo.setOnClickListener(v-> {
-            Toast.makeText(this,"Action take photo from gallery active",Toast.LENGTH_LONG).show();
+        txt_change_avt_take_photo.setOnClickListener(v -> {
+            Toast.makeText(this, "Action take photo from gallery active", Toast.LENGTH_LONG).show();
             Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(takePhotoIntent,REQUEST_IMAGE_CAPTURE);
+            startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
         });
 
 
@@ -141,20 +135,20 @@ public class ViewInformationActivity extends AppCompatActivity {
     }
 
     private void getInformationDetail() {
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_USER +"me",
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_USER + "me",
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
-                        this.userDetailDTO = gson.fromJson(String.valueOf(object),UserDetailDTO.class);
+                        this.userDetailDTO = gson.fromJson(String.valueOf(object), UserDetailDTO.class);
                     } catch (UnsupportedEncodingException | JSONException e) {
                         e.printStackTrace();
                     }
                     updateItems();
                 },
                 error -> {
-                    Log.e("Error information : ",error.toString());
-                }){
+                    Log.e("Error information : ", error.toString());
+                }) {
 
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -190,7 +184,7 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .key(getResources().getString(R.string.mobile))
                 .name(userDetailDTO.getPhoneNumber())
                 .build());
-        MenuInformationAdapter adapter = new MenuInformationAdapter(this,items,R.layout.line_item_menu_button);
+        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button);
         lsv_update_infor.setAdapter(adapter);
         Glide.with(this)
                 .load(userDetailDTO.getImageUrl())
@@ -203,28 +197,27 @@ public class ViewInformationActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.e("test 110,","errrr");
+        Log.e("test 110,", "errrr");
         List<File> files = new ArrayList<>();
-        switch (requestCode){
+        switch (requestCode) {
             case 0:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     Bundle extras = data.getExtras();
                     Bitmap selectedImage = (Bitmap) extras.get("data");
-                    Log.e("uri camera",selectedImage.toString());
+                    Log.e("uri camera", selectedImage.toString());
                     Glide.with(this).load(selectedImage)
                             .centerCrop().circleCrop().into(img_update_infor_avt);
-                    files.add(new File(PathUtil.getPath(this,getImageUri(this,selectedImage))));
-                    userDetailDTO.setImageUrl(getImageUri(this,selectedImage).toString());
+
+                    files.add(new File(PathUtil.getPath(this, getImageUri(this, selectedImage))));
                 }
                 break;
             case 1:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     Uri selectedImage = data.getData();
                     Glide.with(this).load(selectedImage)
                             .centerCrop().circleCrop().into(img_update_infor_avt);
-                    Log.e("gallery","done");
-                    files.add(new File(PathUtil.getPath(this,selectedImage)));
-                    userDetailDTO.setImageUrl(selectedImage.toString());
+                    Log.e("gallery", "done");
+                    files.add(new File(PathUtil.getPath(this, selectedImage)));
                 }
                 break;
         }
@@ -233,7 +226,7 @@ public class ViewInformationActivity extends AppCompatActivity {
 
     private void uploadMultiFiles(List<File> files) {
         MultiPartFileRequest<String> restApiMultiPartRequest =
-                new MultiPartFileRequest<String>(Request.Method.PUT,Constant.API_USER+"me/changeImage",
+                new MultiPartFileRequest<String>(Request.Method.PUT, Constant.API_USER + "me/changeImage",
                         new HashMap<>(), // danh sách request param
                         files,
                         response -> {
@@ -242,11 +235,11 @@ public class ViewInformationActivity extends AppCompatActivity {
                         error -> {
                             Log.i("upload error", "error");
                             NetworkResponse response = error.networkResponse;
-                            if (error instanceof ServerError && error != null) {
+                            if (error != null && error instanceof ServerError) {
                                 try {
                                     String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                                    JSONObject object = new JSONObject(res);
-                                    Log.e("400 : ",res.toString());
+//                                    JSONObject object = new JSONObject(res);
+                                    Log.e("400 : ", res);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

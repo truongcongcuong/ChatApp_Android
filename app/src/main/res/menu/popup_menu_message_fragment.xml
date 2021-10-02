@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_create_group"
+        android:title="Tạo nhóm"
+        android:visible="true"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:title="Tìm bạn"
+        android:visible="true"
+        app:showAsAction="ifRoom|withText" />
+
+</menu>

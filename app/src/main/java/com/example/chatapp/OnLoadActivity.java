@@ -17,18 +17,21 @@ import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.main.MainActivity;
 
 public class OnLoadActivity extends AppCompatActivity {
-    TextView txt_on_load_app_name,txt_on_load_members;
-    ImageView img_on_load_logo;
-    Animation top_animation, bottom_animation;
+    private TextView txt_on_load_app_name;
+    private TextView txt_on_load_members;
+    private ImageView img_on_load_logo;
+    private Animation top_animation;
+    private Animation bottom_animation;
     private static int TIME_OUT = 2500;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_on_load);
-        getSupportActionBar().hide();
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        top_animation = AnimationUtils.loadAnimation(this,R.anim.top_animation);
-        bottom_animation = AnimationUtils.loadAnimation(this,R.anim.bot_animation);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        top_animation = AnimationUtils.loadAnimation(this, R.anim.top_animation);
+        bottom_animation = AnimationUtils.loadAnimation(this, R.anim.bot_animation);
 
         txt_on_load_app_name = findViewById(R.id.txt_on_load_app_name);
         txt_on_load_members = findViewById(R.id.txt_on_load_members);
@@ -38,23 +41,22 @@ public class OnLoadActivity extends AppCompatActivity {
         txt_on_load_app_name.setAnimation(bottom_animation);
         txt_on_load_members.setAnimation(bottom_animation);
 
-        SharedPreferences sharedPreferencesIsLogin = getSharedPreferences("is-login",MODE_PRIVATE);
-        Log.e("login : ", sharedPreferencesIsLogin.getBoolean("status-login",false)+"");
+        SharedPreferences sharedPreferencesIsLogin = getSharedPreferences("is-login", MODE_PRIVATE);
+        Log.e("login : ", sharedPreferencesIsLogin.getBoolean("status-login", false) + "");
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(sharedPreferencesIsLogin.getBoolean("status-login",false)){
+                if (sharedPreferencesIsLogin.getBoolean("status-login", false)) {
                     Intent intent = new Intent(OnLoadActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
-                }
-                else {
+                } else {
                     Intent intent = new Intent(OnLoadActivity.this, HomePageActivity.class);
                     startActivity(intent);
                     finish();
                 }
             }
-        },TIME_OUT);
+        }, TIME_OUT);
     }
 
 }

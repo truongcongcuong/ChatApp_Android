@@ -35,6 +35,7 @@ import com.example.chatapp.adapter.FriendListAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.FriendDTO;
+import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.ui.TestNewFeatureActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -60,8 +61,10 @@ public class ContactFragment extends Fragment {
     private String token;
     private Gson gson;
     private List<FriendDTO> list;
+    private ConstraintLayout ctl_contact_phone_book_friend, ctl_contact_friend_request;
+    Button btn_contact_refresh;
     private List<FriendDTO> searchFriend;
-    private ConstraintLayout ctl_contact_phone_book_friend;
+
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -108,11 +111,20 @@ public class ContactFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_contact, container, false);
         rcv_contact_list = view.findViewById(R.id.rcv_contact_list);
         ctl_contact_phone_book_friend = view.findViewById(R.id.ctl_contact_phone_book_friend);
-        ctl_contact_phone_book_friend.setOnClickListener(v -> {
+        ctl_contact_friend_request = view.findViewById(R.id.ctl_contact_friend_request);
+        btn_contact_refresh = view.findViewById(R.id.btn_contact_refresh);
+        ctl_contact_phone_book_friend.setOnClickListener(v->{
             Intent intent = new Intent(getActivity(), TestNewFeatureActivity.class);
             startActivity(intent);
         });
+        ctl_contact_friend_request.setOnClickListener(v->{
+            Intent intent = new Intent(getActivity(), FriendRequestActivity.class);
+            startActivity(intent);
+        });
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+
+        btn_contact_refresh.setOnClickListener(v->updateListFriends());
+
         updateListFriends();
         return view;
     }

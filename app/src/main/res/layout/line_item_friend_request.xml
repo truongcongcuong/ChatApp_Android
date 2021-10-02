@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/img_line_friend_request_avt"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/defaultprofile">
+    </ImageView>
+    <TextView
+        android:id="@+id/txt_line_friend_request_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/test_text"
+        android:layout_toEndOf="@+id/img_line_friend_request_avt"
+        android:textSize="20dp"
+        android:ellipsize="end"
+        android:textColor="@color/black"
+        android:layout_marginLeft="10dp"
+        android:layout_toStartOf="@+id/txt_line_friend_request_create_at"
+        android:layout_marginRight="10dp"
+        android:maxLines="1">
+    </TextView>
+
+    <Button
+        android:id="@+id/btn_line_friend_request_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/btn_line_friend_request_accept"
+        android:text="@string/cancel_button"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_below="@+id/txt_line_friend_request_name"
+        >
+    </Button>
+
+    <Button
+        android:id="@+id/btn_line_friend_request_accept"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/img_line_friend_request_avt"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:text="@string/accept_button"
+        android:layout_below="@+id/txt_line_friend_request_name"
+        ></Button>
+
+    <TextView
+        android:id="@+id/txt_line_friend_request_create_at"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:textSize="20dp"
+        android:text="5"
+        android:layout_marginRight="10dp">
+    </TextView>
+
+</RelativeLayout
+  >

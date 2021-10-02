@@ -19,14 +19,20 @@ public class InfoActivity extends AppCompatActivity {
     private Gson gson;
     private ImageView info_image;
     private TextView info_name;
+    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
         gson = new Gson();
+        context = getApplicationContext();
+        update();
+    }
 
-        SharedPreferences sharedPreferencesUser = getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+
+    public void update(){
+        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         info_image = findViewById(R.id.info_image);
         info_name = findViewById(R.id.info_name);
@@ -35,4 +41,6 @@ public class InfoActivity extends AppCompatActivity {
                 .into(info_image);
         info_name.setText(user.getDisplayName());
     }
+
+
 }

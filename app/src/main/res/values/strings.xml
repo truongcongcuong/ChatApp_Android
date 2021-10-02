@@ -67,5 +67,10 @@
     <string name="change_password">Change password</string>
     <string name="change_password_detail_8_char">Password must be 8 characters or more.</string>
     <string name="change_password_detail_not_same_old_password">Password must not be the same as your old password.</string>
+    <string name="friend_request_title">Friend request</string>
+    <string name="friend_request_suggestions">Suggestions</string>
+    <string name="friend_list">Friends List</string>
+    <string name="accept_button">Accept</string>
+
 
 </resources>

@@ -59,6 +59,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.vertx.core.json.Json;
+
 public class ViewInformationActivity extends AppCompatActivity {
     ImageButton ibt_update_infor_back;
     ImageView img_update_infor_avt;
@@ -212,6 +214,7 @@ public class ViewInformationActivity extends AppCompatActivity {
                     Glide.with(this).load(selectedImage)
                             .centerCrop().circleCrop().into(img_update_infor_avt);
                     files.add(new File(PathUtil.getPath(this,getImageUri(this,selectedImage))));
+                    userDetailDTO.setImageUrl(getImageUri(this,selectedImage).toString());
                 }
                 break;
             case 1:
@@ -221,6 +224,7 @@ public class ViewInformationActivity extends AppCompatActivity {
                             .centerCrop().circleCrop().into(img_update_infor_avt);
                     Log.e("gallery","done");
                     files.add(new File(PathUtil.getPath(this,selectedImage)));
+                    userDetailDTO.setImageUrl(selectedImage.toString());
                 }
                 break;
         }
@@ -275,4 +279,5 @@ public class ViewInformationActivity extends AppCompatActivity {
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
         return Uri.parse(path);
     }
+
 }

@@ -162,6 +162,9 @@ public class UpdateInformationActivity extends AppCompatActivity {
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
+                    SharedPreferences sharedPreferencesUser = getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor sharedPreferencesUserEditor = sharedPreferencesUser.edit();
+                    sharedPreferencesUserEditor.putString("user-info",Json.encode(dto)).apply();
                 },
                 error -> {
                     NetworkResponse response = error.networkResponse;
@@ -211,6 +214,8 @@ public class UpdateInformationActivity extends AppCompatActivity {
                 .create();
         dialog.show();
     }
+
+
 
 
 }

@@ -41,6 +41,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
+        getSupportActionBar().hide();
 
         txt_change_password_error = findViewById(R.id.txt_change_password_error);
         edt_change_password_re_enter_password = findViewById(R.id.edt_change_password_re_enter_password);

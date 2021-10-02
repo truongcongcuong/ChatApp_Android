@@ -160,8 +160,8 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .build());
             btn_change_image_of_room.setPadding(3, 0, 3, 3);
             Glide.with(RoomDetailActivity.this)
-                    .load(R.drawable.ic_camera)
-                    .centerCrop().circleCrop()
+                    .load(R.drawable.ic_baseline_camera_24)
+                    .centerCrop()
                     .placeholder(R.drawable.image_placeholer)
                     .into(btn_change_image_of_room);
 

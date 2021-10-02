@@ -33,8 +33,9 @@
 
     <ImageView
         android:id="@+id/image_reaction_dialog_type"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:background="@drawable/background_circle_image"
+        android:padding="1dp" />
 
 </LinearLayout>

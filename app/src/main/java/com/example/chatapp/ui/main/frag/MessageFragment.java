@@ -144,6 +144,7 @@ public class MessageFragment extends Fragment {
         sự kiện kéo để làm mới
          */
         refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout.setColorSchemeColors(Color.RED);
         refreshLayout.setOnRefreshListener(() -> {
             page = 0;
             refreshListInbox();
@@ -282,7 +283,7 @@ public class MessageFragment extends Fragment {
 
         int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
         View searchPlate = searchView.findViewById(searchPlateId);
-        searchPlate.setBackgroundResource(R.drawable.search_view_background);
+        searchPlate.setBackgroundResource(R.drawable.search_view_background_light);
         ViewGroup.LayoutParams params = searchPlate.getLayoutParams();
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         searchPlate.setLayoutParams(params);
@@ -447,8 +448,8 @@ public class MessageFragment extends Fragment {
         requestQueue.add(request);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        return super.onOptionsItemSelected(item);
+//    }
 }

@@ -24,6 +24,7 @@ import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -64,6 +65,11 @@ public class GroupFragment extends Fragment {
     private int page = 0;
     private int size = 20;
     private final String type = RoomType.GROUP.toString();
+
+    /*
+    kéo để làm mới
+     */
+    private SwipeRefreshLayout refreshLayout;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -108,11 +114,53 @@ public class GroupFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_group, container, false);
+
+        /*
+        sự kiện kéo để làm mới
+         */
+        refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout.setColorSchemeColors(Color.RED);
+        refreshLayout.setOnRefreshListener(() -> {
+            page = 0;
+            refreshListInboxGroup();
+        });
+
         rcv_list_group = view.findViewById(R.id.rcv_list_group);
         rcv_list_group.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), new ArrayList<>(0));
+        this.rcv_list_group.setAdapter(adapter);
         updateListInboxGroup();
         return view;
+    }
+
+    private void refreshListInboxGroup() {
+        list = new ArrayList<>();
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size + "&type=" + type,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+
+                        JSONObject object = new JSONObject(res);
+                        JSONArray array = (JSONArray) object.get("content");
+                        Type listType = new TypeToken<List<InboxDto>>() {
+                        }.getType();
+                        list = gson.fromJson(array.toString(), listType);
+                        adapter.setList(list);
+                        refreshLayout.setRefreshing(false);
+                    } catch (JSONException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.i("group list error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+        requestQueue.add(request);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -130,7 +178,7 @@ public class GroupFragment extends Fragment {
                         list = gson.fromJson(array.toString(), listType);
                         adapter.setList(list);
 //                        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), list);
-                        this.rcv_list_group.setAdapter(adapter);
+//                        this.rcv_list_group.setAdapter(adapter);
 
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -164,7 +212,7 @@ public class GroupFragment extends Fragment {
 
         int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
         View searchPlate = searchView.findViewById(searchPlateId);
-        searchPlate.setBackgroundResource(R.drawable.search_view_background);
+        searchPlate.setBackgroundResource(R.drawable.search_view_background_light);
         ViewGroup.LayoutParams params = searchPlate.getLayoutParams();
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         searchPlate.setLayoutParams(params);

@@ -331,7 +331,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
 
     private void initImageCreate() {
         Glide.with(this)
-                .load(R.drawable.ic_camera_64)
+                .load(R.drawable.ic_baseline_camera_64)
                 .placeholder(R.drawable.image_placeholer)
                 .into(image_create_group);
         image_create_group.setBackground(null);

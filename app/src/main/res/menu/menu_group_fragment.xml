@@ -10,7 +10,7 @@
 
     <item
         android:id="@+id/create_group_fragment"
-        android:icon="@drawable/ic_create_group"
+        android:icon="@drawable/ic_baseline_group_create_24"
         app:showAsAction="always">
 
     </item>

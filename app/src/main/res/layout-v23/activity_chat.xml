@@ -68,7 +68,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="10dp"
                 android:background="@null"
-                app:srcCompat="@drawable/ic_more" />
+                app:srcCompat="@drawable/ic_baseline_more_vert_24" />
 
         </RelativeLayout>
     </Toolbar>
@@ -88,13 +88,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="5dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:orientation="horizontal">
 
         <EditText
             android:id="@+id/edt_chat_message_send"
             android:layout_width="wrap_content"
-            android:layout_height="45dp"
+            android:layout_height="40dp"
             android:layout_alignParentStart="true"
             android:layout_gravity="start"
             android:layout_marginStart="5dp"
@@ -116,14 +117,14 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:layout_toStartOf="@+id/ibt_chat_send_message"
-            android:background="@drawable/ic_more"
+            android:background="@drawable/ic_baseline_more_vert_24"
             android:layout_centerVertical="true"
             android:foregroundGravity="center_vertical|center_horizontal" />
 
         <ImageButton
             android:id="@+id/ibt_chat_send_message"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentEnd="true"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"

@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -62,9 +63,8 @@ public class ContactFragment extends Fragment {
     private Gson gson;
     private List<FriendDTO> list;
     private ConstraintLayout ctl_contact_phone_book_friend, ctl_contact_friend_request;
-    Button btn_contact_refresh;
+    private Button btn_contact_refresh;
     private List<FriendDTO> searchFriend;
-
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -113,17 +113,17 @@ public class ContactFragment extends Fragment {
         ctl_contact_phone_book_friend = view.findViewById(R.id.ctl_contact_phone_book_friend);
         ctl_contact_friend_request = view.findViewById(R.id.ctl_contact_friend_request);
         btn_contact_refresh = view.findViewById(R.id.btn_contact_refresh);
-        ctl_contact_phone_book_friend.setOnClickListener(v->{
+        ctl_contact_phone_book_friend.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), TestNewFeatureActivity.class);
             startActivity(intent);
         });
-        ctl_contact_friend_request.setOnClickListener(v->{
+        ctl_contact_friend_request.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), FriendRequestActivity.class);
             startActivity(intent);
         });
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
 
-        btn_contact_refresh.setOnClickListener(v->updateListFriends());
+        btn_contact_refresh.setOnClickListener(v -> updateListFriends());
 
         updateListFriends();
         return view;

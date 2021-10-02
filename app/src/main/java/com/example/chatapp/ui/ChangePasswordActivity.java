@@ -1,8 +1,5 @@
 package com.example.chatapp.ui;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -23,7 +23,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
-import com.google.gson.JsonObject;
 
 import org.json.JSONObject;
 
@@ -41,7 +40,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
-        getSupportActionBar().hide();
 
         txt_change_password_error = findViewById(R.id.txt_change_password_error);
         edt_change_password_re_enter_password = findViewById(R.id.edt_change_password_re_enter_password);

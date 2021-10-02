@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.android.volley.NetworkResponse;
@@ -83,7 +82,6 @@ public class InforFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_infor, container, false);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
 
         txt_info_error = view.findViewById(R.id.txt_info_error);
         txt_infor_update = view.findViewById(R.id.txt_infor_update);

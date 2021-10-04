@@ -146,7 +146,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         gson = new Gson();
 
         Bundle bundle = getIntent().getExtras();
-        inboxDto = (InboxDto) bundle.getSerializable("dto");
+        if (bundle != null)
+            inboxDto = (InboxDto) bundle.getSerializable("dto");
 
         Log.e("user ", inboxDto.toString());
 
@@ -310,7 +311,10 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             displayName = inboxDto.getRoom().getName();
             url = inboxDto.getRoom().getImageUrl();
-            detail = String.format("%d%s", inboxDto.getRoom().getNumOfMembers(), " thành viên");
+            if (inboxDto.getRoom().getMembers() != null)
+                detail = String.format("%d%s", inboxDto.getRoom().getMembers().size(), " thành viên");
+            else
+                detail = String.format("%d%s", 0, " thành viên");
         } else {
             displayName = inboxDto.getRoom().getTo().getDisplayName();
             url = inboxDto.getRoom().getTo().getImageUrl();
@@ -573,9 +577,12 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 
     @Override
     public void onBackPressed() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("dto", inboxDto);
+        setResult(Activity.RESULT_OK, resultIntent);
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
-//        finish();
+        super.finish();
     }
 
     /*
@@ -584,6 +591,9 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     @SuppressLint("CheckResult")
     @Override
     public void finish() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("dto", inboxDto);
+        setResult(Activity.RESULT_OK, resultIntent);
         super.finish();
         stompClient
                 .send(new StompMessage(StompCommand.UNSUBSCRIBE,

@@ -59,6 +59,8 @@ import lombok.SneakyThrows;
 public class RoomDetailActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE = 1;
+    private static final int ADD_MEMBER = 2;
+    private static final int VIEW_MEMBER = 3;
     private List<MenuItem> menuItems;
     private MenuButtonAdapter menuAdapter;
     private ListView lv_menu_items;
@@ -101,8 +103,8 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
+        toolbar.setTitle("Tùy chọn");
         setSupportActionBar(toolbar);
-        setTitle("Tùy chọn");
 
         /*
         hiện nút mũi tên quay lại trên toolbar
@@ -137,6 +139,11 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .name("Xem nhóm chung")
                     .build());
             menuItems.add(MenuItem.builder()
+                    .key("createRoomWithThisUser")
+                    .imageResource(R.drawable.ic_reaction_love)
+                    .name("Tạo nhóm với người này")
+                    .build());
+            menuItems.add(MenuItem.builder()
                     .key("block")
                     .imageResource(R.drawable.ic_reaction_love)
                     .name("Chặn tin nhắn")
@@ -157,12 +164,12 @@ public class RoomDetailActivity extends AppCompatActivity {
             menuItems.add(MenuItem.builder()
                     .key("viewMembers")
                     .imageResource(R.drawable.ic_reaction_haha)
-                    .name("Xem thành viên")
+                    .name("Xem thành viên -- đã xong")
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("addMember")
                     .imageResource(R.drawable.ic_reaction_love)
-                    .name("Thêm thành viên")
+                    .name("Thêm thành viên --  đã xong")
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("leaveRoom")
@@ -196,17 +203,22 @@ public class RoomDetailActivity extends AppCompatActivity {
             btn_change_name_of_room.setOnClickListener(v -> showRenameDialog());
         }
 
-        for (int i = 0; i < 3; i++) {
-            menuItems.add(MenuItem.builder()
-                    .key("delete")
-                    .imageResource(R.drawable.ic_reaction_sad)
-                    .name("Xóa cuộc trò chuyện")
-                    .build());
+        menuItems.add(MenuItem.builder()
+                .key("delete")
+                .imageResource(R.drawable.ic_reaction_sad)
+                .name("Xóa cuộc trò chuyện")
+                .build());
 
+        menuItems.add(MenuItem.builder()
+                .key("report")
+                .imageResource(R.drawable.ic_reaction_love)
+                .name("Báo cáo")
+                .build());
+        for (int i = 0; i < 10; i++) {
             menuItems.add(MenuItem.builder()
-                    .key("report")
-                    .imageResource(R.drawable.ic_reaction_love)
-                    .name("Báo cáo")
+                    .key("----------------")
+                    .imageResource(R.drawable.ic_reaction_sad)
+                    .name("----------------")
                     .build());
         }
 
@@ -215,9 +227,15 @@ public class RoomDetailActivity extends AppCompatActivity {
         lv_menu_items.setOnItemClickListener((parent, view, position, itemId) -> {
             MenuItem item = menuItems.get(position);
             if (item.getKey().equals("viewMembers")) {
-                Intent intent = new Intent(RoomDetailActivity.this, MemberActivity.class);
+                Intent intent = new Intent(this, MemberActivity.class);
                 intent.putExtra("dto", inboxDto);
-                startActivity(intent);
+                startActivityForResult(intent, VIEW_MEMBER);
+                overridePendingTransition(R.anim.enter, R.anim.exit);
+
+            } else if (item.getKey().equals("addMember")) {
+                Intent intent = new Intent(this, AddMemberActivity.class);
+                intent.putExtra("dto", inboxDto);
+                startActivityForResult(intent, ADD_MEMBER);
                 overridePendingTransition(R.anim.enter, R.anim.exit);
             }
         });
@@ -347,6 +365,15 @@ public class RoomDetailActivity extends AppCompatActivity {
             uploadMultiFiles(files);
         } else {
             // chưa có hình ảnh nào được chọn
+        }
+        if ((requestCode == ADD_MEMBER || requestCode == VIEW_MEMBER)
+                && (resultCode == Activity.RESULT_OK && data != null)) {
+            Bundle bundle = data.getExtras();
+            if (bundle != null) {
+                InboxDto inboxDto = (InboxDto) bundle.getSerializable("dto");
+                this.inboxDto = inboxDto;
+                Log.d("inboxdto", inboxDto.toString());
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

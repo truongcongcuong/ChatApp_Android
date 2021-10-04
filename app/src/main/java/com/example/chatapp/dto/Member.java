@@ -9,13 +9,13 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of = "user")
-public class MemberDto implements Serializable {
-    private UserProfileDto user;
-    private UserProfileDto addByUser;
+@Builder
+@EqualsAndHashCode(of = "userId")
+public class Member implements Serializable {
+    private String userId;
+    private String addByUserId;
     private String addTime;
     private boolean isAdmin;
 }

@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_marginTop="0dp"
-        android:background="@color/bg_app"
+        android:background="@color/purple_200"
         app:contentInsetEnd="0dp"
         app:contentInsetEndWithActions="0dp"
         app:contentInsetLeft="0dp"

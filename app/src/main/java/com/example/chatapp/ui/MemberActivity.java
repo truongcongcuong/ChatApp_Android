@@ -1,6 +1,8 @@
 package com.example.chatapp.ui;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -9,8 +11,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
-import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -34,17 +36,21 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MemberActivity extends AppCompatActivity {
 
+    private static final int ADD_MEMBER = 2;
     private ListView lv_members;
     private String token;
     private Gson gson;
     private InboxDto inboxDto;
     private Toolbar toolbar;
+    private MemberAdapter adapter;
+    private List<MemberDto> members;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -66,6 +72,7 @@ public class MemberActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.tlb_member);
         lv_members = findViewById(R.id.lv_member);
+        members = new ArrayList<>();
 
         gson = new Gson();
         SharedPreferences sharedPreferencesToken = MemberActivity.this.getSharedPreferences("token", Context.MODE_PRIVATE);
@@ -83,37 +90,42 @@ public class MemberActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Bundle bundle = getIntent().getExtras();
-        inboxDto = (InboxDto) bundle.getSerializable("dto");
+        if (bundle != null)
+            inboxDto = (InboxDto) bundle.getSerializable("dto");
 
         if (inboxDto != null) {
-            StringRequest request = new StringRequest(Request.Method.GET, Constant.API_ROOM + "members/" + inboxDto.getRoom().getId(),
-                    response -> {
-                        try {
-                            String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                            Type listType = new TypeToken<List<MemberDto>>() {
-                            }.getType();
-                            List<MemberDto> memberDtos = gson.fromJson(res, listType);
-
-                            MemberAdapter adapter = new MemberAdapter(MemberActivity.this, R.layout.line_item_member, memberDtos);
-                            lv_members.setAdapter(adapter);
-                            lv_members.setOnItemClickListener((parent, view, pos, itemId) -> {
-
-                            });
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                    },
-                    error -> Log.i("get members error", error.toString())) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    HashMap<String, String> map = new HashMap<>();
-                    map.put("Authorization", "Bearer " + token);
-                    return map;
-                }
-            };
-            RequestQueue requestQueue = Volley.newRequestQueue(MemberActivity.this);
-            requestQueue.add(request);
+            loadMemberList();
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void loadMemberList() {
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_ROOM + "members/" + inboxDto.getRoom().getId(),
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                        Type listType = new TypeToken<List<MemberDto>>() {
+                        }.getType();
+                        members = gson.fromJson(res, listType);
+                        adapter = new MemberAdapter(MemberActivity.this, R.layout.line_item_member, members, inboxDto);
+                        lv_members.setAdapter(adapter);
+                        lv_members.setOnItemClickListener((parent, view, pos, itemId) -> {
+
+                        });
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.i("get members error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(MemberActivity.this);
+        requestQueue.add(request);
     }
 
     /*
@@ -128,9 +140,20 @@ public class MemberActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("dto", inboxDto);
+        setResult(Activity.RESULT_OK, resultIntent);
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
-        finish();
+        super.finish();
+    }
+
+    @Override
+    public void finish() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("dto", inboxDto);
+        setResult(Activity.RESULT_OK, resultIntent);
+        super.finish();
     }
 
     /*
@@ -138,15 +161,31 @@ public class MemberActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_chat_member, menu);
+        getMenuInflater().inflate(R.menu.menu_member_activity, menu);
         MenuItem menuItem = menu.findItem(R.id.member_activity_add_member);
 
         menuItem.setOnMenuItemClickListener(item -> {
-            Toast.makeText(this, "add members", Toast.LENGTH_SHORT).show();
-//            overridePendingTransition(R.anim.enter, R.anim.exit);
+            Intent intent = new Intent(this, AddMemberActivity.class);
+            intent.putExtra("dto", inboxDto);
+            startActivityForResult(intent, ADD_MEMBER);
+            overridePendingTransition(R.anim.enter, R.anim.exit);
             return true;
         });
         return super.onCreateOptionsMenu(menu);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == ADD_MEMBER && resultCode == Activity.RESULT_OK && data != null) {
+            Bundle bundle = data.getExtras();
+            if (bundle != null) {
+                InboxDto inboxDto = (InboxDto) bundle.getSerializable("dto");
+                this.inboxDto = inboxDto;
+                loadMemberList();
+                Log.d("inboxdto", inboxDto.toString());
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

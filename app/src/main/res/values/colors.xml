@@ -15,6 +15,7 @@
     <color name="red">#EC3636</color>
     <color name="error">#d9534f</color>
     <color name="susscess">#5cb85c</color>
+    <color name="green">#259C25</color>
     <color name="color_send">#218aff</color>
     <color name="orange">#F4734A</color>
 </resources>

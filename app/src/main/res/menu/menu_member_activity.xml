@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/member_activity_add_member"
-        android:icon="@drawable/friend_request_custom"
+        android:icon="@drawable/ic_baseline_person_add_alt_24"
         app:showAsAction="ifRoom">
 
     </item>

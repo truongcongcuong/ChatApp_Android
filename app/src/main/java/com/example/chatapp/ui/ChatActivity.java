@@ -7,24 +7,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -53,6 +56,7 @@ import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.utils.FileUtil;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
+import com.example.chatapp.utils.TimeAgo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.r0adkll.slidr.Slidr;
@@ -88,12 +92,11 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 
     private ImageView img_chat_user_avt;
     private TextView txt_chat_user_name;
+    private TextView txt_chat_detail;
     private RecyclerView rcv_chat_list;
     private EditText edt_chat_message_send;
     private ImageButton ibt_chat_send_message;
-    private ImageButton ibt_chat_back;
     private ImageButton ibt_chat_send_media;
-    private ImageButton btn_room_detail;
     private Toolbar tlb_chat;
     private InboxDto inboxDto;
     private MessageAdapter adapter;
@@ -125,21 +128,20 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
                 .edge(true)
-                .edgeSize(0.5f)
+                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
 
-        ibt_chat_back = findViewById(R.id.ibt_chat_back);
         txt_chat_user_name = findViewById(R.id.txt_chat_user_name);
+        txt_chat_detail = findViewById(R.id.txt_chat_detail);
         rcv_chat_list = findViewById(R.id.rcv_chat_list);
         edt_chat_message_send = findViewById(R.id.edt_chat_message_send);
         ibt_chat_send_message = findViewById(R.id.ibt_chat_send_message);
-        tlb_chat = findViewById(R.id.tlb_chat);
+        tlb_chat = findViewById(R.id.tlb_chat_activity);
         img_chat_user_avt = findViewById(R.id.img_chat_user_avt);
         ibt_chat_send_media = findViewById(R.id.ibt_chat_send_media);
         btnScrollToBottom = findViewById(R.id.btn_scroll_to_bottom);
-        btn_room_detail = findViewById(R.id.btn_room_detail);
 
         gson = new Gson();
 
@@ -150,6 +152,16 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 
         GetNewAccessToken getNewAccessToken = new GetNewAccessToken(this);
         getNewAccessToken.sendGetNewTokenRequest();
+
+        tlb_chat.setTitleTextColor(Color.WHITE);
+        tlb_chat.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(tlb_chat);
+
+        /*
+        hiện nút mũi tên quay lại trên toolbar
+         */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         showImageAndDisplayName(inboxDto);
 
@@ -197,8 +209,6 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 visibleOrGoneButtonScrollToBottom();
             }
         });
-
-        ibt_chat_back.setOnClickListener(v -> onBackPressed());
 
         btnScrollToBottom.setOnClickListener(v -> {
             rcv_chat_list.getLayoutManager().smoothScrollToPosition(rcv_chat_list, new RecyclerView.State(), rcv_chat_list.getAdapter().getItemCount());
@@ -259,24 +269,36 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                     Log.i("chat activ react error", throwable.getMessage());
                 });
 
-        ibt_chat_send_message.setOnClickListener(v -> {
-            String message = edt_chat_message_send.getText().toString();
-            if (!TextUtils.isEmpty(message)) {
-                checkInboxBeforeSendTextMessage(message);
-                edt_chat_message_send.setText("");
+        /*
+        sự kiện focus trên edittext
+         */
+        edt_chat_message_send.setOnFocusChangeListener((v, hasFocus) -> {
+            /*
+            không focus thì ẩn bàn phím
+             */
+            if (!hasFocus) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(edt_chat_message_send.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
             }
         });
 
-        btn_room_detail.setOnClickListener(v -> {
-            Log.d("", inboxDto.toString());
-            Intent intent = new Intent(ChatActivity.this, RoomDetailActivity.class);
-            intent.putExtra("dto", inboxDto);
-            startActivityForResult(intent, VIEW_ROOM_DETAIL);
-            overridePendingTransition(R.anim.enter, R.anim.exit);
+        ibt_chat_send_message.setOnClickListener(v -> {
+            String message = edt_chat_message_send.getText().toString();
+            if (!message.trim().isEmpty()) {
+                checkInboxBeforeSendTextMessage(message);
+                edt_chat_message_send.getText().clear();
+                edt_chat_message_send.postDelayed(() -> edt_chat_message_send.requestFocus(), 200);
+            } else {
+                edt_chat_message_send.requestFocus();
+                /*
+                mở bàn phím
+                 */
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(edt_chat_message_send, InputMethodManager.SHOW_IMPLICIT);
+            }
         });
 
         adapter = new MessageAdapter(ChatActivity.this, new ArrayList<>());
-//        rcv_chat_list.setHasFixedSize(true);
         rcv_chat_list.setAdapter(adapter);
         updateList();
     }
@@ -284,15 +306,18 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private void showImageAndDisplayName(InboxDto inboxDto) {
         String displayName = "";
         String url = "";
+        String detail = "";
         if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             displayName = inboxDto.getRoom().getName();
             url = inboxDto.getRoom().getImageUrl();
+            detail = String.format("%d%s", inboxDto.getRoom().getNumOfMembers(), " thành viên");
         } else {
             displayName = inboxDto.getRoom().getTo().getDisplayName();
             url = inboxDto.getRoom().getTo().getImageUrl();
+            detail = String.format("%s%s", "Truy cập ", TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
         }
         txt_chat_user_name.setText(displayName);
-
+        txt_chat_detail.setText(detail);
         Glide.with(this).load(url).placeholder(R.drawable.image_placeholer)
                 .centerCrop().circleCrop().into(img_chat_user_avt);
     }
@@ -312,6 +337,15 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         } else {
             sendMessage(message, MessageType.TEXT);
         }
+    }
+
+    /*
+    sự kiện nhấn icon back trên toolbar
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private void sendMessage(String message, MessageType type) {
@@ -602,5 +636,24 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         public MyLinerLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
             super(context, attrs, defStyleAttr, defStyleRes);
         }
+    }
+
+    /*
+    tạo menu trên thanh toolbar
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chat_activity, menu);
+        MenuItem menuItem = menu.findItem(R.id.room_detail_chat_activity);
+
+        menuItem.setOnMenuItemClickListener(item -> {
+            Log.d("", inboxDto.toString());
+            Intent intent = new Intent(ChatActivity.this, RoomDetailActivity.class);
+            intent.putExtra("dto", inboxDto);
+            startActivityForResult(intent, VIEW_ROOM_DETAIL);
+            overridePendingTransition(R.anim.enter, R.anim.exit);
+            return true;
+        });
+        return super.onCreateOptionsMenu(menu);
     }
 }

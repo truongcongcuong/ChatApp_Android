@@ -20,5 +20,6 @@ public class RoomDTO implements Serializable {
     private UserProfileDto to;
     private String createAt;
     private Set<MemberDto> members;
+    private int numOfMembers;
     private UserProfileDto createByUser;
 }

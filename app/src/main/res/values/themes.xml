@@ -15,7 +15,7 @@
 
         <!-- Customize your theme here. -->
         <!-- chiều cao thanh toolbar-->
-        <item name="actionBarSize">50dp</item>
+        <item name="actionBarSize">52dp</item>
 
         <!-- set màu cho mũi tên quay lại trên thanh toolbar-->
         <item name="colorControlNormal">@color/white</item>

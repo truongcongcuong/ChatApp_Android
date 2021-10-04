@@ -364,12 +364,12 @@ public class MessageFragment extends Fragment {
                 if (!newText.isEmpty()) {
                     search(newText);
                 } else {
-//                    try {
-//                        searchUserResult.clear();
-//                        searchUserAdapter.setList(searchUserResult);
-//                    } catch (Exception e) {
-//                        searchUserAdapter = new SearchUserAdapter(getActivity().getApplicationContext(), null);
-//                    }
+                    try {
+                        searchUserResult.clear();
+                        searchUserAdapter.setList(searchUserResult);
+                    } catch (Exception e) {
+                        searchUserAdapter = new SearchUserAdapter(getActivity().getApplicationContext(), null);
+                    }
                 }
 
                 return false;

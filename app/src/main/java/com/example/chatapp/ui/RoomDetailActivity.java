@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.NestedScrollView;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -60,8 +62,6 @@ public class RoomDetailActivity extends AppCompatActivity {
     private List<MenuItem> menuItems;
     private MenuButtonAdapter menuAdapter;
     private ListView lv_menu_items;
-    private ImageButton btnBack;
-    private TextView title;
     private InboxDto inboxDto;
     private ImageButton imageOfRoom;
     private ImageButton btn_change_image_of_room;
@@ -70,6 +70,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     private NestedScrollView scrollView;
     private Gson gson;
     private String token;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,14 +91,24 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         Slidr.attach(this, config);
 
+        toolbar = findViewById(R.id.tlb_chat_room_detail);
         lv_menu_items = findViewById(R.id.lv_room_detail_menu);
-        btnBack = findViewById(R.id.ibt_room_detail_back);
-        title = findViewById(R.id.txt_room_detail_title);
         imageOfRoom = findViewById(R.id.image_of_room_detail);
         nameOfRoom = findViewById(R.id.name_of_room_detail);
         scrollView = findViewById(R.id.myscroll);
         btn_change_image_of_room = findViewById(R.id.ibt_change_image_of_room);
         btn_change_name_of_room = findViewById(R.id.ibt_change_name_of_room);
+
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+        setTitle("Tùy chọn");
+
+        /*
+        hiện nút mũi tên quay lại trên toolbar
+         */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null)
@@ -199,9 +210,6 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .build());
         }
 
-        title.setText("Tùy chọn");
-        btnBack.setOnClickListener(v -> onBackPressed());
-
         menuAdapter = new MenuButtonAdapter(RoomDetailActivity.this, R.layout.line_item_menu_button, menuItems);
         lv_menu_items.setAdapter(menuAdapter);
         lv_menu_items.setOnItemClickListener((parent, view, position, itemId) -> {
@@ -215,6 +223,15 @@ public class RoomDetailActivity extends AppCompatActivity {
         });
         setListViewHeightBasedOnChildren(lv_menu_items);
         scrollView.post(() -> scrollView.scrollTo(0, 0));
+    }
+
+    /*
+    sự kiện nhấn icon back trên toolbar
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private void showRenameDialog() {
@@ -337,7 +354,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     private void uploadMultiFiles(List<File> files) {
         RoomDTO room = inboxDto.getRoom();
         MultiPartFileRequest<String> restApiMultiPartRequest =
-                new MultiPartFileRequest<String>(Request.Method.POST,Constant.API_ROOM + "changeImage/" + inboxDto.getRoom().getId(),
+                new MultiPartFileRequest<String>(Request.Method.POST, Constant.API_ROOM + "changeImage/" + inboxDto.getRoom().getId(),
                         new HashMap<>(), // danh sách request param
                         files,
                         response -> {

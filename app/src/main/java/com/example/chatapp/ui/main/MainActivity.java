@@ -25,7 +25,7 @@ import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.main.frag.ContactFragment;
 import com.example.chatapp.ui.main.frag.GroupFragment;
-import com.example.chatapp.ui.main.frag.InforFragment;
+import com.example.chatapp.ui.main.frag.InfoFragment;
 import com.example.chatapp.ui.main.frag.MessageFragment;
 import com.example.chatapp.ui.main.frag.RecentFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ContactFragment contactFragment;
     private GroupFragment groupFragment;
     private RecentFragment recentFragment;
-    private InforFragment inforFragment;
+    private InfoFragment infoFragment;
     private Gson gson;
     private UserSummaryDTO user;
 
@@ -216,9 +216,9 @@ public class MainActivity extends AppCompatActivity {
                     recentFragment = new RecentFragment();
                 return recentFragment;
             } else {
-                if (inforFragment == null)
-                    inforFragment = new InforFragment();
-                return inforFragment;
+                if (infoFragment == null)
+                    infoFragment = new InfoFragment();
+                return infoFragment;
             }
         }
 

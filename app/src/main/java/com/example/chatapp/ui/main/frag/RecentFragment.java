@@ -2,9 +2,12 @@ package com.example.chatapp.ui.main.frag;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.chatapp.R;
@@ -56,6 +59,12 @@ public class RecentFragment extends Fragment {
     public void onResume() {
         super.onResume();
         setHasOptionsMenu(isVisible());
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_recent_fragment, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
 }

@@ -22,7 +22,7 @@
         app:contentInsetStartWithNavigation="0dp" />
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/myscroll"
+        android:id="@+id/nested_scroll_room_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -52,8 +52,8 @@
 
                 <ImageButton
                     android:id="@+id/ibt_change_image_of_room"
-                    android:layout_width="25dp"
-                    android:layout_height="20dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:layout_below="@id/image_of_room_detail"
                     android:layout_alignEnd="@id/image_of_room_detail"
                     android:layout_marginTop="-20dp"
@@ -61,6 +61,7 @@
                     android:background="@null" />
 
                 <LinearLayout
+                    android:id="@+id/room_detail_layout_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/ibt_change_image_of_room"
@@ -86,6 +87,19 @@
                         android:layout_marginStart="10dp"
                         android:background="@null" />
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/room_detail_create_at"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/room_detail_layout_name"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:maxLines="1">
+
+                </TextView>
 
             </RelativeLayout>
 

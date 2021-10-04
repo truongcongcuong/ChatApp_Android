@@ -23,9 +23,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.MenuItemCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -66,6 +68,12 @@ public class ContactFragment extends Fragment {
     private ConstraintLayout ctl_contact_phone_book_friend;
     private Button btn_contact_refresh;
     private List<FriendDTO> searchFriend;
+    private NestedScrollView scrollView;
+
+    /*
+    kéo để làm mới
+     */
+    private SwipeRefreshLayout refreshLayout;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -128,7 +136,18 @@ public class ContactFragment extends Fragment {
 
         btn_contact_refresh.setOnClickListener(v -> updateListFriends());
 
+        /*
+        sự kiện kéo để làm mới
+         */
+        refreshLayout = view.findViewById(R.id.swiperefresh);
+        refreshLayout.setColorSchemeColors(Color.RED);
+        refreshLayout.setOnRefreshListener(() -> {
+            updateListFriends();
+        });
+
+        scrollView = view.findViewById(R.id.nested_scroll_contact_fragment);
         updateListFriends();
+        scrollView.post(() -> scrollView.scrollTo(0, 0));
         return view;
     }
 
@@ -146,8 +165,7 @@ public class ContactFragment extends Fragment {
                         list = gson.fromJson(array.toString(), listType);
 
                         adapter.setList(list);
-//                        this.adapter = new FriendListAdapter(list, getActivity().getApplicationContext());
-//                        this.rcv_contact_list.setAdapter(adapter);
+                        refreshLayout.setRefreshing(false);
                     } catch (UnsupportedEncodingException | JSONException e) {
                         e.printStackTrace();
                     }

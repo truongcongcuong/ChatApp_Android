@@ -196,7 +196,8 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         /*
         set sự kiện khi click icon close trên searchview
          */
-        View closeIcon = txt_create_room_find_user.findViewById(closeIconId);
+        ImageView closeIcon = txt_create_room_find_user.findViewById(closeIconId);
+        closeIcon.setImageResource(R.drawable.ic_baseline_close_circle_24);
         closeIcon.setOnClickListener(v -> {
             editText.setText("");
             adapter.notifyDataSetChanged();

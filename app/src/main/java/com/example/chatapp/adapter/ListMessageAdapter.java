@@ -141,7 +141,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             /*
             set padding và background cho icon số tin nhắn mới
              */
-            holder.txt_lim_unread_message.setPadding(20, 7, 20, 7);
+            holder.txt_lim_unread_message.setPadding(30, 10, 30, 10);
             holder.txt_lim_unread_message.setBackgroundResource(R.drawable.background_unreadmessage);
             if (inboxDto.getCountNewMessage() <= maxMessageSizeDisplay)
                 holder.txt_lim_unread_message.setText(String.format("%d", inboxDto.getCountNewMessage()));

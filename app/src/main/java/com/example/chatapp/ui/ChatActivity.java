@@ -52,6 +52,7 @@ import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.MessageType;
+import com.example.chatapp.enumvalue.OnlineStatus;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.utils.FileUtil;
 import com.example.chatapp.utils.MultiPartFileRequest;
@@ -318,7 +319,10 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         } else {
             displayName = inboxDto.getRoom().getTo().getDisplayName();
             url = inboxDto.getRoom().getTo().getImageUrl();
-            detail = String.format("%s%s", "Truy cập ", TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
+            if (inboxDto.getRoom().getTo().getOnlineStatus().equals(OnlineStatus.ONLINE))
+                detail = "Đang truy cập";
+            else
+                detail = String.format("%s%s", "Truy cập ", TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
         }
         txt_chat_user_name.setText(displayName);
         txt_chat_detail.setText(detail);

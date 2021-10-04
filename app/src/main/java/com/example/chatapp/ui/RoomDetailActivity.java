@@ -69,6 +69,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     private ImageButton btn_change_image_of_room;
     private ImageButton btn_change_name_of_room;
     private TextView nameOfRoom;
+    private TextView room_detail_create_at;
     private NestedScrollView scrollView;
     private Gson gson;
     private String token;
@@ -97,7 +98,8 @@ public class RoomDetailActivity extends AppCompatActivity {
         lv_menu_items = findViewById(R.id.lv_room_detail_menu);
         imageOfRoom = findViewById(R.id.image_of_room_detail);
         nameOfRoom = findViewById(R.id.name_of_room_detail);
-        scrollView = findViewById(R.id.myscroll);
+        room_detail_create_at = findViewById(R.id.room_detail_create_at);
+        scrollView = findViewById(R.id.nested_scroll_room_detail);
         btn_change_image_of_room = findViewById(R.id.ibt_change_image_of_room);
         btn_change_name_of_room = findViewById(R.id.ibt_change_name_of_room);
 
@@ -122,7 +124,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         menuItems = new ArrayList<>();
         menuItems.add(MenuItem.builder()
                 .key("viewRepo")
-                .imageResource(R.drawable.ic_reaction_love)
+                .imageResource(R.drawable.ic_baseline_folder_open_24)
                 .name("Kho lưu trữ")
                 .build());
 
@@ -133,47 +135,49 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .placeholder(R.drawable.image_placeholer)
                     .into(imageOfRoom);
             nameOfRoom.setText(inboxDto.getRoom().getTo().getDisplayName());
+
             menuItems.add(MenuItem.builder()
                     .key("viewCommonGroup")
-                    .imageResource(R.drawable.ic_reaction_love)
+                    .imageResource(R.drawable.ic_baseline_groups_24)
                     .name("Xem nhóm chung")
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("createRoomWithThisUser")
-                    .imageResource(R.drawable.ic_reaction_love)
+                    .imageResource(R.drawable.ic_baseline_group_create_24_black)
                     .name("Tạo nhóm với người này")
                     .build());
             menuItems.add(MenuItem.builder()
-                    .key("block")
-                    .imageResource(R.drawable.ic_reaction_love)
-                    .name("Chặn tin nhắn")
-                    .build());
-            menuItems.add(MenuItem.builder()
                     .key("viewProfile")
-                    .imageResource(R.drawable.ic_reaction_love)
+                    .imageResource(R.drawable.ic_baseline_profile_circle_24)
                     .name("Xem trang cá nhân")
                     .build());
+            menuItems.add(MenuItem.builder()
+                    .key("block")
+                    .imageResource(R.drawable.ic_baseline_block_24)
+                    .name("Chặn tin nhắn")
+                    .build());
         }
-        if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+        else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             Glide.with(RoomDetailActivity.this)
                     .load(inboxDto.getRoom().getImageUrl())
                     .centerCrop().circleCrop()
                     .placeholder(R.drawable.image_placeholer)
                     .into(imageOfRoom);
             nameOfRoom.setText(inboxDto.getRoom().getName());
+            room_detail_create_at.setText("Đã tạo: " + inboxDto.getRoom().getCreateAt());
             menuItems.add(MenuItem.builder()
                     .key("viewMembers")
-                    .imageResource(R.drawable.ic_reaction_haha)
+                    .imageResource(R.drawable.ic_baseline_groups_24)
                     .name("Xem thành viên -- đã xong")
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("addMember")
-                    .imageResource(R.drawable.ic_reaction_love)
+                    .imageResource(R.drawable.ic_baseline_group_create_24_black)
                     .name("Thêm thành viên --  đã xong")
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("leaveRoom")
-                    .imageResource(R.drawable.ic_reaction_love)
+                    .imageResource(R.drawable.ic_baseline_leave_24)
                     .name("Rời khỏi nhóm")
                     .build());
             btn_change_image_of_room.setPadding(3, 0, 3, 3);
@@ -195,7 +199,7 @@ public class RoomDetailActivity extends AppCompatActivity {
 
             btn_change_name_of_room.setPadding(1, 1, 1, 1);
             Glide.with(RoomDetailActivity.this)
-                    .load(R.drawable.ic_edit)
+                    .load(R.drawable.ic_baseline_change_circle_24)
                     .centerCrop().circleCrop()
                     .placeholder(R.drawable.image_placeholer)
                     .into(btn_change_name_of_room);
@@ -205,19 +209,18 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         menuItems.add(MenuItem.builder()
                 .key("delete")
-                .imageResource(R.drawable.ic_reaction_sad)
+                .imageResource(R.drawable.ic_baseline_delete_forever_24)
                 .name("Xóa cuộc trò chuyện")
                 .build());
 
         menuItems.add(MenuItem.builder()
                 .key("report")
-                .imageResource(R.drawable.ic_reaction_love)
+                .imageResource(R.drawable.ic_baseline_report_24)
                 .name("Báo cáo")
                 .build());
         for (int i = 0; i < 10; i++) {
             menuItems.add(MenuItem.builder()
                     .key("----------------")
-                    .imageResource(R.drawable.ic_reaction_sad)
                     .name("----------------")
                     .build());
         }

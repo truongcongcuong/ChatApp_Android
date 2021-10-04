@@ -95,7 +95,7 @@ public class GroupFragment extends Fragment {
         /*
         enable menu trên action bar
          */
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(false);
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -317,4 +317,14 @@ public class GroupFragment extends Fragment {
                 .collect(Collectors.toList());
         adapter.setList(searchGroup);
     }
+
+    /*
+    chỉ khi nào fragment được hiển thị thì mới hiện menu
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        setHasOptionsMenu(isVisible());
+    }
+
 }

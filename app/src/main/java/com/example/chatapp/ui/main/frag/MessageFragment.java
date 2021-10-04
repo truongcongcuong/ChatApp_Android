@@ -96,7 +96,7 @@ public class MessageFragment extends Fragment {
         /*
         enable menu trên action bar
          */
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(false);
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -125,6 +125,10 @@ public class MessageFragment extends Fragment {
         super.onResume();
         if (adapter != null)
             adapter.notifyDataSetChanged();
+        /*
+        chỉ khi nào fragment được hiển thị thì mới hiện menu
+         */
+        setHasOptionsMenu(isVisible());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

@@ -3,13 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/search_user_fragment_message"
-        android:icon="@drawable/ic_baseline_search_24"
-        app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView" />
-
-    <item
-        android:id="@+id/submenu_fragment_message"
+        android:id="@+id/room_detail_chat_activity"
         android:icon="@drawable/ic_baseline_more_vert_24"
         app:showAsAction="ifRoom">
     </item>

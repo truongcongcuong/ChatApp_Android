@@ -84,7 +84,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
                 .edge(true)
-                .edgeSize(0.5f)
+                .edgeSize(1f)
                 .build();
 
         gson = new Gson();

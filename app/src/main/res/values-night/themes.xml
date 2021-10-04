@@ -19,4 +19,10 @@
         <!-- set màu cho mũi tên quay lại trên thanh toolbar-->
         <item name="colorControlNormal">@color/white</item>
     </style>
+
+    <style name="Theme.ChatApp.SlidrActivityTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>

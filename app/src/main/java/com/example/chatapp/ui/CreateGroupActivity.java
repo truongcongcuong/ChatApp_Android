@@ -55,6 +55,9 @@ import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,8 +122,21 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_group);
+
+        // gạt ở cạnh trái để trở về
+        SlidrConfig config = new SlidrConfig.Builder()
+                .position(SlidrPosition.LEFT)
+                .sensitivity(1f)
+                .velocityThreshold(2400)
+                .distanceThreshold(0.25f)
+                .edge(true)
+                .edgeSize(1f)
+                .build();
+
+        Slidr.attach(this, config);
 
         toolbar = findViewById(R.id.tlb_create_group_activity);
         toolbar.setTitle(R.string.unname_group);
@@ -599,5 +615,11 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         };
         request.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
         Volley.newRequestQueue(this).add(request);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
 }

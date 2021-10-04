@@ -2,16 +2,18 @@ package com.example.chatapp.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ImageButton;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -38,13 +40,11 @@ import java.util.Map;
 
 public class MemberActivity extends AppCompatActivity {
 
-    private ImageButton ibt_back;
-    private ImageButton ibt_add_member;
-    private TextView title;
     private ListView lv_members;
     private String token;
     private Gson gson;
     private InboxDto inboxDto;
+    private Toolbar toolbar;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -59,25 +59,28 @@ public class MemberActivity extends AppCompatActivity {
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
                 .edge(true)
-                .edgeSize(0.5f)
+                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
 
-        ibt_back = findViewById(R.id.ibt_member_detail_back);
-        ibt_add_member = findViewById(R.id.ibt_member_add);
-        title = findViewById(R.id.txt_member_detail_title);
+        toolbar = findViewById(R.id.tlb_member);
         lv_members = findViewById(R.id.lv_member);
-
-        ibt_back.setOnClickListener(v -> onBackPressed());
-        ibt_add_member.setOnClickListener(v -> {
-            Toast.makeText(this, "add memeber", Toast.LENGTH_SHORT).show();
-        });
 
         gson = new Gson();
         SharedPreferences sharedPreferencesToken = MemberActivity.this.getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
-        title.setText("Thành viên");
+
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+        setTitle("Thành viên");
+
+        /*
+        hiện nút mũi tên quay lại trên toolbar
+         */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Bundle bundle = getIntent().getExtras();
         inboxDto = (InboxDto) bundle.getSerializable("dto");
@@ -113,11 +116,37 @@ public class MemberActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    sự kiện nhấn icon back trên toolbar
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
         finish();
+    }
+
+    /*
+    tạo menu trên thanh toolbar
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chat_member, menu);
+        MenuItem menuItem = menu.findItem(R.id.member_activity_add_member);
+
+        menuItem.setOnMenuItemClickListener(item -> {
+            Toast.makeText(this, "add members", Toast.LENGTH_SHORT).show();
+//            overridePendingTransition(R.anim.enter, R.anim.exit);
+            return true;
+        });
+        return super.onCreateOptionsMenu(menu);
     }
 
 }

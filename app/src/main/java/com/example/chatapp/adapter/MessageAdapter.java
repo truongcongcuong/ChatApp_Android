@@ -218,10 +218,14 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     if (position == list.size() - 1) {
                         senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                     } else {
-                        if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
-                            senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
-                        } else {
-                            senderViewHolder.timeOfMessage.setHeight(0);
+                        if (messageDto.getSender() != null) {
+                            if (list.get(position + 1).getSender() == null) {
+                                senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+                            } else if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
+                                senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+                            } else {
+                                senderViewHolder.timeOfMessage.setHeight(0);
+                            }
                         }
                     }
                     switch (messageDto.getType()) {
@@ -311,7 +315,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     ReceiverViewHolder receiverViewHolder = (ReceiverViewHolder) holder;
                     /*
                      chỉ hiện ảnh của tin nhắn cuối cùng theo user id
-                     , chỉ hiện thời gian của tin nhắn cuối cùng
+                     chỉ hiện thời gian của tin nhắn cuối cùng
                      */
                     if (messageDto.getSender() != null) {
                         if (position == list.size() - 1) {
@@ -321,18 +325,23 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
                             receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                         } else {
-                            if (list.get(position + 1).getSender() == null) {
-                                Glide.with(context).load(messageDto.getSender().getImageUrl())
-                                        .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
-                                        .into(receiverViewHolder.senderImage);
-                            } else if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
-                                Glide.with(context).load(messageDto.getSender().getImageUrl())
-                                        .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
-                                        .into(receiverViewHolder.senderImage);
-                                receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
-                                receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
-                            } else {
-                                receiverViewHolder.timeOfMessage.setHeight(0);
+                            if (messageDto.getSender() != null) {
+                                if (list.get(position + 1).getSender() == null) {
+                                    Glide.with(context).load(messageDto.getSender().getImageUrl())
+                                            .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                            .into(receiverViewHolder.senderImage);
+                                    receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+
+                                } else if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
+                                    Glide.with(context).load(messageDto.getSender().getImageUrl())
+                                            .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                            .into(receiverViewHolder.senderImage);
+                                    receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
+                                    receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
+
+                                } else {
+                                    receiverViewHolder.timeOfMessage.setHeight(0);
+                                }
                             }
                         }
                     }

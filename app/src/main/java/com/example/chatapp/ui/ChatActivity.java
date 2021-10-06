@@ -247,7 +247,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 .subscribe(x -> {
                     Log.i("chat activ subcri mess", x.getPayload());
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
-                    adapter.deleteOldReadTracking(messageDto.getSender().getId());
+                    if (messageDto.getSender() != null)
+                        adapter.deleteOldReadTracking(messageDto.getSender().getId());
                     updateMessageRealTime(messageDto);
                 }, throwable -> {
                     Log.i("chat activ subcri erro", throwable.getMessage());
@@ -484,7 +485,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
             }
         });
         new Thread(() -> {
-            if (!messageDto.getSender().getId().equals(user.getId())) {
+            if (messageDto.getSender() != null && !messageDto.getSender().getId().equals(user.getId())) {
                 try {
                     Thread.sleep(1500);
                 } catch (InterruptedException e) {

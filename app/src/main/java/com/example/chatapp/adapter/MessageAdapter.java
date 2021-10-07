@@ -3,18 +3,17 @@ package com.example.chatapp.adapter;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -22,6 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReactionReceiver;
@@ -30,6 +31,8 @@ import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.Reaction;
 import com.example.chatapp.enumvalue.MessageType;
+import com.example.chatapp.ui.ViewImageActivity;
+import com.example.chatapp.ui.ViewVideoActivity;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -59,7 +62,8 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     // khi nhận được reaction notification thì cập nhật reaction vào message
     public void updateReactionToMessage(ReactionReceiver receiver) {
-        for (MessageDto m : list) {
+        for (int i = 0; i < list.size(); i++) {
+            MessageDto m = list.get(i);
             if (m.getId().equals(receiver.getMessageId())) {
                 List<Reaction> reactions = m.getReactions();
                 if (reactions == null)
@@ -75,7 +79,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 tìm holder tại vị trí message đó, set recyclable=true để cập nhật lại reaction
                 sau đó set lại recyclable=false để khi cuộn dữ liệu không bị sai
                  */
-                RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(list.indexOf(m));
+                RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
                 if (holder != null) {
                     holder.setIsRecyclable(true);
                     Activity activity = (Activity) context;
@@ -240,33 +244,65 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             );
                             // set chiều rộng tối thiếu cho textview
                             senderViewHolder.senderMessage.setMinEms(2);
+                            // set chiều rộng cho videoview =0 để wrapcontent
+//                            setVideoWidthToZero(senderViewHolder.contentVideo);
                             break;
                         case IMAGE:
                             Glide.with(context).load(messageDto.getContent())
+                                    .apply(RequestOptions.bitmapTransform(new RoundedCorners(48)))
                                     .into(senderViewHolder.contentImage);
+                            LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            imageParams.setMargins(5, 10, 5, 10);
+                            senderViewHolder.contentImage.setLayoutParams(imageParams);
+                            // set textview message content height=0
+                            senderViewHolder.senderMessage.setHeight(0);
+
+                            senderViewHolder.contentImage.setOnClickListener(v -> {
+                                Intent intent = new Intent(context, ViewImageActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable("message", messageDto);
+                                intent.putExtras(bundle);
+                                context.startActivity(intent);
+                            });
+                            // set chiều rộng cho videoview =0 để wrapcontent
+//                            setVideoWidthToZero(senderViewHolder.contentVideo);
+                            senderViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                             break;
                         case VIDEO:
-                            /*
-                            set chiều dài và chiều rộng cho video view
-                             */
-                            ViewGroup.LayoutParams params = senderViewHolder.contentVideo.getLayoutParams();
-                            params.width = 1080;
-                            params.height = 720;
-                            senderViewHolder.contentVideo.setLayoutParams(params);
-                            senderViewHolder.contentVideo.requestLayout();
+                            senderViewHolder.contentVideo.setBackgroundResource(R.drawable.background_video);
+                            senderViewHolder.contentVideo.setOnClickListener(v -> {
+                                Intent intent = new Intent(context, ViewVideoActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable("message", messageDto);
+                                intent.putExtras(bundle);
+                                context.startActivity(intent);
+                            });
+                            senderViewHolder.senderMessage.setHeight(0);
+                            LinearLayout.LayoutParams videoParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            videoParams.setMargins(5, 10, 5, 10);
+                            senderViewHolder.contentVideo.setLayoutParams(videoParams);
+                            senderViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
 
-                            MediaController mediaController = new MediaController(context);
-                            mediaController.setMediaPlayer(senderViewHolder.contentVideo);
-                            mediaController.setAnchorView(senderViewHolder.contentVideo);
+                            /*((Activity) context).runOnUiThread(() -> {
+                                Uri uri = Uri.parse(messageDto.getContent());
+                                senderViewHolder.contentVideo.setVideoURI(uri);
+                                senderViewHolder.senderMessage.setHeight(0);
 
-                            Uri uri = Uri.parse(messageDto.getContent());
-                            senderViewHolder.contentVideo.setVideoURI(uri);
-                            senderViewHolder.contentVideo.setMediaController(mediaController);
-//                            senderViewHolder.contentVideo.requestFocus();
-//                            senderViewHolder.contentVideo.setOnPreparedListener(mp -> {
-//                            mp.setLooping(true);
-//                            senderViewHolder.contentVideo.start();
-//                            });
+                                LinearLayout.LayoutParams videoParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                videoParams.setMargins(5, 30, 5, 20);
+                                senderViewHolder.contentVideo.setLayoutParams(videoParams);
+
+                                senderViewHolder.contentVideo.setOnPreparedListener(mp -> {
+                                    senderViewHolder.contentVideo.seekTo(1);
+                                    mp.setLooping(true);
+                                    mp.setOnVideoSizeChangedListener((mp1, width, height) -> {
+                                        MediaController mediaController = new MediaController(context);
+                                        senderViewHolder.contentVideo.setMediaController(mediaController);
+                                        mediaController.setAnchorView(senderViewHolder.contentVideo);
+                                    });
+                                });
+                                senderViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
+                            });*/
                             break;
                     }
                     // hiện danh sách người đã xem tin nhắn
@@ -281,6 +317,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             if (senderViewHolder.rcv_read_many.getLayoutManager() == null)
                                 senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_many.setAdapter(readbyAdapter);
+                            LinearLayout.LayoutParams rcv_params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                            rcv_params.bottomMargin = 10;
+                            senderViewHolder.rcv_read_many.setLayoutParams(rcv_params);
                         }
                         // chỉ có một người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() == 1) {
@@ -293,7 +332,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     if (messageDto.getReactions() != null) {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-                        layoutManager.setStackFromEnd(true);
+//                        layoutManager.setStackFromEnd(true);
 
                         if (senderViewHolder.send_rcv_reaction.getLayoutManager() == null)
                             senderViewHolder.send_rcv_reaction.setLayoutManager(layoutManager);
@@ -304,7 +343,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                          */
                         if (!messageDto.getReactions().isEmpty()) {
                             LinearLayout.LayoutParams marginLayoutParams = new LinearLayout.LayoutParams(senderViewHolder.send_rcv_reaction.getLayoutParams());
-                            marginLayoutParams.setMargins(25, 0, 20, 0);
+                            marginLayoutParams.setMargins(25, 0, 0, 0);
                             senderViewHolder.send_rcv_reaction.setLayoutParams(marginLayoutParams);
                             senderViewHolder.send_rcv_reaction.requestLayout();
                         }
@@ -322,7 +361,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             Glide.with(context).load(messageDto.getSender().getImageUrl())
                                     .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
                                     .into(receiverViewHolder.senderImage);
-                            receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
+                            receiverViewHolder.senderImage.setBackgroundResource(R.drawable.border_for_circle_image);
                             receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                         } else {
                             if (messageDto.getSender() != null) {
@@ -336,7 +375,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     Glide.with(context).load(messageDto.getSender().getImageUrl())
                                             .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
                                             .into(receiverViewHolder.senderImage);
-                                    receiverViewHolder.senderImage.setBackgroundResource(R.drawable.background_circle_image);
+                                    receiverViewHolder.senderImage.setBackgroundResource(R.drawable.border_for_circle_image);
                                     receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
 
                                 } else {
@@ -355,30 +394,64 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     10
                             );
                             receiverViewHolder.senderMessage.setMinEms(2);
+                            // set chiều rộng cho videoview =0 để wrapcontent
+//                            setVideoWidthToZero(receiverViewHolder.contentVideo);
                             break;
                         case IMAGE:
                             Glide.with(context).load(messageDto.getContent())
+                                    .apply(RequestOptions.bitmapTransform(new RoundedCorners(48)))
                                     .into(receiverViewHolder.contentImage);
+                            LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            imageParams.setMargins(5, 10, 5, 10);
+                            receiverViewHolder.contentImage.setLayoutParams(imageParams);
+                            receiverViewHolder.senderMessage.setHeight(0);
+
+                            receiverViewHolder.contentImage.setOnClickListener(v -> {
+                                Intent intent = new Intent(context, ViewImageActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable("message", messageDto);
+                                intent.putExtras(bundle);
+                                context.startActivity(intent);
+                            });
+                            // set chiều rộng cho videoview =0 để wrapcontent
+//                            setVideoWidthToZero(receiverViewHolder.contentVideo);
+                            receiverViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                             break;
                         case VIDEO:
-                            ViewGroup.LayoutParams params = receiverViewHolder.contentVideo.getLayoutParams();
-                            params.width = 1080;
-                            params.height = 720;
-                            receiverViewHolder.contentVideo.setLayoutParams(params);
-                            receiverViewHolder.contentVideo.requestLayout();
+                            receiverViewHolder.contentVideo.setBackgroundResource(R.drawable.background_video);
+                            receiverViewHolder.contentVideo.setOnClickListener(v -> {
+                                Intent intent = new Intent(context, ViewVideoActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable("message", messageDto);
+                                intent.putExtras(bundle);
+                                context.startActivity(intent);
+                            });
+                            receiverViewHolder.senderMessage.setHeight(0);
+                            LinearLayout.LayoutParams videoParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            videoParams.setMargins(5, 10, 5, 10);
+                            receiverViewHolder.contentVideo.setLayoutParams(videoParams);
+                            receiverViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
 
-                            MediaController mediaController = new MediaController(context);
-                            mediaController.setMediaPlayer(receiverViewHolder.contentVideo);
-                            mediaController.setAnchorView(receiverViewHolder.contentVideo);
+                            /*((Activity) context).runOnUiThread(() -> {
+                                Uri uri = Uri.parse(messageDto.getContent());
+//                                receiverViewHolder.contentVideo.setVideoURI(uri);
+                                receiverViewHolder.senderMessage.setHeight(0);
 
-                            Uri uri = Uri.parse(messageDto.getContent());
-                            receiverViewHolder.contentVideo.setVideoURI(uri);
-                            receiverViewHolder.contentVideo.setMediaController(mediaController);
-//                            senderViewHolder.contentVideo.requestFocus();
-//                            receiverViewHolder.contentVideo.setOnPreparedListener(mp -> {
-//                            mp.setLooping(true);
-//                            senderViewHolder.contentVideo.start();
-//                            });
+                                LinearLayout.LayoutParams videoParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                videoParams.setMargins(5, 30, 5, 20);
+                                receiverViewHolder.contentVideo.setLayoutParams(videoParams);
+
+                                receiverViewHolder.contentVideo.setOnPreparedListener(mp -> {
+                                    receiverViewHolder.contentVideo.seekTo(1);
+                                    mp.setLooping(true);
+                                    mp.setOnVideoSizeChangedListener((mp1, width, height) -> {
+                                        MediaController mediaController = new MediaController(context);
+                                        receiverViewHolder.contentVideo.setMediaController(mediaController);
+                                        mediaController.setAnchorView(receiverViewHolder.contentVideo);
+                                    });
+                                });
+                                receiverViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
+                            });*/
                             break;
                     }
                     // hiện danh sách những người đã xem tin nhắn
@@ -393,6 +466,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             if (receiverViewHolder.rcv_read_many.getLayoutManager() == null)
                                 receiverViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_many.setAdapter(readbyAdapter);
+                            LinearLayout.LayoutParams rcv_params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                            rcv_params.bottomMargin = 10;
+                            receiverViewHolder.rcv_read_many.setLayoutParams(rcv_params);
                         }
                         // chỉ có một người đã xem tin nhắn
                         if (messageDto.getReadbyes().size() == 1) {
@@ -405,7 +481,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     if (messageDto.getReactions() != null) {
                         ReactionAdapter reactionAdapter = new ReactionAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-                        layoutManager.setStackFromEnd(true);
+//                        layoutManager.setStackFromEnd(true);
 
                         if (receiverViewHolder.receiver_rcv_reaction.getLayoutManager() == null)
                             receiverViewHolder.receiver_rcv_reaction.setLayoutManager(layoutManager);
@@ -413,7 +489,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                         if (!messageDto.getReactions().isEmpty()) {
                             LinearLayout.LayoutParams marginLayoutParams = new LinearLayout.LayoutParams(receiverViewHolder.receiver_rcv_reaction.getLayoutParams());
-                            marginLayoutParams.setMargins(25, 0, 20, 0);
+                            marginLayoutParams.setMargins(25, 0, 0, 0);
                             receiverViewHolder.receiver_rcv_reaction.setLayoutParams(marginLayoutParams);
                             receiverViewHolder.receiver_rcv_reaction.requestLayout();
                         }
@@ -448,7 +524,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         rcvReaction.setAdapter(arrayAdapter);
 
         titleOfDialog.setText("Bày tỏ cảm xúc");
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_corner_white);
         dialog.show();
 //        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 //        lp.copyFrom(dialog.getWindow().getAttributes());
@@ -486,7 +562,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         RecyclerView rcv_read_many;
         RecyclerView send_rcv_reaction;
         ImageView contentImage;
-        VideoView contentVideo;
+        ImageView contentVideo;
         LinearLayout messageLayout;
 
         public SenderViewHolder(@NonNull View itemView) {
@@ -503,12 +579,6 @@ public class MessageAdapter extends RecyclerView.Adapter {
             rcv_read_one.addItemDecoration(new ItemDecorator(-15));
             rcv_read_many.addItemDecoration(new ItemDecorator(-15));
             send_rcv_reaction.addItemDecoration(new ItemDecorator(-15));
-
-            ViewGroup.LayoutParams params = contentVideo.getLayoutParams();
-            params.width = 0;
-            contentVideo.setLayoutParams(params);
-            contentVideo.requestLayout();
-
         }
     }
 
@@ -524,7 +594,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         RecyclerView rcv_read_many;
         RecyclerView receiver_rcv_reaction;
         ImageView contentImage;
-        VideoView contentVideo;
+        ImageView contentVideo;
         LinearLayout messageLayout;
 
         public ReceiverViewHolder(@NonNull View itemView) {
@@ -542,12 +612,6 @@ public class MessageAdapter extends RecyclerView.Adapter {
             rcv_read_one.addItemDecoration(new ItemDecorator(-15));
             rcv_read_many.addItemDecoration(new ItemDecorator(-15));
             receiver_rcv_reaction.addItemDecoration(new ItemDecorator(-15));
-
-            ViewGroup.LayoutParams params = contentVideo.getLayoutParams();
-            params.width = 0;
-            contentVideo.setLayoutParams(params);
-            contentVideo.requestLayout();
-
         }
     }
 
@@ -585,5 +649,12 @@ public class MessageAdapter extends RecyclerView.Adapter {
             return list.get(list.size() - 1);
         return null;
     }
+
+/*    private void setVideoWidthToZero(VideoView videoView) {
+        ViewGroup.LayoutParams params = videoView.getLayoutParams();
+        params.width = 0;
+        videoView.setLayoutParams(params);
+        videoView.requestLayout();
+    }*/
 
 }

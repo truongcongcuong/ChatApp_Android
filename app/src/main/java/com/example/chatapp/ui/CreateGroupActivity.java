@@ -356,18 +356,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
 
     @Override
     public boolean onSupportNavigateUp() {
-        if (!txt_create_group_name.getText().toString().trim().isEmpty()
-                || !usersSelected.isEmpty() || imageGroupFile != null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.confirm_abort_create_group)
-                    .setPositiveButton(R.string.continue_create_group, (dialog, id) -> dialog.dismiss())
-                    .setNegativeButton(R.string.abort_create_group, (dialog, id) -> {
-                        dialog.cancel();
-                        onBackPressed();
-                    });
-            builder.create().show();
-        } else
-            onBackPressed();
+        onBackPressed();
         return true;
     }
 
@@ -503,7 +492,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                         .circleCrop()
                         .placeholder(R.drawable.image_placeholer)
                         .into(image_create_group);
-                image_create_group.setBackgroundResource(R.drawable.background_circle_image);
+                image_create_group.setBackgroundResource(R.drawable.border_for_circle_image);
                 image_create_group_delete.setVisibility(View.VISIBLE);
             } else {
                 initImageCreate();
@@ -620,7 +609,20 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+        if (!txt_create_group_name.getText().toString().trim().isEmpty()
+                || !usersSelected.isEmpty() || imageGroupFile != null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.confirm_abort_create_group)
+                    .setPositiveButton(R.string.continue_create_group, (dialog, id) -> dialog.dismiss())
+                    .setNegativeButton(R.string.abort_create_group, (dialog, id) -> {
+                        dialog.cancel();
+                        super.onBackPressed();
+                        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+                    });
+            builder.create().show();
+        } else {
+            super.onBackPressed();
+            overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+        }
     }
 }

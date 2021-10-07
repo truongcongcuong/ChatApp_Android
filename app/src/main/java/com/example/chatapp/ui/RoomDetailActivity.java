@@ -275,7 +275,7 @@ public class RoomDetailActivity extends AppCompatActivity {
             return false;
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_corner_white);
         dialog.show();
 
         btn_cancel.setOnClickListener(v1 -> dialog.dismiss());

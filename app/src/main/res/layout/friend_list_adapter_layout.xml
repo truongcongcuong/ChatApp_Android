@@ -19,7 +19,7 @@
             android:layout_height="50dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
-            android:background="@drawable/background_circle_image"
+            android:background="@drawable/border_for_circle_image"
             android:minWidth="45dp"
             android:minHeight="45dp"
             android:padding="1dp"

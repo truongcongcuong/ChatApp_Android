@@ -21,6 +21,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp">
         <activity
+            android:name=".ui.ViewImageActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
+            android:name=".ui.ViewVideoActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
             android:name=".ui.AddMemberActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
         <activity android:name=".ui.FriendRequestActivity" />
@@ -37,10 +43,8 @@
         <activity
             android:name=".ui.RoomDetailActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
-        <activity android:name=".ui.InfoActivity" />
         <activity android:name=".ui.HomePageActivity" />
         <activity android:name=".ui.signin.SigninActivity" />
-        <activity android:name=".ui.SignOutActivity" />
         <activity
             android:name=".ui.ChatActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />

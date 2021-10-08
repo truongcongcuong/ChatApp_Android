@@ -39,6 +39,7 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.FriendDTO;
 import com.example.chatapp.ui.FriendRequestActivity;
+import com.example.chatapp.ui.SyncContactActivity;
 import com.example.chatapp.ui.TestNewFeatureActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -123,7 +124,7 @@ public class ContactFragment extends Fragment {
         ctl_contact_friend_request = view.findViewById(R.id.ctl_contact_friend_request);
         btn_contact_refresh = view.findViewById(R.id.btn_contact_refresh);
         ctl_contact_phone_book_friend.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), TestNewFeatureActivity.class);
+            Intent intent = new Intent(getActivity(), SyncContactActivity.class);
             startActivity(intent);
         });
         ctl_contact_friend_request.setOnClickListener(v -> {

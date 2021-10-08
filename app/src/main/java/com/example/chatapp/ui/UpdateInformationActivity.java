@@ -215,6 +215,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
+
                 },
                 error -> {
                     NetworkResponse response = error.networkResponse;

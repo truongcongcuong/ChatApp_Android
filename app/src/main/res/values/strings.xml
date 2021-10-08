@@ -78,6 +78,12 @@
     <string name="friend_request_suggestions">Suggestions</string>
     <string name="friend_list">Friends List</string>
     <string name="accept_button">Accept</string>
+    <string name="phone_book_friend_title">You\'ve got these contacts in your phonebook</string>
+    <string name="add_button">Add</string>
+    <string name="added_button">Added</string>
+    <string name="send_friend_request_title">Friend Request Send</string>
+    <string name="send_friend_request_message_failed">Something was wrong. Try it again</string>
+    <string name="send_friend_request_message_success">Friend request has been sent successfully</string>
 
 
 </resources>

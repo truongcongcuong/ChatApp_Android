@@ -12,7 +12,7 @@
         android:id="@+id/item_create_group_user_img"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/background_circle_image"
+        android:background="@drawable/border_for_circle_image"
         android:padding="1dp"
         android:layout_marginStart="10dp"
         android:visibility="visible" />

@@ -11,7 +11,7 @@
         android:id="@+id/item_create_group_selected_user_img"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/background_circle_image"
+        android:background="@drawable/border_for_circle_image"
         android:padding="1dp"
         android:layout_marginEnd="5dp"
         android:layout_marginStart="5dp"
@@ -27,7 +27,6 @@
         android:layout_alignEnd="@+id/item_create_group_selected_user_img"
         android:layout_marginTop="-5dp"
         android:layout_marginEnd="-5dp"
-        android:background="@drawable/background_circle"
-        app:srcCompat="@drawable/ic_baseline_clear_24" />
+        android:background="@drawable/ic_baseline_close_circle_24_white" />
 
 </RelativeLayout>

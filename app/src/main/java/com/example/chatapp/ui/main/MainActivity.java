@@ -20,7 +20,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.chatapp.R;
-import com.example.chatapp.cons.WebsocketClient;
+import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.main.frag.ContactFragment;
@@ -70,10 +70,10 @@ public class MainActivity extends AppCompatActivity {
 //        inforFragment = new InforFragment();
 
         // connect to websocket
-        WebsocketClient.getInstance().connect(user.getId(), user.getAccessToken());
+        WebSocketClient.getInstance().connect(user.getId(), user.getAccessToken());
 
         //subcribe message
-        WebsocketClient.getInstance().getStompClient()
+        WebSocketClient.getInstance().getStompClient()
                 .topic("/users/queue/messages")
                 .subscribe(x -> {
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);

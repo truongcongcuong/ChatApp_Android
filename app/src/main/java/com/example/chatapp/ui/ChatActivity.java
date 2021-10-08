@@ -22,7 +22,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -247,7 +246,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 .subscribe(x -> {
                     Log.i("chat activ subcri mess", x.getPayload());
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
-                    adapter.deleteOldReadTracking(messageDto.getSender().getId());
+                    if (messageDto.getSender() != null)
+                        adapter.deleteOldReadTracking(messageDto.getSender().getId());
                     updateMessageRealTime(messageDto);
                 }, throwable -> {
                     Log.i("chat activ subcri erro", throwable.getMessage());
@@ -285,10 +285,11 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         });
 
         ibt_chat_send_message.setOnClickListener(v -> {
-            String message = edt_chat_message_send.getText().toString();
-            if (!message.trim().isEmpty()) {
+            String message = edt_chat_message_send.getText().toString().trim();
+            if (!message.isEmpty()) {
                 checkInboxBeforeSendTextMessage(message);
                 edt_chat_message_send.getText().clear();
+                edt_chat_message_send.setText("");
                 edt_chat_message_send.postDelayed(() -> edt_chat_message_send.requestFocus(), 200);
             } else {
                 edt_chat_message_send.requestFocus();
@@ -474,25 +475,27 @@ public class ChatActivity extends AppCompatActivity implements SendData {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateMessageRealTime(MessageDto messageDto) {
-        this.adapter.updateMessage(messageDto);
-        ChatActivity.this.runOnUiThread(new Runnable() {
-            public void run() {
-                rcv_chat_list.getLayoutManager()
-                        .smoothScrollToPosition(rcv_chat_list,
-                                new RecyclerView.State(),
-                                rcv_chat_list.getAdapter().getItemCount());
-            }
-        });
-        new Thread(() -> {
-            if (!messageDto.getSender().getId().equals(user.getId())) {
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        if (messageDto.getRoomId().equals(inboxDto.getRoom().getId())) {
+            this.adapter.updateMessage(messageDto);
+            ChatActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    rcv_chat_list.getLayoutManager()
+                            .smoothScrollToPosition(rcv_chat_list,
+                                    new RecyclerView.State(),
+                                    rcv_chat_list.getAdapter().getItemCount());
                 }
-                sendReadMessageNotification();
-            }
-        }).start();
+            });
+            new Thread(() -> {
+                if (messageDto.getSender() != null && !messageDto.getSender().getId().equals(user.getId())) {
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    sendReadMessageNotification();
+                }
+            }).start();
+        }
     }
 
     @Override
@@ -518,7 +521,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 File file = new File(PathUtil.getPath(ChatActivity.this, data.getData()));
                 files.add(file);
             }
-            Toast.makeText(this, "file đã chọn " + files.toString(), Toast.LENGTH_SHORT).show();
+            Log.d("--file da chon", files.toString());
             sendFilesMessages(files);
         } else {
             // chưa có hình ảnh nào được chọn

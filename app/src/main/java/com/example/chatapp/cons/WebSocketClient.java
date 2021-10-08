@@ -9,17 +9,17 @@ import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
 import ua.naiksoftware.stomp.dto.StompHeader;
 
-public class WebsocketClient {
+public class WebSocketClient {
     private static StompClient stompClient;
-    private static WebsocketClient instance = null;
+    private static WebSocketClient instance = null;
 
-    private WebsocketClient() {
+    private WebSocketClient() {
         stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, Constant.WEB_SOCKET);
     }
 
-    public static WebsocketClient getInstance() {
+    public static WebSocketClient getInstance() {
         if (instance == null)
-            instance = new WebsocketClient();
+            instance = new WebSocketClient();
         if (stompClient == null)
             stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, Constant.WEB_SOCKET);
         return instance;

@@ -70,7 +70,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
 
             // hiện ảnh của người xem dùng thư viện Glide
             if (position < max - 1) {
-                holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+                holder.readby_image.setBackgroundResource(R.drawable.border_for_circle_image);
                 Glide.with(context).load(readBy.getReadByUser().getImageUrl())
                         .placeholder(R.drawable.image_placeholer)
                         .centerCrop().circleCrop().into(holder.readby_image);
@@ -78,7 +78,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
 
             if (position == max - 1) {
                 int remain = list.size() - max;
-                holder.readby_image.setBackgroundResource(R.drawable.background_circle_image);
+                holder.readby_image.setBackgroundResource(R.drawable.border_for_circle_image);
                 Glide.with(context).load(readBy.getReadByUser().getImageUrl())
                         .placeholder(R.drawable.image_placeholer)
                         .centerCrop().circleCrop().into(holder.readby_image);
@@ -102,7 +102,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
 
                 });
                 titleOfDialog.setText("Những người đã xem");
-                dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+                dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_corner_white);
                 dialog.show();
             });
         }

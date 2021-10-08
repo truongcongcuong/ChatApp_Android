@@ -175,7 +175,8 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         /*
         set sự kiện khi click icon close trên searchview
          */
-        View closeIcon = txt_add_member_find_user.findViewById(closeIconId);
+        ImageView closeIcon = txt_add_member_find_user.findViewById(closeIconId);
+        closeIcon.setImageResource(R.drawable.ic_baseline_close_circle_24);
         closeIcon.setOnClickListener(v -> {
             editText.setText("");
             adapter.notifyDataSetChanged();
@@ -274,7 +275,7 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         }
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, Constant.API_ROOM + "members/" + inboxDto.getRoom().getId(), array,
                 response -> {
-                    String res= response.toString();
+                    String res = response.toString();
                     Type listType = new TypeToken<Set<Member>>() {
                     }.getType();
                     Set<Member> memberCreate = gson.fromJson(res, listType);
@@ -288,7 +289,7 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
                     builder.setMessage("Thêm thành viên thành công")
                             .setPositiveButton("Ok", (dialog, id) -> {
                                 dialog.cancel();
-                                onBackPressed();
+                                finish();
                             });
                     builder.setCancelable(false);
                     builder.create().show();
@@ -314,18 +315,7 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
 
     @Override
     public boolean onSupportNavigateUp() {
-        if (!txt_add_member_find_user.getQuery().toString().trim().isEmpty()
-                || !usersSelected.isEmpty()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Bạn có muốn hủy việc thêm thành viên")
-                    .setPositiveButton("Tiếp tục thêm thành viên", (dialog, id) -> dialog.dismiss())
-                    .setNegativeButton("Hủy", (dialog, id) -> {
-                        dialog.cancel();
-                        onBackPressed();
-                    });
-            builder.create().show();
-        } else
-            onBackPressed();
+        onBackPressed();
         return true;
     }
 
@@ -450,12 +440,29 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
 
     @Override
     public void onBackPressed() {
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("dto", inboxDto);
-        setResult(Activity.RESULT_OK, resultIntent);
-        super.onBackPressed();
-        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
-        super.finish();
+        if (!txt_add_member_find_user.getQuery().toString().trim().isEmpty()
+                || !usersSelected.isEmpty()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Bạn có muốn hủy việc thêm thành viên")
+                    .setPositiveButton("Tiếp tục thêm thành viên", (dialog, id) -> dialog.dismiss())
+                    .setNegativeButton("Hủy", (dialog, id) -> {
+                        dialog.cancel();
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("dto", inboxDto);
+                        setResult(Activity.RESULT_OK, resultIntent);
+                        super.onBackPressed();
+                        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+                        super.finish();
+                    });
+            builder.create().show();
+        } else {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("dto", inboxDto);
+            setResult(Activity.RESULT_OK, resultIntent);
+            super.onBackPressed();
+            overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+            super.finish();
+        }
     }
 
     @Override
@@ -464,6 +471,7 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         resultIntent.putExtra("dto", inboxDto);
         setResult(Activity.RESULT_OK, resultIntent);
         super.finish();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
 
 }

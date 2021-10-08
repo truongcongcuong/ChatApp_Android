@@ -14,7 +14,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatapp.R;
-import com.example.chatapp.cons.WebsocketClient;
+import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReactionSend;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -86,7 +86,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
         nếu click thì gửi reaction lên server
          */
         holder.itemView.setOnClickListener(v -> {
-            WebsocketClient.getInstance().getStompClient()
+            WebSocketClient.getInstance().getStompClient()
                     .send("/app/reaction", Json.encode(reactionSend))
                     .subscribe(() -> {
 

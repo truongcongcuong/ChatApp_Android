@@ -19,24 +19,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.ServerError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.PhoneBookFriendDTO;
-import com.example.chatapp.ui.HomePageActivity;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.Inflater;
 
 public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.ViewHolder> {
-    List<PhoneBookFriendDTO> list;
-    Context context;
-    String token;
+    private List<PhoneBookFriendDTO> list;
+    private final Context context;
+    private String token;
+
     public SyncContactAdapter(List<PhoneBookFriendDTO> list, Context context, String token) {
         this.list = list;
         this.context = context;
@@ -46,20 +47,19 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.line_item_sync_contact,parent,false);
-        return new ViewHolder(view,this);
+        View view = LayoutInflater.from(context).inflate(R.layout.line_item_sync_contact, parent, false);
+        return new ViewHolder(view, this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PhoneBookFriendDTO dto = list.get(position);
-        if (dto.isFriend()){
+        if (dto.isFriend()) {
             holder.btn_li_sync_contact_action.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.gray)));
             holder.btn_li_sync_contact_action.setText(context.getString(R.string.added_button));
-        }
-        else {
-            holder.btn_li_sync_contact_action.setOnClickListener(v->sendFriendRequest(dto));
+        } else {
+            holder.btn_li_sync_contact_action.setOnClickListener(v -> sendFriendRequest(dto));
         }
 
         Glide.with(context).load(dto.getUser().getImageUrl())
@@ -71,11 +71,11 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
     }
 
     private void sendFriendRequest(PhoneBookFriendDTO dto) {
-        Log.e("is-active","true");
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_FRIEND_REQUEST+"/"+dto.getUser().getId(),
+        Log.e("is-active", "true");
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_FRIEND_REQUEST + "/" + dto.getUser().getId(),
                 response -> {
                     showDialogSignupSuccess(context.getString(R.string.send_friend_request_title)
-                            ,context.getString(R.string.send_friend_request_message_success));
+                            , context.getString(R.string.send_friend_request_message_success));
 
                 },
                 error -> {
@@ -84,13 +84,13 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                             showDialogSignupSuccess(context.getString(R.string.send_friend_request_title)
-                                    ,res);
+                                    , res);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
 
                     }
-                }){
+                }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> map = new HashMap<>();
@@ -98,6 +98,8 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
                 return map;
             }
         };
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        requestQueue.add(request);
     }
 
     @Override
@@ -105,11 +107,13 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         SyncContactAdapter adapter;
         ImageView img_li_sync_contact_avt;
-        TextView txt_li_sync_contact_contact_name,txt_li_sync_contact_display_name;
+        TextView txt_li_sync_contact_contact_name;
+        TextView txt_li_sync_contact_display_name;
         Button btn_li_sync_contact_action;
+
         public ViewHolder(@NonNull View itemView, SyncContactAdapter adapter) {
             super(itemView);
             this.adapter = adapter;
@@ -121,7 +125,6 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         }
     }
 
-
     private void showDialogSignupSuccess(String title, String message) {
         AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setTitle(title)
@@ -130,4 +133,5 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
                 .create();
         alertDialog.show();
     }
+
 }

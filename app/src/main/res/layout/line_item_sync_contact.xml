@@ -3,12 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="10dp">
+
     <ImageView
         android:id="@+id/img_li_sync_contact_avt"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_centerVertical="true">
-    </ImageView>
+        android:layout_centerVertical="true"
+        android:background="@drawable/border_for_circle_image"
+        android:padding="1dp"></ImageView>
     <TextView
         android:id="@+id/txt_li_sync_contact_contact_name"
         android:layout_width="wrap_content"

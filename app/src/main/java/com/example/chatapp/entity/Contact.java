@@ -9,5 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class Contact implements Serializable {
     public String name;
-    public String phoneNumber;
+    public String phone;
 }

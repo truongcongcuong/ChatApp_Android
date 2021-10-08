@@ -186,9 +186,9 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 super.onScrolled(recyclerView, dx, dy);
                 first = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findFirstVisibleItemPosition();
                 last = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findLastVisibleItemPosition();
-                if (!recyclerView.canScrollVertically(-1)) {
-                    loadMoreData();
-                }
+//                if (!recyclerView.canScrollVertically(-1)) {
+//                    loadMoreData();
+//                }
                 visibleOrGoneButtonScrollToBottom();
             }
 
@@ -198,15 +198,15 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 first = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findFirstVisibleItemPosition();
                 last = ((LinearLayoutManager) rcv_chat_list.getLayoutManager()).findLastVisibleItemPosition();
 
-                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    // scroll to bottom
-                }
+//                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                     scroll to bottom
+//                }
                 if (!recyclerView.canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                     loadMoreData();
                 }
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    // scrolling
-                }
+//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+//                     scrolling
+//                }
                 visibleOrGoneButtonScrollToBottom();
             }
         });
@@ -395,6 +395,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         };
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
     }
 
@@ -468,6 +470,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 }
             };
 
+            DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            request.setRetryPolicy(retryPolicy);
             RequestQueue requestQueue = Volley.newRequestQueue(this);
             requestQueue.add(request);
         }

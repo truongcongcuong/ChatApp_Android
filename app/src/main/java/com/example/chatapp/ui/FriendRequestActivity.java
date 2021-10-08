@@ -1,28 +1,24 @@
 package com.example.chatapp.ui;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TextView;
-
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
-import com.example.chatapp.adapter.FriendListAdapter;
 import com.example.chatapp.adapter.FriendRequestAdapter;
 import com.example.chatapp.cons.Constant;
-import com.example.chatapp.dto.FriendDTO;
-import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.entity.FriendRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -92,6 +88,8 @@ public class FriendRequestActivity extends AppCompatActivity {
             }
         };
         RequestQueue queue = Volley.newRequestQueue(this);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         queue.add(request);
     }
 

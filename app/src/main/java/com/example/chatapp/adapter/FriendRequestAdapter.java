@@ -1,7 +1,6 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -21,7 +21,6 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
-import com.example.chatapp.dto.FriendDTO;
 import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.utils.TimeAgo;
 
@@ -101,6 +100,8 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             }
         };
         RequestQueue queue = Volley.newRequestQueue(context);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         queue.add(request);
     }
 

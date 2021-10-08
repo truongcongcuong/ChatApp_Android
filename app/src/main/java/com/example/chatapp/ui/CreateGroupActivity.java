@@ -430,6 +430,8 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
             }
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         requestQueue.getCache().clear();
         requestQueue.add(request);
     }

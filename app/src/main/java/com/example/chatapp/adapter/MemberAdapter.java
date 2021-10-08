@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -200,6 +201,8 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                         }
                     };
                     RequestQueue requestQueue = Volley.newRequestQueue(context);
+                    DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                    request.setRetryPolicy(retryPolicy);
                     requestQueue.add(request);
                 });
         builder.create().show();
@@ -235,6 +238,8 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                         }
                     };
                     RequestQueue requestQueue = Volley.newRequestQueue(context);
+                    DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                    request.setRetryPolicy(retryPolicy);
                     requestQueue.add(request);
                 });
         builder.create().show();

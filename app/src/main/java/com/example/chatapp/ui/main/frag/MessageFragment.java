@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -158,6 +159,7 @@ public class MessageFragment extends Fragment {
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
                 /*LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (linearLayoutManager != null) {
                     *//*
@@ -168,26 +170,25 @@ public class MessageFragment extends Fragment {
                 /*
                 nếu cuộn xuống cuối recyclerview thì load thêm data
                  */
-                if (!recyclerView.canScrollVertically(1)) {
-                    loadMoreData();
-                }
-                super.onScrolled(recyclerView, dx, dy);
+//                if (!recyclerView.canScrollVertically(1)) {
+//                    loadMoreData();
+//                }
             }
 
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
 
-                if (!recyclerView.canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    // scroll to top
-                }
+//                if (!recyclerView.canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                     scroll to top
+//                }
                 if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                     // scroll to bottom
                     loadMoreData();
                 }
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    // scrolling
-                }
+//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+//                    // scrolling
+//                }
             }
         });
         return view;
@@ -224,6 +225,8 @@ public class MessageFragment extends Fragment {
             }
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
     }
 
@@ -265,6 +268,8 @@ public class MessageFragment extends Fragment {
             }
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
     }
 
@@ -450,6 +455,8 @@ public class MessageFragment extends Fragment {
             }
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         requestQueue.getCache().clear();
         requestQueue.add(request);
     }

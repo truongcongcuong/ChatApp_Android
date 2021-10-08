@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -40,7 +41,6 @@ import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.FriendDTO;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.ui.SyncContactActivity;
-import com.example.chatapp.ui.TestNewFeatureActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -181,6 +181,8 @@ public class ContactFragment extends Fragment {
         };
 
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
     }
 

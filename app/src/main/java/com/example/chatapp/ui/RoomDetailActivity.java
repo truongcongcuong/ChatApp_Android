@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.NestedScrollView;
@@ -36,6 +37,7 @@ import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.enumvalue.RoomType;
+import com.example.chatapp.ui.main.MainActivity;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
@@ -156,8 +158,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .imageResource(R.drawable.ic_baseline_block_24)
                     .name("Chặn tin nhắn")
                     .build());
-        }
-        else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+        } else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             Glide.with(RoomDetailActivity.this)
                     .load(inboxDto.getRoom().getImageUrl())
                     .centerCrop().circleCrop()
@@ -178,7 +179,7 @@ public class RoomDetailActivity extends AppCompatActivity {
             menuItems.add(MenuItem.builder()
                     .key("leaveRoom")
                     .imageResource(R.drawable.ic_baseline_leave_24)
-                    .name("Rời khỏi nhóm")
+                    .name("Rời khỏi nhóm -- đã xong")
                     .build());
             btn_change_image_of_room.setPadding(3, 0, 3, 3);
             Glide.with(RoomDetailActivity.this)
@@ -210,7 +211,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         menuItems.add(MenuItem.builder()
                 .key("delete")
                 .imageResource(R.drawable.ic_baseline_delete_forever_24)
-                .name("Xóa cuộc trò chuyện")
+                .name("Xóa cuộc trò chuyện --đã xong")
                 .build());
 
         menuItems.add(MenuItem.builder()
@@ -240,10 +241,50 @@ public class RoomDetailActivity extends AppCompatActivity {
                 intent.putExtra("dto", inboxDto);
                 startActivityForResult(intent, ADD_MEMBER);
                 overridePendingTransition(R.anim.enter, R.anim.exit);
+            } else if (item.getKey().equals("leaveRoom")) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Rời khỏi nhóm " + inboxDto.getRoom().getName())
+                        .setPositiveButton("Hủy", (dialog, id) -> dialog.cancel())
+                        .setNegativeButton("Rời khỏi nhóm", (dialog, id) -> {
+                            leaveGroup();
+                        });
+                builder.create().show();
+            } else if (item.getKey().equals("delete")) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Xóa lịch sử cuộc trò chuyện này?")
+                        .setPositiveButton("Hủy", (dialog, id) -> dialog.cancel())
+                        .setNegativeButton("Xóa", (dialog, id) -> {
+                            deleteInbox();
+                        });
+                builder.create().show();
             }
         });
         setListViewHeightBasedOnChildren(lv_menu_items);
         scrollView.post(() -> scrollView.scrollTo(0, 0));
+    }
+
+    private void deleteInbox() {
+        StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_INBOX + "/" + inboxDto.getId(),
+                response -> {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    super.finish();
+                },
+                error -> Log.i("delete inbox error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        requestQueue.add(request);
     }
 
     /*
@@ -280,6 +321,30 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         btn_cancel.setOnClickListener(v1 -> dialog.dismiss());
         btn_ok.setOnClickListener(v1 -> rename(inboxDto, dialog, newName.getText().toString().trim()));
+    }
+
+    private void leaveGroup() {
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_ROOM + "leave/" + inboxDto.getRoom().getId(),
+                response -> {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    super.finish();
+                },
+                error -> Log.i("leave error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        requestQueue.add(request);
     }
 
     private void rename(InboxDto ibdto, Dialog dialog, String newName) {

@@ -152,6 +152,7 @@ public class MessageFragment extends Fragment {
         refreshLayout.setColorSchemeColors(Color.RED);
         refreshLayout.setOnRefreshListener(() -> {
             page = 0;
+            Log.d("--", "on refresh ");
             refreshListInbox();
         });
 
@@ -184,6 +185,7 @@ public class MessageFragment extends Fragment {
 //                }
                 if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                     // scroll to bottom
+                    Log.d("--", "on recylerview scroll event ");
                     loadMoreData();
                 }
 //                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
@@ -196,6 +198,7 @@ public class MessageFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void refreshListInbox() {
+        Log.d("--", "on refresh function");
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size,
                 response -> {
                     try {
@@ -238,6 +241,7 @@ public class MessageFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateListInbox() {
+        Log.d("--", "on update list function ");
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size,
                 response -> {
                     try {

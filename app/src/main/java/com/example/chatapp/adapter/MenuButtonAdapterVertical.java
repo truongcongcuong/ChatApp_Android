@@ -16,11 +16,11 @@ import com.example.chatapp.dto.MenuItem;
 
 import java.util.List;
 
-public class MenuButtonAdapter extends ArrayAdapter<MenuItem> {
+public class MenuButtonAdapterVertical extends ArrayAdapter<MenuItem> {
     private final Context context;
     private final List<MenuItem> items;
 
-    public MenuButtonAdapter(Context context, int resource, List<MenuItem> items) {
+    public MenuButtonAdapterVertical(Context context, int resource, List<MenuItem> items) {
         super(context, resource, items);
         this.items = items;
         this.context = context;
@@ -29,7 +29,7 @@ public class MenuButtonAdapter extends ArrayAdapter<MenuItem> {
     @Override
     @SuppressLint("ViewHolder")
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = LayoutInflater.from(context).inflate(R.layout.line_item_menu_button, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.line_item_menu_button_vertical, parent, false);
 
         MenuItem item = items.get(position);
 

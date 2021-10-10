@@ -185,7 +185,7 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .key(getResources().getString(R.string.mobile))
                 .name(userDetailDTO.getPhoneNumber())
                 .build());
-        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button);
+        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button_vertical);
         lsv_update_infor.setAdapter(adapter);
         Glide.with(this)
                 .load(userDetailDTO.getImageUrl())

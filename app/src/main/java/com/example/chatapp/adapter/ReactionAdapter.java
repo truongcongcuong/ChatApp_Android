@@ -1,18 +1,18 @@
 package com.example.chatapp.adapter;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -22,6 +22,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.dialog.ViewAllReactionDialog;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReactionDto;
 import com.example.chatapp.entity.Reaction;
@@ -67,6 +68,7 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
         return new ViewHolder(view);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -152,20 +154,10 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
         }
     }
 
-    private void showDialogListReaction(List<ReactionDto> reactionDtos) {
-        final Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.reaction_dialog);
-        ListView listView = dialog.findViewById(R.id.lv_reaction_dialog);
-        TextView titleOfDialog = dialog.findViewById(R.id.txt_reaction_dialog_title);
-
-        ReactionDialogAdapter arrayAdapter = new ReactionDialogAdapter(context, R.layout.reaction_dialog_line_item, reactionDtos);
-        listView.setAdapter(arrayAdapter);
-        listView.setOnItemClickListener((parent, view, pos, itemId) -> {
-
-        });
-        titleOfDialog.setText("Những người đã bày tỏ cảm xúc");
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_corner_white);
-        dialog.show();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void showDialogListReaction(List<ReactionDto> reactions) {
+        ViewAllReactionDialog viewAllReactionDialog = new ViewAllReactionDialog(context, reactions);
+        viewAllReactionDialog.show();
     }
 
     @Override

@@ -11,4 +11,5 @@ public class MessageSendToServer implements Serializable {
     private String roomId;
     private MessageType type;
     private String content;
+    private String replyId;
 }

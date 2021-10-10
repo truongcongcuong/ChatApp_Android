@@ -28,7 +28,7 @@ public class ReadbyDialogAdapter extends ArrayAdapter<ReadByDto> {
     @SuppressLint("ViewHolder")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = LayoutInflater.from(context).inflate(R.layout.readby_dialog_line_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.line_item_readby_dialog, parent, false);
 
         ImageView imageOfUser = view.findViewById(R.id.image_readby_dialog_item);
         TextView displayName = view.findViewById(R.id.txt_readby_dialog_displayname);

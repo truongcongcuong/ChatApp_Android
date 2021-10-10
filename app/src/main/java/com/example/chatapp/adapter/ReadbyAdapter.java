@@ -1,6 +1,5 @@
 package com.example.chatapp.adapter;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -9,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
+import com.example.chatapp.dialog.ViewAllReadTrackingDialog;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReadByDto;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -59,6 +58,7 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
         return new ViewHolder(view);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -90,20 +90,8 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
 
             // click vào list readby, sẽ hiện popup danh sách những người đã xem tin nhắn này và thời gian xem
             holder.itemView.setOnClickListener(v -> {
-                final Dialog dialog = new Dialog(context);
-                dialog.setContentView(R.layout.readby_dialog);
-
-                ListView listView = dialog.findViewById(R.id.lv_readby_dialog);
-                TextView titleOfDialog = dialog.findViewById(R.id.txt_readby_dialog_title);
-
-                ReadbyDialogAdapter arrayAdapter = new ReadbyDialogAdapter(context, R.layout.readby_dialog_line_item, list);
-                listView.setAdapter(arrayAdapter);
-                listView.setOnItemClickListener((parent, view, pos, itemId) -> {
-
-                });
-                titleOfDialog.setText("Những người đã xem");
-                dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_corner_white);
-                dialog.show();
+                ViewAllReadTrackingDialog viewAllReactionDialog = new ViewAllReadTrackingDialog(context, list);
+                viewAllReactionDialog.show();
             });
         }
     }

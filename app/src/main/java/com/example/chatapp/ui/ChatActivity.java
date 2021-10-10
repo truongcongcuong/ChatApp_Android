@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -43,6 +44,7 @@ import com.example.chatapp.adapter.MessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.cons.SendData;
+import com.example.chatapp.cons.SendDataReplyMessage;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
@@ -88,7 +90,7 @@ import ua.naiksoftware.stomp.dto.StompCommand;
 import ua.naiksoftware.stomp.dto.StompHeader;
 import ua.naiksoftware.stomp.dto.StompMessage;
 
-public class ChatActivity extends AppCompatActivity implements SendData {
+public class ChatActivity extends AppCompatActivity implements SendData, SendDataReplyMessage {
 
     private ImageView img_chat_user_avt;
     private TextView txt_chat_user_name;
@@ -112,6 +114,11 @@ public class ChatActivity extends AppCompatActivity implements SendData {
     private static final int VIEW_ROOM_DETAIL = 2;
     private StompClient stompClient;
     private boolean isFirstTimeRun = true;
+
+    private TextView txt_name_reply_chat_activity;
+    private TextView txt_content_reply_chat_activity;
+    private LinearLayout layout_reply_chat_activity;
+    private String replyMessageId = null;
 
     @SuppressLint("CheckResult")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -142,6 +149,17 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         img_chat_user_avt = findViewById(R.id.img_chat_user_avt);
         ibt_chat_send_media = findViewById(R.id.ibt_chat_send_media);
         btnScrollToBottom = findViewById(R.id.btn_scroll_to_bottom);
+
+        txt_name_reply_chat_activity = findViewById(R.id.txt_name_reply_chat_activity);
+        txt_content_reply_chat_activity = findViewById(R.id.txt_content_reply_chat_activity);
+        ImageView img_close_reply_chat_activity = findViewById(R.id.img_close_reply_chat_activity);
+        layout_reply_chat_activity = findViewById(R.id.layout_reply_chat_activity);
+        layout_reply_chat_activity.setVisibility(View.GONE);
+
+        img_close_reply_chat_activity.setOnClickListener(v -> {
+            replyMessageId = null;
+            layout_reply_chat_activity.setVisibility(View.GONE);
+        });
 
         gson = new Gson();
 
@@ -271,6 +289,16 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                     Log.i("chat activ react error", throwable.getMessage());
                 });
 
+        stompClient
+                .topic("/users/queue/messages/delete")
+                .subscribe(x -> {
+                    Log.d("--deleted mes", x.getPayload());
+                    MessageDto deletedMessage = gson.fromJson(x.getPayload(), MessageDto.class);
+                    adapter.updateDeletedMessage(deletedMessage);
+                }, throwable -> {
+                    Log.i("chat activ react error", throwable.getMessage());
+                });
+
         /*
         sự kiện focus trên edittext
          */
@@ -290,6 +318,8 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                 checkInboxBeforeSendTextMessage(message);
                 edt_chat_message_send.getText().clear();
                 edt_chat_message_send.setText("");
+                replyMessageId = null;
+                layout_reply_chat_activity.setVisibility(View.GONE);
                 edt_chat_message_send.postDelayed(() -> edt_chat_message_send.requestFocus(), 200);
             } else {
                 edt_chat_message_send.requestFocus();
@@ -361,6 +391,7 @@ public class ChatActivity extends AppCompatActivity implements SendData {
         MessageSendToServer messageSendToServer = new MessageSendToServer();
         messageSendToServer.setContent(message);
         messageSendToServer.setRoomId(inboxDto.getRoom().getId());
+        messageSendToServer.setReplyId(replyMessageId);
         messageSendToServer.setType(type);
         Log.e("send : ", Json.encode(messageSendToServer));
 
@@ -637,6 +668,18 @@ public class ChatActivity extends AppCompatActivity implements SendData {
                         Log.d("unsubscribe reaction", "ok");
                     }
                 });
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void reply(MessageDto messageDto) {
+        layout_reply_chat_activity.setVisibility(View.VISIBLE);
+        txt_content_reply_chat_activity.setText(messageDto.getContent());
+        txt_name_reply_chat_activity.setText("Đang trả lời " + messageDto.getSender().getDisplayName());
+        replyMessageId = messageDto.getId();
+        edt_chat_message_send.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(edt_chat_message_send, InputMethodManager.SHOW_IMPLICIT);
     }
 
     static class MyLinerLayoutManager extends LinearLayoutManager {

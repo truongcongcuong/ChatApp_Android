@@ -28,7 +28,7 @@ public class ReactionDialogAdapter extends ArrayAdapter<ReactionDto> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (view == null)
-            view = LayoutInflater.from(context).inflate(R.layout.reaction_dialog_line_item, parent, false);
+            view = LayoutInflater.from(context).inflate(R.layout.line_item_view_reaction_dialog, parent, false);
 
         ImageView imageOfUser = view.findViewById(R.id.image_reaction_dialog_item);
         TextView displayName = view.findViewById(R.id.txt_reaction_dialog_displayname);

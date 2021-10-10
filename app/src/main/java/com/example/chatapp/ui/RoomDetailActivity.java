@@ -5,12 +5,17 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -19,6 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -31,7 +37,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
-import com.example.chatapp.adapter.MenuButtonAdapter;
+import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MenuItem;
@@ -64,7 +70,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     private static final int ADD_MEMBER = 2;
     private static final int VIEW_MEMBER = 3;
     private List<MenuItem> menuItems;
-    private MenuButtonAdapter menuAdapter;
+    private MenuButtonAdapterVertical menuAdapter;
     private ListView lv_menu_items;
     private InboxDto inboxDto;
     private ImageButton imageOfRoom;
@@ -77,6 +83,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     private String token;
     private Toolbar toolbar;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
@@ -226,7 +233,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .build());
         }
 
-        menuAdapter = new MenuButtonAdapter(RoomDetailActivity.this, R.layout.line_item_menu_button, menuItems);
+        menuAdapter = new MenuButtonAdapterVertical(RoomDetailActivity.this, R.layout.line_item_menu_button_vertical, menuItems);
         lv_menu_items.setAdapter(menuAdapter);
         lv_menu_items.setOnItemClickListener((parent, view, position, itemId) -> {
             MenuItem item = menuItems.get(position);
@@ -296,9 +303,10 @@ public class RoomDetailActivity extends AppCompatActivity {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void showRenameDialog() {
         final Dialog dialog = new Dialog(RoomDetailActivity.this);
-        dialog.setContentView(R.layout.rename_room_dialog);
+        dialog.setContentView(R.layout.layout_rename_room_dialog);
 
         TextView title = dialog.findViewById(R.id.txt_rename_dialog_title);
         EditText newName = dialog.findViewById(R.id.txt_rename_new_name);
@@ -306,20 +314,53 @@ public class RoomDetailActivity extends AppCompatActivity {
         Button btn_ok = dialog.findViewById(R.id.btn_rename_ok);
 
         btn_ok.setEnabled(false);
+        btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark)));
 
         newName.setText(inboxDto.getRoom().getName());
 
-        title.setText("Đổi tên");
-        newName.setOnKeyListener((v1, keyCode, event) -> {
-            btn_ok.setEnabled(!newName.getText().toString().isEmpty());
-            btn_ok.setEnabled(!newName.getText().toString().equals(inboxDto.getRoom().getName()));
-            return false;
+        newName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!newName.getText().toString().isEmpty()) {
+                    btn_ok.setEnabled(true);
+                    btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+                } else {
+                    btn_ok.setEnabled(false);
+                    btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark)));
+                }
+                if (!newName.getText().toString().equals(inboxDto.getRoom().getName())) {
+                    btn_ok.setEnabled(true);
+                    btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+                } else {
+                    btn_ok.setEnabled(false);
+                    btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark)));
+                }
+            }
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_corner_white);
+        title.setText("Đổi tên");
+
+        WindowManager.LayoutParams layoutParams = dialog.getWindow().getAttributes();
+        layoutParams.dimAmount = .5f;
+        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+//        layoutParams.gravity = Gravity.BOTTOM;
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.getWindow().setAttributes(layoutParams);
         dialog.show();
 
-        btn_cancel.setOnClickListener(v1 -> dialog.dismiss());
+        btn_cancel.setOnClickListener(v1 -> dialog.cancel());
         btn_ok.setOnClickListener(v1 -> rename(inboxDto, dialog, newName.getText().toString().trim()));
     }
 

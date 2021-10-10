@@ -1,5 +1,6 @@
 package com.example.chatapp.adapter;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -34,11 +35,13 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
     private MessageDto messageDto;
     private final UserSummaryDTO user;
     private final Gson gson;
+    private Dialog dialog;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public ReactionDialogCreateAdapter(MessageDto messageDto, Context context) {
+    public ReactionDialogCreateAdapter(MessageDto messageDto, Context context, Dialog dialog) {
         this.context = context;
         this.messageDto = messageDto;
+        this.dialog = dialog;
 
         resources = new ArrayList<>();
         types = new ArrayList<>();
@@ -65,7 +68,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.reaction_dialog_create_line_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.line_item_reaction_create_dialog, parent, false);
         return new ViewHolder(view);
     }
 
@@ -91,6 +94,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
                     .subscribe(() -> {
 
                     });
+            dialog.cancel();
         });
     }
 

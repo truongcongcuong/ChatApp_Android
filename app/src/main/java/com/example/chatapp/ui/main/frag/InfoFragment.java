@@ -30,7 +30,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
-import com.example.chatapp.adapter.MenuButtonAdapter;
+import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -52,7 +52,7 @@ public class InfoFragment extends Fragment {
     private ImageView image_info_image;
 
     private List<MenuItem> menuItems;
-    private MenuButtonAdapter menuAdapter;
+    private MenuButtonAdapterVertical menuAdapter;
     private ListView lv_info_fragment_menu;
     private NestedScrollView nestedScrollView;
 
@@ -137,7 +137,7 @@ public class InfoFragment extends Fragment {
                     .build());
         }
 
-        menuAdapter = new MenuButtonAdapter(getActivity(), R.layout.line_item_menu_button, menuItems);
+        menuAdapter = new MenuButtonAdapterVertical(getActivity(), R.layout.line_item_menu_button_vertical, menuItems);
         lv_info_fragment_menu.setAdapter(menuAdapter);
         lv_info_fragment_menu.setOnItemClickListener((parent, view1, position, itemId) -> {
             MenuItem item = menuItems.get(position);

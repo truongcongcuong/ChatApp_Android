@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.AddFriendActivity"
+    android:orientation="vertical"
+    android:background="@color/gray">
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/bg_app">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/ibt_add_friend_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentLeft="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_baseline_arrow_back_24"
+                android:layout_centerVertical="true">
+            </ImageButton>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/ibt_add_friend_back"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:gravity="center"
+                android:text="@string/add_friend_title"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginRight="60dp"
+                >
+            </TextView>
+
+        </RelativeLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/add_friend_detail"
+        android:padding="5dp"
+        android:textSize="15dp"
+        android:textColor="@color/black"
+        android:background="@color/white">
+    </TextView>
+
+    <LinearLayout
+        android:layout_marginTop="1dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/white">
+        <EditText
+            android:id="@+id/edt_add_friend_enter_phone_number"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:hint="@string/enter_phone_number"
+            android:padding="5dp"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:layout_width="match_parent">
+        </EditText>
+
+        <Button
+            android:id="@+id/btn_add_friend_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_button"
+            android:layout_gravity="center_vertical">
+        </Button>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rll_add_friend_manage_friend_request"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="5dp"
+        >
+
+        <ImageView
+            android:id="@+id/img_add_friend_setting_friend_request"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_setting_friend_request">
+        </ImageView>
+
+        <TextView
+            android:layout_marginTop="5dp"
+            android:id="@+id/txt_add_friend_manage_friend_request"
+            android:layout_marginLeft="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/img_add_friend_setting_friend_request"
+            android:text="@string/manage_friend_request"
+            android:textColor="@color/black"
+            android:textSize="18dp">
+        </TextView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txt_add_friend_manage_friend_request"
+            android:layout_toEndOf="@id/img_add_friend_setting_friend_request"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:text="@string/manage_friend_request_detail">
+        </TextView>
+
+    </RelativeLayout>
+
+
+
+
+</LinearLayout>

@@ -46,6 +46,7 @@
     <string name="notification_feature_error">The feature has not been updated</string>
     <string name="feature_error_content">Waiting for new update...</string>
     <string name="search">Search your friends ...</string>
+    <string name="search_button">Search</string>
     <string name="friend_request">Friend request</string>
     <string name="phonebook_friend">Phonebook friend</string>
     <string name="all_contact">All contacts</string>
@@ -84,6 +85,15 @@
     <string name="send_friend_request_title">Friend Request Send</string>
     <string name="send_friend_request_message_failed">Something was wrong. Try it again</string>
     <string name="send_friend_request_message_success">Friend request has been sent successfully</string>
+    <string name="add_friend_title">Add friend</string>
+    <string name="add_friend_detail">Add friend with phone number</string>
+    <string name="enter_phone_number">Enter phone number</string>
+    <string name="manage_friend_request">Manage friend requests</string>
+    <string name="manage_friend_request_detail">Undo or resend the request</string>
+    <string name="recall_button">Recall</string>
+    <string name="login_session_expired">Your session has expired. Please log in again.</string>
+    <string name="login_session_expired_title">Session expired.</string>
+
 
 
 </resources>

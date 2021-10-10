@@ -1,8 +1,13 @@
 package com.example.chatapp.cons;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
@@ -13,6 +18,8 @@ import com.android.volley.ServerError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.chatapp.R;
+import com.example.chatapp.ui.HomePageActivity;
 
 import org.json.JSONObject;
 
@@ -90,6 +97,30 @@ public class GetNewAccessToken {
         queue.add(request);
 
 
+    }
+
+
+    private void showDialogSignupSuccess() {
+        AlertDialog alertDialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.login_session_expired_title)
+                .setMessage(R.string.login_session_expired)
+//                .setNegativeButton(R.string.accept, null)
+                .setPositiveButton(R.string.confirm_button, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences sharedPreferencesIsLogin = context.getSharedPreferences("is-login", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editorIsLogin = sharedPreferencesIsLogin.edit();
+                        editorIsLogin.putBoolean("status-login", false).apply();
+                        Intent i = new Intent(context, HomePageActivity.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        i.putExtra("EXIT", true);
+                        context.startActivity(i);
+                        ((Activity) context).finish();
+                    }
+                })
+                .create();
+        alertDialog.show();
     }
 
 }

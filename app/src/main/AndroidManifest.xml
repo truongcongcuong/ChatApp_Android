@@ -20,7 +20,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp">
-
         <activity
             android:name=".ui.ViewImageActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
@@ -38,6 +37,8 @@
         <activity android:name=".ui.UpdateInformationActivity" />
         <activity android:name=".ui.SyncContactActivity" />
         <activity android:name=".ui.ViewInformationActivity" />
+        <activity android:name=".ui.AddFriendActivity" />
+        <activity android:name=".ui.ManageFriendRequestActivity" />
         <activity android:name=".ui.TestNewFeatureActivity" />
         <activity
             android:name=".ui.MemberActivity"

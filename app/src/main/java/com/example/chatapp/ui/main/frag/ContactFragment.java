@@ -39,6 +39,7 @@ import com.example.chatapp.adapter.FriendListAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.FriendDTO;
+import com.example.chatapp.ui.AddFriendActivity;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.ui.SyncContactActivity;
 import com.google.gson.Gson;
@@ -226,6 +227,7 @@ public class ContactFragment extends Fragment {
 
         menuItemAdd.setOnMenuItemClickListener(item -> {
             Toast.makeText(getActivity(), "add friend", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getActivity().getApplicationContext(), AddFriendActivity.class));
             return true;
         });
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+>
+
+    <ImageView
+        android:id="@+id/img_li_manage_friend_request_avt"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@android:color/transparent"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        >
+    </ImageView>
+
+    <TextView
+        android:id="@+id/txt_li_manage_friend_request_display_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:text="@string/test_text"
+        android:paddingLeft="10dp"
+        android:textColor="@color/black"
+        android:textSize="18dp"
+        android:paddingRight="10dp"
+        android:maxLines="1"
+        android:layout_toEndOf="@id/img_li_manage_friend_request_avt"
+        android:layout_toStartOf="@id/btn_li_manage_friend_request_recall">
+    </TextView>
+
+    <Button
+        android:id="@+id/btn_li_manage_friend_request_recall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:backgroundTint="@color/gray"
+        android:text="@string/recall_button"
+        android:textColorHint="@color/colorPrimary"></Button>
+
+</RelativeLayout>

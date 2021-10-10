@@ -20,13 +20,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp">
-        <activity android:name=".ui.ManageFriendRequestActivity"></activity>
-        <activity android:name=".ui.AddFriendActivity" />
-        <activity android:name=".ui.FriendRequestActivity" />
+        <activity
+            android:name=".ui.ViewImageActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
+            android:name=".ui.ViewVideoActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
+            android:name=".ui.AddMemberActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity android:name=".ui.FriendRequestActivity"></activity>
         <activity android:name=".ui.ChangePasswordActivity" />
         <activity android:name=".ui.CreateGroupActivity" />
         <activity android:name=".ui.UpdateInformationActivity" />
-        <activity android:name=".ui.SyncContactActivity" />
+        <activity android:name=".ui.SyncContactActivity"/>
         <activity android:name=".ui.ViewInformationActivity" />
         <activity android:name=".ui.TestNewFeatureActivity" />
         <activity

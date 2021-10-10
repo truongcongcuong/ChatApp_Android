@@ -126,7 +126,7 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
     }
 
     private void bindData(@NonNull ViewHolder holder, Reaction reaction) {
-        holder.image_reaction_item.setBackgroundResource(R.drawable.background_circle_image);
+        holder.image_reaction_item.setBackgroundResource(R.drawable.border_for_circle_image);
         switch (reaction.getType()) {
             case HAHA:
                 holder.image_reaction_item.setImageResource(R.drawable.ic_reaction_haha);
@@ -161,7 +161,7 @@ public class ReactionAdapter extends RecyclerView.Adapter<ReactionAdapter.ViewHo
 
         });
         titleOfDialog.setText("Những người đã bày tỏ cảm xúc");
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_readby_dialog);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.background_corner_white);
         dialog.show();
     }
 

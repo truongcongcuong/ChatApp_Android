@@ -18,7 +18,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/background_circle_image"
+            android:background="@drawable/border_for_circle_image"
             android:foregroundGravity="center_vertical"
             android:padding="1dp"
             app:layout_constraintBottom_toBottomOf="parent"

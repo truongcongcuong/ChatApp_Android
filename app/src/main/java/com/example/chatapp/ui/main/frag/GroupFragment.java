@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -227,9 +226,11 @@ public class GroupFragment extends Fragment {
          */
         int closeIconId = searchView.getContext().getResources().getIdentifier("android:id/search_close_btn", null, null);
         int editTextId = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-        View closeIcon = searchView.findViewById(closeIconId);
+        ImageView closeIcon = searchView.findViewById(closeIconId);
+        closeIcon.setImageResource(R.drawable.ic_baseline_close_circle_24_white);
         EditText editText = searchView.findViewById(editTextId);
         editText.setHintTextColor(Color.WHITE);
+        editText.setTextColor(Color.WHITE);
         editText.setPadding(50, 0, 50, 0);
 
         menuItemCreate.setOnMenuItemClickListener(item -> {
@@ -242,7 +243,6 @@ public class GroupFragment extends Fragment {
         sự kiện click icon close trên search view
          */
         closeIcon.setOnClickListener(v -> {
-            Toast.makeText(getActivity(), "icon close", Toast.LENGTH_SHORT).show();
             adapter.setList(list);
             editText.setText("");
         });

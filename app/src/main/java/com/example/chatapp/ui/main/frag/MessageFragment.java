@@ -302,9 +302,11 @@ public class MessageFragment extends Fragment {
          */
         int closeIconId = searchView.getContext().getResources().getIdentifier("android:id/search_close_btn", null, null);
         int editTextId = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-        View closeIcon = searchView.findViewById(closeIconId);
+        ImageView closeIcon = searchView.findViewById(closeIconId);
+        closeIcon.setImageResource(R.drawable.ic_baseline_close_circle_24_white);
         EditText editText = searchView.findViewById(editTextId);
         editText.setHintTextColor(Color.WHITE);
+        editText.setTextColor(Color.WHITE);
         editText.setPadding(50, 0, 50, 0);
 
         menu.findItem(R.id.submenu_fragment_message).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {

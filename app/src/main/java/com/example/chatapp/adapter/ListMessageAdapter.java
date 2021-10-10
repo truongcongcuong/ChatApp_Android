@@ -28,6 +28,7 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.ui.ChatActivity;
 import com.example.chatapp.utils.TimeAgo;
@@ -50,7 +51,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     private final int maxMessageSizeDisplay = 5;
     private final Gson gson;
     private final UserSummaryDTO user;
-    private SimpleDateFormat dateFormat;
+    private static final SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private String access_token;
 
     public ListMessageAdapter(Context context, List<InboxDto> dtos) {
@@ -60,7 +61,6 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         else
             list = new ArrayList<>();
         gson = new Gson();
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         String userJson = sharedPreferencesUser.getString("user-info", null);
@@ -92,7 +92,6 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             displayName = inboxDto.getRoom().getName();
             url = inboxDto.getRoom().getImageUrl();
-
         } else {
             /*
             lấy tên và iamgeurl nếu là chat one
@@ -109,26 +108,19 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         if (lastMessage != null) {
             holder.txt_lim_last_message.setText(lastMessage.getContent());
             holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
-            String content;
+            String content = lastMessage.getContent();
             if (lastMessage.getSender() != null) {
-                if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
-                /*
-                chat group thì hiện tên người gửi cộng nội dung tin nhắn
-                 */
-                    content = lastMessage.getSender().getDisplayName() + ": " + lastMessage.getContent();
-                } else {
-                /*
-                chat one thì hiện mình nội dung tin nhắn
-                 */
-                    content = lastMessage.getContent();
-                }
+                if (!lastMessage.getType().equals(MessageType.TEXT))
+                    content = String.format("%s%s%s", "[", lastMessage.getType().toString(), "]");
                 /*
                 nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
                  */
                 if (user.getId().equals(lastMessage.getSender().getId()))
-                    content = "Bạn: " + lastMessage.getContent();
-            } else {
-                content = lastMessage.getContent();
+                    content = String.format("%s%s", "Bạn: ", content);
+                else {
+                    if (inboxDto.getRoom().getType().equals(RoomType.GROUP))
+                        content = String.format("%s: %s", lastMessage.getSender().getDisplayName(), content);
+                }
             }
             holder.txt_lim_last_message.setText(content);
         }
@@ -170,7 +162,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
              */
             inboxDto.setCountNewMessage(0);
             list.set(position, inboxDto);
-            Log.d("counttt", list.get(position).getCountNewMessage() + "");
+            notifyItemChanged(position);
 
             Intent intent = new Intent(context, ChatActivity.class);
             Bundle bundle = new Bundle();
@@ -209,7 +201,9 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
                 /*
                 nếu người gửi của message trùng với người dùng hiện tại thì không tăng số tin nhắn mới
                  */
-                if (!user.getId().equals(messageDto.getSender().getId()))
+                if (messageDto.getSender() != null && !messageDto.getSender().getId().equals(user.getId()))
+                    inboxDto.setCountNewMessage(inboxDto.getCountNewMessage() + 1);
+                else if (messageDto.getSender() == null)
                     inboxDto.setCountNewMessage(inboxDto.getCountNewMessage() + 1);
                 inboxIsExists = true;
             }
@@ -224,6 +218,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
                         try {
                             String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                             InboxDto inboxDto = gson.fromJson(res, InboxDto.class);
+                            Log.d("------", inboxDto.toString());
                             list.add(inboxDto);
                             sortTimeLastMessage();
                             notifyDataSetChanged();

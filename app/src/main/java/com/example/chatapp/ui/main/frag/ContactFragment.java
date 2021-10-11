@@ -20,6 +20,7 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.MenuItemCompat;
@@ -60,6 +61,7 @@ import java.util.stream.Collectors;
 
 public class ContactFragment extends Fragment {
 
+    private static final int RESULT_OK = -1;
     private RecyclerView rcv_contact_list;
     private FriendListAdapter adapter;
     private String token;
@@ -129,7 +131,7 @@ public class ContactFragment extends Fragment {
         });
         ctl_contact_friend_request.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), FriendRequestActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent,1);
         });
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         this.adapter = new FriendListAdapter(list, getActivity().getApplicationContext());
@@ -317,4 +319,13 @@ public class ContactFragment extends Fragment {
         setHasOptionsMenu(isVisible());
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==1){
+            if (resultCode == RESULT_OK){
+                updateListFriends();
+            }
+        }
+    }
 }

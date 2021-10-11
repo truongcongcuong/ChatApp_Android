@@ -3,6 +3,7 @@ package com.example.chatapp.ui;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -62,7 +63,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
     private String token;
     private Date birthday;
     private Gson gson;
-
+    boolean dataChange = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,7 +143,10 @@ public class UpdateInformationActivity extends AppCompatActivity {
             updateInfo(dto);
         });
 
-        ibt_edit_profile_back.setOnClickListener(v -> finish());
+        ibt_edit_profile_back.setOnClickListener(v -> {
+            back();
+            finish();
+        });
 
 
     }
@@ -251,5 +255,18 @@ public class UpdateInformationActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.confirm_button, null)
                 .create();
         dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        back();
+        super.onBackPressed();
+    }
+
+    public void back(){
+        Intent intent = new Intent();
+        intent.putExtra("data-change",dataChange);
+        setResult(RESULT_OK,intent);
+        Log.e("lo","no");
     }
 }

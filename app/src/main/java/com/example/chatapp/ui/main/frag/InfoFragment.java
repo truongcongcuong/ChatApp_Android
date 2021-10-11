@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
@@ -46,7 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InfoFragment extends Fragment {
+public class InfoFragment extends Fragment{
+    private static final int RESULT_OK = -1;
     private TextView txt_info_name;
     private ImageView image_info_image;
 
@@ -185,7 +188,7 @@ public class InfoFragment extends Fragment {
 
     private void viewInformation() {
         Intent intent = new Intent(getContext(), ViewInformationActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent,1);
     }
 
     private void signout() {
@@ -263,4 +266,19 @@ public class InfoFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1){
+            if(resultCode == RESULT_OK){
+                boolean dataChange=data.getBooleanExtra("data-change",false);
+                if (dataChange){
+                    getUserInfo();
+                    Log.e("update after datachange", "true: ");
+                }
+            }
+        }
+    }
 }

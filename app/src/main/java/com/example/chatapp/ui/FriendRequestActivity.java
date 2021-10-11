@@ -1,6 +1,7 @@
 package com.example.chatapp.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageButton;
@@ -19,6 +20,11 @@ import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.FriendRequestAdapter;
 import com.example.chatapp.cons.Constant;
+
+import com.example.chatapp.cons.SendData;
+import com.example.chatapp.dto.FriendDTO;
+import com.example.chatapp.dto.InboxDto;
+
 import com.example.chatapp.entity.FriendRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -27,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLDecoder;
@@ -35,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FriendRequestActivity extends AppCompatActivity {
+public class FriendRequestActivity extends AppCompatActivity implements SendData {
     ImageButton ibt_friend_request_back;
     TextView txt_fiend_request_total_friend_request;
     RecyclerView lsv_friend_request_list;
@@ -44,6 +51,7 @@ public class FriendRequestActivity extends AppCompatActivity {
     Gson gson;
     FriendRequestAdapter adapter;
     List<FriendRequest> list;
+    boolean dataChange = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +64,10 @@ public class FriendRequestActivity extends AppCompatActivity {
         txt_fiend_request_total_friend_request = findViewById(R.id.txt_fiend_request_total_friend_request);
         lsv_friend_request_list = findViewById(R.id.lsv_friend_request_list);
 
-        ibt_friend_request_back.setOnClickListener(v->finish());
+        ibt_friend_request_back.setOnClickListener(v-> {
+            back();
+            finish();
+        });
 
         getListFriendRequest();
     }
@@ -100,5 +111,22 @@ public class FriendRequestActivity extends AppCompatActivity {
 
         txt_fiend_request_total_friend_request.setText(totalFriendRequest);
 
+    }
+
+    public void back(){
+        Intent intent = new Intent();
+        intent.putExtra("data-change",dataChange);
+        setResult(RESULT_OK,intent);
+    }
+
+    @Override
+    public void SendingData(String s) {
+        dataChange = Boolean.valueOf(s);
+    }
+
+    @Override
+    public void onBackPressed() {
+        back();
+        super.onBackPressed();
     }
 }

@@ -34,8 +34,6 @@ public class WebSocketClient {
         headers.add(new StompHeader("userId", userId));
         headers.add(new StompHeader("access_token", access_token));
 
-        Log.i("userId", userId);
-        Log.i("access_token", access_token);
 
         stompClient.connect(headers);
 

@@ -37,6 +37,7 @@ import com.example.chatapp.adapter.MenuInformationAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.UserDetailDTO;
+import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.User;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
@@ -55,6 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.vertx.core.json.Json;
+
 public class ViewInformationActivity extends AppCompatActivity {
     private ImageButton ibt_update_infor_back;
     private ImageView img_update_infor_avt;
@@ -63,11 +66,13 @@ public class ViewInformationActivity extends AppCompatActivity {
     private List<MenuItem> items;
     private NestedScrollView nsv_update_infor;
     private String userToString, token;
-    private User user;
+    private UserSummaryDTO dto;
     private Gson gson;
     private UserDetailDTO userDetailDTO;
     private static final int REQUEST_GALLERY = 1;
     private static final int REQUEST_IMAGE_CAPTURE = 0;
+    boolean dataChange = false;
+    SharedPreferences sharedPreferencesUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,13 +88,18 @@ public class ViewInformationActivity extends AppCompatActivity {
 //        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
 //        userToString = sharedPreferencesUser.getString("user-infor",null);
         gson = new Gson();
+        sharedPreferencesUser = getSharedPreferences("user", Context.MODE_PRIVATE);
+        dto = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 //        user = gson.fromJson(userToString,User.class);
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
 
         getInformationDetail();
-        ibt_update_infor_back.setOnClickListener(v -> finish());
+        ibt_update_infor_back.setOnClickListener(v -> {
+            back();
+            finish();
+        });
         img_update_infor_avt.setOnClickListener(v -> showDialogChangeAvt());
         btn_update_infor.setOnClickListener(v -> {
             Intent intent = new Intent(ViewInformationActivity.this, UpdateInformationActivity.class);
@@ -97,7 +107,7 @@ public class ViewInformationActivity extends AppCompatActivity {
             bundle.putSerializable("user", userDetailDTO);
             Log.e("user bundle :", userDetailDTO.toString());
             intent.putExtras(bundle);
-            startActivity(intent);
+            startActivityForResult(intent,2);
         });
 
 
@@ -215,14 +225,23 @@ public class ViewInformationActivity extends AppCompatActivity {
             case 1:
                 if (resultCode == RESULT_OK) {
                     Uri selectedImage = data.getData();
+                    userDetailDTO.setImageUrl(selectedImage.toString());
                     Glide.with(this).load(selectedImage)
                             .centerCrop().circleCrop().into(img_update_infor_avt);
                     Log.e("gallery", "done");
                     files.add(new File(PathUtil.getPath(this, selectedImage)));
                 }
                 break;
+
+            case 2:
+                if(resultCode == RESULT_OK){
+                    getInformationDetail();
+                    Log.e("View-Infor-Acti","update after data change");
+                }
+                break;
         }
-        uploadMultiFiles(files);
+        if(requestCode!=2)
+            uploadMultiFiles(files);
     }
 
     private void uploadMultiFiles(List<File> files) {
@@ -231,6 +250,9 @@ public class ViewInformationActivity extends AppCompatActivity {
                         new HashMap<>(), // danh sách request param
                         files,
                         response -> {
+                            dataChange =true;
+                            SharedPreferences.Editor editor = sharedPreferencesUser.edit();
+                            editor.putString("user-info", Json.encode(userDetailDTO)).apply();
                             Log.i("upload succ", "success");
                         },
                         error -> {
@@ -274,4 +296,15 @@ public class ViewInformationActivity extends AppCompatActivity {
         return Uri.parse(path);
     }
 
+    @Override
+    public void onBackPressed() {
+        back();
+        super.onBackPressed();
+    }
+
+    private void back() {
+        Intent intent = new Intent();
+        intent.putExtra("data-change",dataChange);
+        setResult(RESULT_OK,intent);
+    }
 }

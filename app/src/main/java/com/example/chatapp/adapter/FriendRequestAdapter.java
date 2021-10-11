@@ -21,6 +21,10 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
+
+import com.example.chatapp.cons.SendData;
+import com.example.chatapp.dto.FriendDTO;
+
 import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.utils.TimeAgo;
 
@@ -87,6 +91,8 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         StringRequest request = new StringRequest(method, Constant.API_FRIEND_REQUEST+"/"+friendRequest.getFrom().getId(),
                 response -> {
                     Log.e("response: ",response.toString());
+                    SendData sendData = (SendData) context;
+                    sendData.SendingData(String.valueOf(true));
                     notifyDataChange(position);
                 }, error -> {
             Log.e("error: ",error.toString());

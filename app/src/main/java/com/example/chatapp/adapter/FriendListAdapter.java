@@ -1,11 +1,9 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
+import android.os.Build;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,29 +11,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
-import com.example.chatapp.cons.Constant;
+import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.FriendDTO;
-import com.example.chatapp.dto.InboxDto;
-import com.example.chatapp.ui.ChatActivity;
 import com.google.gson.Gson;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import lombok.SneakyThrows;
 
@@ -65,22 +52,27 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         return new ViewHolder(view);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SneakyThrows
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         FriendDTO friend = list.get(position);
+        if (friend != null) {
+            // load image
+            Glide.with(context).load(friend.getFriend().getImageUrl())
+                    .placeholder(R.drawable.image_placeholer)
+                    .centerCrop().circleCrop().into(holder.img_list_contact_avt);
 
-        // load image
-        Glide.with(context).load(friend.getFriend().getImageUrl())
-                .placeholder(R.drawable.image_placeholer)
-                .centerCrop().circleCrop().into(holder.img_list_contact_avt);
-
-        holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());
-        Date dateCreate = sdfFull.parse(friend.getCreateAt());
-        holder.txt_list_contact_create_at.setText(String.format("%s%s", "Bạn bè từ ", sdfYMD.format(dateCreate)));
-        holder.itemView.setOnClickListener(v -> getInboxWith(friend.getFriend().getId()));
+            holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());
+            Date dateCreate = sdfFull.parse(friend.getCreateAt());
+            holder.txt_list_contact_create_at.setText(String.format("%s%s", "Bạn bè từ ", sdfYMD.format(dateCreate)));
+            holder.itemView.setOnClickListener(v -> {
+                ProfileDialog profileDialog = new ProfileDialog(context, friend.getFriend(), null);
+                profileDialog.show();
+            });
+        }
     }
 
     @Override
@@ -111,7 +103,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
     /**
      * Click vào một bạn bè để mở activity chat
      */
-    private void getInboxWith(String anotherUserId) {
+    /*private void getInboxWith(String anotherUserId) {
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "/with/" + anotherUserId,
                 response -> {
                     try {
@@ -141,5 +133,5 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
-    }
+    }*/
 }

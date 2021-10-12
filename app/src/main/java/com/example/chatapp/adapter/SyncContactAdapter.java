@@ -1,7 +1,7 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -29,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.PhoneBookFriendDTO;
+import com.example.chatapp.enumvalue.FriendStatus;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +39,7 @@ import java.util.Map;
 public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.ViewHolder> {
     private List<PhoneBookFriendDTO> list;
     private final Context context;
-    private String token;
+    private final String token;
 
     public SyncContactAdapter(List<PhoneBookFriendDTO> list, Context context, String token) {
         this.list = list;
@@ -56,11 +58,30 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PhoneBookFriendDTO dto = list.get(position);
-        if (dto.isFriend()) {
-            holder.btn_li_sync_contact_action.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.gray)));
-            holder.btn_li_sync_contact_action.setText(context.getString(R.string.added_button));
-        } else {
-            holder.btn_li_sync_contact_action.setOnClickListener(v -> sendFriendRequest(dto));
+        if (dto.getFriendStatus().equals(FriendStatus.SENT)) {
+            holder.btn_li_sync_contact_action.setText("Thu hồi");
+            holder.btn_li_sync_contact_action.setOnClickListener(v -> {
+                Toast.makeText(context, "thu hoi loi moi", Toast.LENGTH_SHORT).show();
+                deleteSentRequest(dto);
+            });
+        } else if (dto.getFriendStatus().equals(FriendStatus.RECEIVED)) {
+            holder.btn_li_sync_contact_action.setText("Đồng ý");
+            holder.btn_li_sync_contact_action.setOnClickListener(v -> {
+                Toast.makeText(context, "chap nhan loi moi", Toast.LENGTH_SHORT).show();
+                acceptFriendRequest(dto);
+            });
+        } else if (dto.getFriendStatus().equals(FriendStatus.FRIEND)) {
+            holder.btn_li_sync_contact_action.setText("Đã kết bạn");
+            holder.btn_li_sync_contact_action.setTextColor(Color.DKGRAY);
+            holder.btn_li_sync_contact_action.setBackground(null);
+            holder.btn_li_sync_contact_action.setBackgroundTintList(null);
+
+        } else if (dto.getFriendStatus().equals(FriendStatus.NONE)) {
+            holder.btn_li_sync_contact_action.setText("Kết bạn");
+            holder.btn_li_sync_contact_action.setOnClickListener(v -> {
+                Toast.makeText(context, "add friend", Toast.LENGTH_SHORT).show();
+                sendFriendRequest(dto);
+            });
         }
 
         Glide.with(context).load(dto.getUser().getImageUrl())
@@ -75,16 +96,17 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         Log.e("is-active", "true");
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_FRIEND_REQUEST + "/" + dto.getUser().getId(),
                 response -> {
-                    showDialogSignupSuccess(context.getString(R.string.send_friend_request_title)
+                    dto.setFriendStatus(FriendStatus.SENT);
+                    showDialogSentSuccess(context.getString(R.string.send_friend_request_title)
                             , context.getString(R.string.send_friend_request_message_success));
-
+                    notifyDataSetChanged();
                 },
                 error -> {
                     NetworkResponse response = error.networkResponse;
                     if (error instanceof ServerError && error != null) {
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                            showDialogSignupSuccess(context.getString(R.string.send_friend_request_title)
+                            showDialogSentSuccess(context.getString(R.string.send_friend_request_title)
                                     , res);
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -128,13 +150,57 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         }
     }
 
-    private void showDialogSignupSuccess(String title, String message) {
+    private void showDialogSentSuccess(String title, String message) {
         AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
                 .setNegativeButton(R.string.accept, null)
                 .create();
         alertDialog.show();
+    }
+
+    private void deleteSentRequest(PhoneBookFriendDTO dto) {
+        StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_FRIEND_REQUEST + "/" + dto.getUser().getId(),
+                response -> {
+                    dto.setFriendStatus(FriendStatus.NONE);
+                    notifyDataSetChanged();
+                }, error -> {
+            Log.e("error: ", error.toString());
+
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(context);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        queue.add(request);
+    }
+
+    private void acceptFriendRequest(PhoneBookFriendDTO dto) {
+        StringRequest request = new StringRequest(Request.Method.PUT, Constant.API_FRIEND_REQUEST + "/" + dto.getUser().getId(),
+                response -> {
+                    dto.setFriendStatus(FriendStatus.FRIEND);
+                    notifyDataSetChanged();
+                }, error -> {
+            Log.e("error: ", error.toString());
+
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(context);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        queue.add(request);
     }
 
 }

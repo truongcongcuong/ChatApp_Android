@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_material_light"
+    android:orientation="vertical"
+    tools:context=".ui.ViewInformationActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/bg_infor">
+
+        <ImageView
+            android:id="@+id/img_view_profile_activity"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/border_for_circle_image"
+            tools:srcCompat="@tools:sample/avatars">
+
+        </ImageView>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp">
+
+        <Button
+            android:id="@+id/btn_chat_view_profile_activity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_btn_friend_phonebook"
+            android:gravity="center_vertical|center_horizontal"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:minWidth="120dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="Nhắn tin"
+            android:textAlignment="center"
+            app:backgroundTint="@null" />
+
+        <Button
+            android:id="@+id/btn_friend_status_view_profile_activity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/background_btn_friend_phonebook"
+            android:gravity="center_vertical|center_horizontal"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:minWidth="120dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:textAlignment="center"
+            app:backgroundTint="@null" />
+    </LinearLayout>
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_view_profile_activity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:minHeight="?attr/actionBarSize"
+        app:contentInsetEnd="0dp"
+        app:contentInsetEndWithActions="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp"
+        app:contentInsetStartWithNavigation="0dp" />
+
+</RelativeLayout>

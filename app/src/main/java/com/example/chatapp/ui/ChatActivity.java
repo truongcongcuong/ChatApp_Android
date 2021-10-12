@@ -3,8 +3,10 @@ package com.example.chatapp.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -30,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -120,6 +123,22 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
     private LinearLayout layout_reply_chat_activity;
     private String replyMessageId = null;
 
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                MessageDto newMessage = (MessageDto) bundle.getSerializable("newMessage");
+                Log.d("-new mess in chat acti", newMessage.toString());
+
+                if (newMessage.getSender() != null)
+                    adapter.deleteOldReadTracking(newMessage.getSender().getId());
+                updateMessageRealTime(newMessage);
+            }
+        }
+    };
+
     @SuppressLint("CheckResult")
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -127,6 +146,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("new_message"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -259,17 +279,17 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
 
         stompClient.connect(headers);
 
-        stompClient
-                .topic("/users/queue/messages")
-                .subscribe(x -> {
-                    Log.i("chat activ subcri mess", x.getPayload());
-                    MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
-                    if (messageDto.getSender() != null)
-                        adapter.deleteOldReadTracking(messageDto.getSender().getId());
-                    updateMessageRealTime(messageDto);
-                }, throwable -> {
-                    Log.i("chat activ subcri erro", throwable.getMessage());
-                });
+//        stompClient
+//                .topic("/users/queue/messages")
+//                .subscribe(x -> {
+//                    Log.i("chat activ subcri mess", x.getPayload());
+//                    MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
+//                    if (messageDto.getSender() != null)
+//                        adapter.deleteOldReadTracking(messageDto.getSender().getId());
+//                    updateMessageRealTime(messageDto);
+//                }, throwable -> {
+//                    Log.i("chat activ subcri erro", throwable.getMessage());
+//                });
 
         stompClient
                 .topic("/users/queue/read")

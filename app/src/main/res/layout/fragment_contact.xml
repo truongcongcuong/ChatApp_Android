@@ -111,7 +111,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/cav_contact_phonebook_friend"
-                        android:layout_marginTop="4dp">
+                        android:layout_marginTop="2dp">
 
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
@@ -150,7 +150,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_below="@+id/cav_contact_all"
-                        android:background="@color/background_material_light" />
+                        android:background="@color/background_material_light"
+                        android:scrollbarSize="3dp"
+                        android:scrollbarThumbVertical="@color/gray"
+                        android:scrollbars="vertical" />
                 </RelativeLayout>
             </LinearLayout>
 

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/img_line_friend_request_avt"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerVertical="true"
+        android:background="@drawable/border_for_circle_image"
+        android:padding="1dp"
+        android:src="@drawable/defaultprofile">
+
+    </ImageView>
+
+    <TextView
+        android:id="@+id/txt_line_friend_request_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_toStartOf="@+id/txt_line_friend_request_create_at"
+        android:layout_toEndOf="@+id/img_line_friend_request_avt"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/test_text"
+        android:textColor="@color/black"
+        android:textSize="18sp">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/txt_line_friend_request_create_at"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="5dp"
+        android:text="5"
+        android:textSize="14sp">
+
+    </TextView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txt_line_friend_request_name"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="5dp"
+        android:layout_toEndOf="@+id/img_line_friend_request_avt"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_line_friend_request_accept"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/accept_button"
+            android:textColor="#00BD5B">
+
+        </Button>
+
+        <Button
+            android:id="@+id/btn_line_friend_request_cancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:text="@string/cancel_button"
+            android:textColor="@color/red">
+
+        </Button>
+    </LinearLayout>
+
+</RelativeLayout>

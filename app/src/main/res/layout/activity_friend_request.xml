@@ -1,118 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.FriendRequestActivity"
-    android:orientation="vertical">
+    android:animateLayoutChanges="true"
+    android:background="@color/background_material_light"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.FriendRequestActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/bg_app"
-        android:layout_marginTop="0dp"
-        >
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical">
-
-            <ImageButton
-                android:id="@+id/ibt_friend_request_back"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_baseline_arrow_back_24"
-                android:layout_centerVertical="true"
-                app:tint="@color/white">
-
-            </ImageButton>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="@string/friend_request_title"
-                android:textSize="20dp"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/ibt_friend_request_back"
-                android:paddingStart="20dp"
-                android:gravity="center_vertical"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                >
-            </TextView>
-        </RelativeLayout>
-    </androidx.appcompat.widget.Toolbar>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardElevation="5dp">
-
-        <LinearLayout
-            android:padding="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_marginStart="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/friend_request_suggestions"
-                style="?attr/materialButtonOutlinedStyle">
-            </Button>
-
-            <Button
-                android:layout_marginRight="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="@string/friend_list"
-                style="?attr/materialButtonOutlinedStyle">
-            </Button>
-
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/friend_request_title"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:textColor="@color/black">
-
-        </TextView>
-
-        <TextView
-            android:id="@+id/txt_fiend_request_total_friend_request"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/red"
-            android:textSize="20dp"
-            android:textStyle="bold">
-
-        </TextView>
-    </LinearLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_marginTop="10dp"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/lsv_friend_request_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </androidx.recyclerview.widget.RecyclerView>
-    </androidx.core.widget.NestedScrollView>
 
-</LinearLayout>
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_friend_request"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="0dp"
+            android:background="@color/purple_200"
+            android:theme="@style/Theme.ChatApp"
+            app:contentInsetEnd="0dp"
+            app:contentInsetEndWithActions="0dp"
+            app:contentInsetLeft="0dp"
+            app:contentInsetRight="0dp"
+            app:contentInsetStart="0dp"
+            app:contentInsetStartWithNavigation="0dp" />
+        <!--app:layout_scrollFlags="scroll|enterAlways"-->
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout_friend_request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/toolbar_friend_request"
+            android:minHeight="?attr/actionBarSize" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_paper_friend_request"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

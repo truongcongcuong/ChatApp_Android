@@ -1,7 +1,9 @@
 package com.example.chatapp.ui.main.frag;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -25,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.MenuItemCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -99,6 +102,15 @@ public class ContactFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         /*
+        khi đồng ý kết bạn ở activity friend request thì contact fragment load lại danh sách bạn bè
+         */
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateListFriends();
+            }
+        }, new IntentFilter("accept_friend"));
+        /*
         enable menu trên action bar
          */
         setHasOptionsMenu(false);
@@ -133,7 +145,7 @@ public class ContactFragment extends Fragment {
             startActivity(intent);
         });
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        this.adapter = new FriendListAdapter(list, getActivity().getApplicationContext());
+        this.adapter = new FriendListAdapter(list, getActivity());
         this.rcv_contact_list.setAdapter(adapter);
 
         btn_contact_refresh.setOnClickListener(v -> updateListFriends());

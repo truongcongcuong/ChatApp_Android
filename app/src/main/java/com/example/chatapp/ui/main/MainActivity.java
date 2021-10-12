@@ -1,6 +1,7 @@
 package com.example.chatapp.ui.main;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -81,6 +83,11 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             messageFragment.setNewMessage(messageDto);
+                            Intent intent = new Intent("new_message");
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("newMessage", messageDto);
+                            intent.putExtras(bundle);
+                            LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
                         }
                     });
                 }, throwable -> {

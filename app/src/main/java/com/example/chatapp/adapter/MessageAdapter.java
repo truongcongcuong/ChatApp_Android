@@ -25,6 +25,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.MessageOptionDialog;
+import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReactionReceiver;
 import com.example.chatapp.dto.ReadByDto;
@@ -428,6 +429,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         receiverViewHolder.receiver_message_reaction_layout.setVisibility(View.VISIBLE);
                     }
                     receiverViewHolder.messageLayout.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
+                    receiverViewHolder.receiverImage.setOnClickListener(v -> {
+                        ProfileDialog profileDialog = new ProfileDialog(context, messageDto.getSender(), null);
+                        profileDialog.show();
+                    });
                     break;
                 case ITEM_SYSTEM:
                     SystemViewHolder systemViewHolder = (SystemViewHolder) holder;

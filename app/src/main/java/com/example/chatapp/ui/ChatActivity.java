@@ -25,9 +25,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -95,33 +97,33 @@ import ua.naiksoftware.stomp.dto.StompMessage;
 
 public class ChatActivity extends AppCompatActivity implements SendData, SendDataReplyMessage {
 
-    private ImageView img_chat_user_avt;
+    private static final int PICK_IMAGE = 1;
+    private static final int VIEW_ROOM_DETAIL = 2;
+    private static final int REQUEST_PERMISSION = 3;
+    private final int size = 20;
+    private int page = 0;
+    private int first = 0;
+    private int last = first;
+    private boolean isFirstTimeRun = true;
+
+    private String access_token;
+    private String replyMessageId = null;
+
     private TextView txt_chat_user_name;
     private TextView txt_chat_detail;
+    private TextView txt_name_reply_chat_activity;
+    private TextView txt_content_reply_chat_activity;
+
+    private ImageView img_chat_user_avt;
     private RecyclerView rcv_chat_list;
     private EditText edt_chat_message_send;
-    private ImageButton ibt_chat_send_message;
-    private ImageButton ibt_chat_send_media;
-    private Toolbar tlb_chat;
     private InboxDto inboxDto;
     private MessageAdapter adapter;
     private Gson gson;
-    private int page = 0;
-    private int size = 20;
-    private int first = 0;
-    private int last = first;
     private UserSummaryDTO user;
-    private String access_token;
     private Button btnScrollToBottom;
-    private static final int PICK_IMAGE = 1;
-    private static final int VIEW_ROOM_DETAIL = 2;
     private StompClient stompClient;
-    private boolean isFirstTimeRun = true;
-
-    private TextView txt_name_reply_chat_activity;
-    private TextView txt_content_reply_chat_activity;
     private LinearLayout layout_reply_chat_activity;
-    private String replyMessageId = null;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -164,10 +166,10 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         txt_chat_detail = findViewById(R.id.txt_chat_detail);
         rcv_chat_list = findViewById(R.id.rcv_chat_list);
         edt_chat_message_send = findViewById(R.id.edt_chat_message_send);
-        ibt_chat_send_message = findViewById(R.id.ibt_chat_send_message);
-        tlb_chat = findViewById(R.id.tlb_chat_activity);
+        ImageButton ibt_chat_send_message = findViewById(R.id.ibt_chat_send_message);
+        Toolbar tlb_chat = findViewById(R.id.tlb_chat_activity);
         img_chat_user_avt = findViewById(R.id.img_chat_user_avt);
-        ibt_chat_send_media = findViewById(R.id.ibt_chat_send_media);
+        ImageButton ibt_chat_send_media = findViewById(R.id.ibt_chat_send_media);
         btnScrollToBottom = findViewById(R.id.btn_scroll_to_bottom);
 
         txt_name_reply_chat_activity = findViewById(R.id.txt_name_reply_chat_activity);
@@ -255,17 +257,22 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         });
 
         ibt_chat_send_media.setOnClickListener(v -> {
-            // xin quyền truy cập vào bộ sưu tập
-            int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission Needed")
+                            .setMessage("Permission is needed to access files from your device...")
+                            .setPositiveButton("OK", (dialog, which) ->
+                                    ActivityCompat.requestPermissions(ChatActivity.this,
+                                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                            REQUEST_PERMISSION))
+                            .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel()).create().show();
+                } else {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
+                }
+            } else {
+                openFileChoose();
             }
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
         });
 
 //        stompClient = WebsocketClient.getInstance().getStompClient();
@@ -335,7 +342,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         ibt_chat_send_message.setOnClickListener(v -> {
             String message = edt_chat_message_send.getText().toString().trim();
             if (!message.isEmpty()) {
-                checkInboxBeforeSendTextMessage(message);
+                checkInboxExistsBeforeSendMessage(message, MessageType.TEXT);
                 edt_chat_message_send.getText().clear();
                 edt_chat_message_send.setText("");
                 replyMessageId = null;
@@ -390,11 +397,11 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
     }
 
     @SuppressLint("CheckResult")
-    private void checkInboxBeforeSendTextMessage(String message) {
+    private void checkInboxExistsBeforeSendMessage(String message, MessageType messageType) {
         if (inboxDto.getId() == null) {
-            createInboxAndSendTextMessage(inboxDto.getRoom().getTo().getId(), message);
+            createInboxIfNotExistsAndSendMessage(inboxDto.getRoom().getTo().getId(), message, messageType);
         } else {
-            sendMessage(message, MessageType.TEXT);
+            sendMessage(message, messageType);
         }
     }
 
@@ -425,13 +432,13 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
     /*
     hai người chưa có room chung nên phải tạo room và inbox trước khi gửi tin nhắn đầu tiên
      */
-    private void createInboxAndSendTextMessage(String toUserId, String message) {
+    private void createInboxIfNotExistsAndSendMessage(String toUserId, String message, MessageType messageType) {
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_INBOX + "/with/" + toUserId,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         inboxDto = gson.fromJson(res, InboxDto.class);
-                        sendMessage(message, MessageType.TEXT);
+                        sendMessage(message, messageType);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -577,7 +584,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
                 files.add(file);
             }
             Log.d("--file da chon", files.toString());
-            sendFilesMessages(files);
+            checkInboxExistsAndSendFileMessage(files);
         } else {
             // chưa có hình ảnh nào được chọn
         }
@@ -595,7 +602,35 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
     /*
     gửi tin nhắn file, hình ảnh, video
      */
-    private void sendFilesMessages(List<File> files) {
+    private void checkInboxExistsAndSendFileMessage(List<File> files) {
+        if (inboxDto.getId() == null) {
+            StringRequest request = new StringRequest(Request.Method.POST, Constant.API_INBOX + "/with/" + inboxDto.getRoom().getTo().getId(),
+                    response -> {
+                        try {
+                            String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                            inboxDto = gson.fromJson(res, InboxDto.class);
+                            sendFileMessage(files);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                    },
+                    error -> Log.i("chat activ send mes err", error.toString())) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("Authorization", "Bearer " + access_token);
+                    return map;
+                }
+            };
+
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            request.setRetryPolicy(retryPolicy);
+            requestQueue.add(request);
+        }
+    }
+
+    private void sendFileMessage(List<File> files) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("roomId", inboxDto.getRoom().getId());
         MultiPartFileRequest<String> restApiMultiPartRequest =
@@ -740,4 +775,26 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         });
         return super.onCreateOptionsMenu(menu);
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openFileChoose();
+            } else {
+                Toast.makeText(this, "Please allow the Permission", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void openFileChoose() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+    }
+
 }

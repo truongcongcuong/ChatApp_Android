@@ -153,12 +153,12 @@ public class RoomDetailActivity extends AppCompatActivity {
             menuItems.add(MenuItem.builder()
                     .key("createRoomWithThisUser")
                     .imageResource(R.drawable.ic_baseline_group_create_24_black)
-                    .name("Tạo nhóm với người này")
+                    .name("Tạo nhóm với người này --đã xong")
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("viewProfile")
                     .imageResource(R.drawable.ic_baseline_profile_circle_24)
-                    .name("Xem trang cá nhân")
+                    .name("Xem trang cá nhân -- đã xong")
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("block")
@@ -188,6 +188,11 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .imageResource(R.drawable.ic_baseline_leave_24)
                     .name("Rời khỏi nhóm -- đã xong")
                     .build());
+            menuItems.add(MenuItem.builder()
+                    .key("deleteGroup")
+                    .imageResource(R.drawable.ic_baseline_delete_forever_24)
+                    .name("Giải tán nhóm")
+                    .build());
             btn_change_image_of_room.setPadding(3, 0, 3, 3);
             Glide.with(RoomDetailActivity.this)
                     .load(R.drawable.ic_baseline_camera_24)
@@ -216,7 +221,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         }
 
         menuItems.add(MenuItem.builder()
-                .key("delete")
+                .key("deleteInbox")
                 .imageResource(R.drawable.ic_baseline_delete_forever_24)
                 .name("Xóa cuộc trò chuyện --đã xong")
                 .build());
@@ -256,7 +261,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                             leaveGroup();
                         });
                 builder.create().show();
-            } else if (item.getKey().equals("delete")) {
+            } else if (item.getKey().equals("deleteInbox")) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("Xóa lịch sử cuộc trò chuyện này?")
                         .setPositiveButton("Hủy", (dialog, id) -> dialog.cancel())
@@ -264,6 +269,20 @@ public class RoomDetailActivity extends AppCompatActivity {
                             deleteInbox();
                         });
                 builder.create().show();
+            } else if (item.getKey().equals("viewProfile")) {
+                Intent intent = new Intent(this, ViewProfileActivity.class);
+                Bundle bundle2 = new Bundle();
+                bundle2.putString("userId", inboxDto.getRoom().getTo().getId());
+                intent.putExtras(bundle2);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } else if (item.getKey().equals("createRoomWithThisUser")) {
+                Intent intent = new Intent(this, CreateGroupActivity.class);
+                Bundle bundle3 = new Bundle();
+                Log.d("------", inboxDto.getRoom().getTo().toString());
+                bundle3.putSerializable("user", inboxDto.getRoom().getTo());
+                intent.putExtras(bundle3);
+                startActivity(intent);
             }
         });
         setListViewHeightBasedOnChildren(lv_menu_items);

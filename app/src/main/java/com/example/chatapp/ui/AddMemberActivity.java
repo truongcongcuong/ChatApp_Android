@@ -194,7 +194,7 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         searchPlate.setBackgroundResource(R.drawable.search_view_background);
 
         rcv_user_add_member_activity.setLayoutManager(new LinearLayoutManager(this));
-        this.adapter = new SearchUserCreateGroupAdapter(this, new ArrayList<>());
+        this.adapter = new SearchUserCreateGroupAdapter(this, null, null);
         rcv_user_add_member_activity.setAdapter(adapter);
 
         txt_add_member_find_user.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

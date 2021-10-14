@@ -35,12 +35,16 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
     private final UserSummaryDTO user;
     private final SendDataCreateRoomActivity sendData;
 
-    public SearchUserCreateGroupAdapter(Context context, List<UserProfileDto> list) {
+    public SearchUserCreateGroupAdapter(Context context, List<UserProfileDto> list, List<UserProfileDto> selected) {
         this.context = context;
         if (list == null)
             this.list = new ArrayList<>(0);
         else
             this.list = list;
+        if (selected == null)
+            this.selected = new ArrayList<>(0);
+        else
+            this.selected = selected;
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         String userJson = sharedPreferencesUser.getString("user-info", null);
 
@@ -49,7 +53,6 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
 
         gson = new Gson();
         user = gson.fromJson(userJson, UserSummaryDTO.class);
-        selected = new ArrayList<>(0);
         sendData = (SendDataCreateRoomActivity) context;
 
     }
@@ -95,9 +98,11 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
              */
             holder.itemView.setOnClickListener(v -> {
                 if (!holder.item_create_group_checkbox.isChecked()) {
-                    selected.add(user);
-                    sendData.addUserToGroup(user);
-                    holder.item_create_group_checkbox.setChecked(true);
+                    if (!selected.contains(user)) {
+                        selected.add(user);
+                        sendData.addUserToGroup(user);
+                        holder.item_create_group_checkbox.setChecked(true);
+                    }
                 } else {
                     selected.removeIf(x -> x.getId().equals(user.getId()));
                     sendData.deleteUser(user.getId());
@@ -110,9 +115,11 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
              */
             holder.item_create_group_checkbox.setOnClickListener(v -> {
                 if (holder.item_create_group_checkbox.isChecked()) {
-                    selected.add(user);
-                    sendData.addUserToGroup(user);
-                    holder.item_create_group_checkbox.setChecked(true);
+                    if (!selected.contains(user)) {
+                        selected.add(user);
+                        sendData.addUserToGroup(user);
+                        holder.item_create_group_checkbox.setChecked(true);
+                    }
                 } else {
                     selected.removeIf(x -> x.getId().equals(user.getId()));
                     sendData.deleteUser(user.getId());

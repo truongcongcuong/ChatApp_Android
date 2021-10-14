@@ -138,9 +138,18 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
 
         Slidr.attach(this, config);
 
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            UserProfileDto user = (UserProfileDto) bundle.getSerializable("user");
+            Log.d("----", user.toString());
+            if (usersSelected == null)
+                usersSelected = new ArrayList<>();
+            usersSelected.add(user);
+        } else
+            usersSelected = new ArrayList<>(0);
+
         toolbar = findViewById(R.id.tlb_create_group_activity);
         toolbar.setTitle(R.string.unname_group);
-        toolbar.setSubtitle(R.string.no_member);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
@@ -217,7 +226,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         initImageCreate();
 
         lv_create_group_user.setLayoutManager(new LinearLayoutManager(CreateGroupActivity.this));
-        this.adapter = new SearchUserCreateGroupAdapter(CreateGroupActivity.this, new ArrayList<>());
+        this.adapter = new SearchUserCreateGroupAdapter(CreateGroupActivity.this, null, usersSelected);
         lv_create_group_user.setAdapter(adapter);
 
         txt_create_room_find_user.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -300,8 +309,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         /*
         layput bottom chỉ hiện khi người dùng chọn nhiều hơn một người để tạo nhóm
          */
-        bottomLayout.setVisibility(View.GONE);
-        usersSelected = new ArrayList<>();
+        setSubTitleAndShowBottomLayout();
         selectedUserAdapter = new SelectedUserCreateGroupAdapter(CreateGroupActivity.this, usersSelected);
         LinearLayoutManager layoutManager
                 = new LinearLayoutManager(CreateGroupActivity.this, LinearLayoutManager.HORIZONTAL, false);
@@ -442,20 +450,21 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void addUserToGroup(Serializable serializable) {
-        usersSelected.add((UserProfileDto) serializable);
+        UserProfileDto user = (UserProfileDto) serializable;
+        if (!usersSelected.contains(user))
+            usersSelected.add(user);
         selectedUserAdapter.notifyDataSetChanged();
 
         rcv_create_group_selected.getLayoutManager().smoothScrollToPosition(rcv_create_group_selected,
                 new RecyclerView.State(), selectedUserAdapter.getItemCount());
-        toolbar.setSubtitle(String.format("%d%s", usersSelected.size(), " thành viên."));
 
         if (!usersSelected.isEmpty()) {
-            bottomLayout.setVisibility(View.VISIBLE);
             if (!txt_create_group_name.getText().toString().isEmpty()) {
                 create_group_continue.setBackgroundTintList(null);
                 create_group_continue.setEnabled(true);
             }
         }
+        setSubTitleAndShowBottomLayout();
     }
 
     /*
@@ -468,13 +477,11 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         adapter.uncheckForUser(idToDelete);
         selectedUserAdapter.notifyDataSetChanged();
 
-        toolbar.setSubtitle(String.format("%d%s", usersSelected.size(), " thành viên."));
         if (usersSelected.isEmpty()) {
-            bottomLayout.setVisibility(View.GONE);
-            toolbar.setSubtitle("Chưa có thành viên.");
             create_group_continue.setBackgroundTintList(backgroundTintList);
             create_group_continue.setEnabled(false);
         }
+        setSubTitleAndShowBottomLayout();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -625,6 +632,16 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         } else {
             super.onBackPressed();
             overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+        }
+    }
+
+    private void setSubTitleAndShowBottomLayout() {
+        if (usersSelected == null || usersSelected.isEmpty()) {
+            bottomLayout.setVisibility(View.GONE);
+            toolbar.setSubtitle(R.string.no_member);
+        } else {
+            bottomLayout.setVisibility(View.VISIBLE);
+            toolbar.setSubtitle(String.format("%d%s", usersSelected.size(), " thành viên."));
         }
     }
 }

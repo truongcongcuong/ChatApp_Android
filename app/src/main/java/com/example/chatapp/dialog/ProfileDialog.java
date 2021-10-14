@@ -29,7 +29,6 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.UserProfileDto;
-import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.ChatActivity;
 import com.example.chatapp.ui.ViewProfileActivity;
 import com.google.gson.Gson;
@@ -44,17 +43,10 @@ import java.util.Map;
 
 public class ProfileDialog extends Dialog {
 
-    private UserProfileDto userProfileDto;
-    private UserSummaryDTO user;
     private Gson gson;
     private String token;
     private Context context;
-    private ListView listView;
     private List<MenuItem> menuItems;
-    private MenuButtonAdapterVertical menuAdapter;
-    private ImageView profile_image_dialog;
-    private TextView profile_name_dialog;
-
 
     private ProfileDialog(@NonNull Context context) {
         super(context);
@@ -63,12 +55,9 @@ public class ProfileDialog extends Dialog {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ProfileDialog(@NonNull Context context, UserProfileDto userProfileDto, List<MenuItem> listMenu) {
         super(context);
-        this.userProfileDto = userProfileDto;
         this.context = context;
 
         gson = new Gson();
-        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-        user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
         SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
@@ -90,11 +79,13 @@ public class ProfileDialog extends Dialog {
         }
 
         setContentView(R.layout.layout_profile_dialog);
-        listView = findViewById(R.id.lv_profile_dialog);
-        profile_image_dialog = findViewById(R.id.profile_image_dialog);
-        profile_name_dialog = findViewById(R.id.profile_name_dialog);
+        ListView listView = findViewById(R.id.lv_profile_dialog);
+        ImageView profile_image_dialog = findViewById(R.id.profile_image_dialog);
+        TextView profile_name_dialog = findViewById(R.id.profile_name_dialog);
+        ImageView imv_close = findViewById(R.id.profile_imv_close);
+        imv_close.setOnClickListener(v -> cancel());
 
-        menuAdapter = new MenuButtonAdapterVertical(context, R.layout.line_item_menu_button_vertical, menuItems);
+        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(context, R.layout.line_item_menu_button_vertical, menuItems);
         listView.setAdapter(menuAdapter);
         if (userProfileDto != null) {
             Glide.with(context).load(userProfileDto.getImageUrl())

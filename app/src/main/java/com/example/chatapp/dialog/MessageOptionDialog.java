@@ -40,17 +40,10 @@ import java.util.Map;
 public class MessageOptionDialog extends Dialog implements View.OnClickListener {
 
     private MessageDto messageDto;
-    private RecyclerView rcvReaction;
     private RecyclerView rcvMenuOption;
-    private ReactionDialogCreateAdapter arrayAdapter;
-    private MenuButtonAdapterHorizontal menuButtonAdapterHorizontal;
     private List<MenuItem> menuItems;
-
-    private UserSummaryDTO user;
-    private Gson gson;
     private String token;
     private Context context;
-
 
     private MessageOptionDialog(@NonNull Context context) {
         super(context);
@@ -63,14 +56,14 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
         this.context = context;
         setContentView(R.layout.layout_message_option_dialog);
 
-        rcvReaction = findViewById(R.id.rcv_reaction_dialog_create);
+        RecyclerView rcvReaction = findViewById(R.id.rcv_reaction_dialog_create);
         rcvMenuOption = findViewById(R.id.rcv_message_option_menu);
 
         ConstraintLayout layout_menu_in_message_option_dialog = findViewById(R.id.layout_menu_in_message_option_dialog);
 
-        gson = new Gson();
+        Gson gson = new Gson();
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-        user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+        UserSummaryDTO user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
         SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
@@ -93,12 +86,12 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
         }
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-        arrayAdapter = new ReactionDialogCreateAdapter(messageDto, context, this);
+        ReactionDialogCreateAdapter arrayAdapter = new ReactionDialogCreateAdapter(messageDto, context, this);
         rcvReaction.setLayoutManager(layoutManager);
         rcvReaction.setAdapter(arrayAdapter);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(context, 4, LinearLayoutManager.VERTICAL, false);
-        menuButtonAdapterHorizontal = new MenuButtonAdapterHorizontal(context, menuItems, this);
+        MenuButtonAdapterHorizontal menuButtonAdapterHorizontal = new MenuButtonAdapterHorizontal(context, menuItems, this);
         rcvMenuOption.setLayoutManager(gridLayoutManager);
         rcvMenuOption.setAdapter(menuButtonAdapterHorizontal);
 

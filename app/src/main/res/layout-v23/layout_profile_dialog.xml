@@ -25,6 +25,16 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp">
 
+            <ImageView
+                android:id="@+id/profile_imv_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_baseline_close_circle_24">
+
+            </ImageView>
+
             <ImageButton
                 android:id="@+id/profile_image_dialog"
                 android:layout_width="120dp"

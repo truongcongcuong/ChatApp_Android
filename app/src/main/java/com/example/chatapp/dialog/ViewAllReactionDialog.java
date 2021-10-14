@@ -3,10 +3,10 @@ package com.example.chatapp.dialog;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -15,23 +15,11 @@ import androidx.annotation.RequiresApi;
 
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.ReactionDialogAdapter;
-import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReactionDto;
-import com.example.chatapp.dto.UserSummaryDTO;
-import com.google.gson.Gson;
 
 import java.util.List;
 
 public class ViewAllReactionDialog extends Dialog {
-
-    private MessageDto messageDto;
-    private List<ReactionDto> reactions;
-
-    private UserSummaryDTO user;
-    private Gson gson;
-    private String token;
-    private Context context;
-
 
     private ViewAllReactionDialog(@NonNull Context context) {
         super(context);
@@ -40,19 +28,12 @@ public class ViewAllReactionDialog extends Dialog {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ViewAllReactionDialog(@NonNull Context context, List<ReactionDto> reactions) {
         super(context);
-        this.reactions = reactions;
-        this.context = context;
-
-        gson = new Gson();
-        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-        user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
-
-        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
-        token = sharedPreferencesToken.getString("access-token", null);
 
         setContentView(R.layout.layout_view_reaction_dialog);
         ListView listView = findViewById(R.id.lv_reaction_dialog);
         TextView titleOfDialog = findViewById(R.id.txt_reaction_dialog_title);
+        ImageView imv_close = findViewById(R.id.imv_reaction_dialog_close);
+        imv_close.setOnClickListener(v -> cancel());
 
         ReactionDialogAdapter arrayAdapter = new ReactionDialogAdapter(context, R.layout.line_item_view_reaction_dialog, reactions);
         listView.setAdapter(arrayAdapter);

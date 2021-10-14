@@ -1,16 +1,18 @@
 package com.example.chatapp.dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -64,7 +66,7 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
         rcvReaction = findViewById(R.id.rcv_reaction_dialog_create);
         rcvMenuOption = findViewById(R.id.rcv_message_option_menu);
 
-        LinearLayout layout_menu_in_message_option_dialog = findViewById(R.id.layout_menu_in_message_option_dialog);
+        ConstraintLayout layout_menu_in_message_option_dialog = findViewById(R.id.layout_menu_in_message_option_dialog);
 
         gson = new Gson();
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
@@ -107,6 +109,12 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         getWindow().setAttributes(layoutParams);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayHeight = displayMetrics.heightPixels;
+
+        layout_menu_in_message_option_dialog.setMaxHeight((int) (displayHeight * 0.22f));
 
     }
 

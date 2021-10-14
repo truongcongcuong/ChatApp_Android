@@ -1,11 +1,13 @@
 package com.example.chatapp.dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -121,8 +123,12 @@ public class ProfileDialog extends Dialog {
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
 //        layoutParams.gravity = Gravity.BOTTOM;
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-//        getWindow().setBackgroundDrawableResource(R.drawable.dark_background_dialog_circle);
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayHeight = displayMetrics.heightPixels;
+        layoutParams.height = (int) (displayHeight * 0.5f);
         getWindow().setAttributes(layoutParams);
 
     }

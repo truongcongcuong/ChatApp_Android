@@ -1,9 +1,11 @@
 package com.example.chatapp.dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -41,7 +43,6 @@ public class ViewAllReactionDialog extends Dialog {
         this.reactions = reactions;
         this.context = context;
 
-
         gson = new Gson();
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
@@ -55,9 +56,9 @@ public class ViewAllReactionDialog extends Dialog {
 
         ReactionDialogAdapter arrayAdapter = new ReactionDialogAdapter(context, R.layout.line_item_view_reaction_dialog, reactions);
         listView.setAdapter(arrayAdapter);
-        listView.setOnItemClickListener((parent, view, pos, itemId) -> {
-
-        });
+//        listView.setOnItemClickListener((parent, view, pos, itemId) -> {
+//
+//        });
         titleOfDialog.setText("Những người đã bày tỏ cảm xúc");
 
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
@@ -65,8 +66,12 @@ public class ViewAllReactionDialog extends Dialog {
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
 //        layoutParams.gravity = Gravity.BOTTOM;
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-//        getWindow().setBackgroundDrawableResource(R.drawable.dark_background_dialog_circle);
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayHeight = displayMetrics.heightPixels;
+        layoutParams.height = (int) (displayHeight * 0.5f);
         getWindow().setAttributes(layoutParams);
 
     }

@@ -679,7 +679,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         setResult(Activity.RESULT_OK, resultIntent);
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
-        super.finish();
+        finish();
     }
 
     /*
@@ -691,7 +691,6 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         Intent resultIntent = new Intent();
         resultIntent.putExtra("dto", inboxDto);
         setResult(Activity.RESULT_OK, resultIntent);
-        super.finish();
         stompClient
                 .send(new StompMessage(StompCommand.UNSUBSCRIBE,
                         Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/read"))),
@@ -723,6 +722,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
                         Log.d("unsubscribe reaction", "ok");
                     }
                 });
+        super.finish();
     }
 
     @SuppressLint("SetTextI18n")

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -28,6 +29,7 @@ import com.example.chatapp.cons.SendDataFriendRequest;
 import com.example.chatapp.ui.main.frag.FriendRequestReceivedFragment;
 import com.example.chatapp.ui.main.frag.FriendRequestSentFragment;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
@@ -40,7 +42,6 @@ import java.util.Map;
 
 public class FriendRequestActivity extends AppCompatActivity implements SendDataFriendRequest {
     private TabLayout tabLayout_friend_request;
-    private ViewPager2 viewPager_friend_request;
     private FriendRequestReceivedFragment friendRequestReceivedFragment;
     private FriendRequestSentFragment friendRequestSentFragment;
     private static final int NUM_PAGES = 2;
@@ -81,7 +82,7 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         tabLayout_friend_request = findViewById(R.id.tab_layout_friend_request);
-        viewPager_friend_request = findViewById(R.id.view_paper_friend_request);
+        ViewPager2 viewPager_friend_request = findViewById(R.id.view_paper_friend_request);
         viewPager_friend_request.setAdapter(new ScreenSlidePagerAdapter(this));
         viewPager_friend_request.setPageTransformer(new ZoomOutPageTransformer());
         viewPager_friend_request.setOffscreenPageLimit(NUM_PAGES);
@@ -90,42 +91,8 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         tabLayout_friend_request.addTab(tabLayout_friend_request.newTab().setText("Đã gửi"));
         tabLayout_friend_request.setSelectedTabIndicatorColor(getResources().getColor(R.color.purple_200));
 
-        tabLayout_friend_request.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager_friend_request.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
-        viewPager_friend_request.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                TabLayout.Tab tabAtPosition = tabLayout_friend_request.getTabAt(position);
-                if (tabAtPosition != null)
-                    tabAtPosition.select();
-                super.onPageSelected(position);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                super.onPageScrollStateChanged(state);
-            }
-        });
+        new TabLayoutMediator(tabLayout_friend_request, viewPager_friend_request, (tab, position) -> {
+        }).attach();
 
         countFriendRequestReceived();
         countFriendRequestSent();

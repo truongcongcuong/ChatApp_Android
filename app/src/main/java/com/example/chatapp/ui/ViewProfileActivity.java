@@ -38,9 +38,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     private ImageView img_view_profile_activity;
     private Button btn_friend_status_view_profile_activity;
-    private Button btn_chat_view_profile_activity;
     private String userId;
-    private UserSummaryDTO currentUser;
     private Gson gson;
     private String token;
 
@@ -56,8 +54,6 @@ public class ViewProfileActivity extends AppCompatActivity {
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
@@ -66,7 +62,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         img_view_profile_activity = findViewById(R.id.img_view_profile_activity);
         Toolbar toolbar_view_profile_activity = findViewById(R.id.toolbar_view_profile_activity);
         btn_friend_status_view_profile_activity = findViewById(R.id.btn_friend_status_view_profile_activity);
-        btn_chat_view_profile_activity = findViewById(R.id.btn_chat_view_profile_activity);
+        Button btn_chat_view_profile_activity = findViewById(R.id.btn_chat_view_profile_activity);
 
         toolbar_view_profile_activity.setTitleTextColor(Color.WHITE);
         toolbar_view_profile_activity.setSubtitleTextColor(Color.WHITE);
@@ -84,7 +80,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         gson = new Gson();
         SharedPreferences sharedPreferencesUser = getSharedPreferences("user", Context.MODE_PRIVATE);
-        currentUser = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+        UserSummaryDTO currentUser = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);

@@ -1,66 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="20dp"
     android:layout_marginLeft="20dp"
-    android:layout_marginRight="20dp">
+    android:layout_marginRight="20dp"
+    app:cardCornerRadius="20dp">
 
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:orientation="vertical">
-       <ImageView
-           android:layout_width="match_parent"
-           android:layout_height="100dp"
-           android:background="@drawable/dialog_bg_1">
-       </ImageView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-       <LinearLayout
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:orientation="vertical">
-           <TextView
-               android:paddingLeft="100dp"
-               android:id="@+id/txt_change_avt_view"
-               android:paddingTop="10dp"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:text="@string/view_avatar"
-               android:textSize="25dp"
-               android:textColor="@color/black"
-               android:drawablePadding="18dp"
-               android:drawableLeft="@drawable/ic_outline_remove_red_eye_24"
-               >
-           </TextView>
-           <TextView
-               android:paddingLeft="100dp"
-               android:id="@+id/txt_change_avt_take_photo"
-               android:paddingTop="10dp"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:text="@string/take_photo"
-               android:textSize="25dp"
-               android:textColor="@color/black"
-               android:drawablePadding="18dp"
-               android:drawableLeft="@drawable/ic_outline_camera_alt_24"
-               >
-           </TextView>
-           <TextView
-               android:paddingLeft="100dp"
-               android:id="@+id/txt_change_avt_from_gallery"
-               android:paddingTop="10dp"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:text="@string/choose_from_gallery"
-               android:textSize="25dp"
-               android:textColor="@color/black"
-               android:drawablePadding="18dp"
-               android:drawableLeft="@drawable/ic_outline_image_24"
-               >
-           </TextView>
-       </LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@drawable/dialog_bg_1">
 
-   </LinearLayout>
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_change_avt_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_outline_remove_red_eye_24"
+                android:drawablePadding="18dp"
+                android:paddingStart="100dp"
+                android:paddingTop="10dp"
+                android:text="@string/view_avatar"
+                android:textColor="@color/black"
+                android:textSize="25sp">
+
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_change_avt_take_photo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_outline_camera_alt_24"
+                android:drawablePadding="18dp"
+                android:paddingStart="100dp"
+                android:paddingTop="10dp"
+                android:text="@string/take_photo"
+                android:textColor="@color/black"
+                android:textSize="25sp">
+
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_change_avt_from_gallery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_outline_image_24"
+                android:drawablePadding="18dp"
+                android:paddingStart="100dp"
+                android:paddingTop="10dp"
+                android:text="@string/choose_from_gallery"
+                android:textColor="@color/black"
+                android:textSize="25sp">
+
+            </TextView>
+        </LinearLayout>
+
+    </LinearLayout>
 </androidx.cardview.widget.CardView>

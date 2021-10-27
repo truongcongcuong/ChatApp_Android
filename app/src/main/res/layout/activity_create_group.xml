@@ -64,23 +64,22 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="5dp"
-                android:layout_toRightOf="@+id/image_create_group_avt"
+                android:layout_toEndOf="@+id/image_create_group_avt"
                 android:background="@drawable/search_view_background"
                 android:ems="10"
-                android:hint="Đặt tên nhóm"
+                android:hint="@string/group_name"
                 android:inputType="textPersonName"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:paddingEnd="10dp" />
         </RelativeLayout>
 
         <SearchView
             android:id="@+id/txt_create_group_find_user"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:ems="10"
             android:iconifiedByDefault="false"
-            android:inputType="textPersonName"
-            android:paddingTop="2dp" />
+            android:inputType="textPersonName" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

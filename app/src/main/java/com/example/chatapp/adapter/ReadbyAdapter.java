@@ -1,7 +1,6 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
@@ -19,8 +18,6 @@ import com.example.chatapp.R;
 import com.example.chatapp.dialog.ViewAllReadTrackingDialog;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReadByDto;
-import com.example.chatapp.dto.UserSummaryDTO;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,22 +26,18 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
 
     private List<ReadByDto> list;
     private final Context context;
-    private MessageDto messageDto;
     private final int max = 10;
-    private final UserSummaryDTO user;
-    private final Gson gson;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ReadbyAdapter(MessageDto messageDto, Context context) {
-        this.messageDto = messageDto;
         if (messageDto != null)
             this.list = new ArrayList<>(messageDto.getReadbyes());
         else
             this.list = new ArrayList<>();
         this.context = context;
-        gson = new Gson();
-        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-        user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
+//        Gson gson = new Gson();
+//        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+//        UserSummaryDTO user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
         /*
         xóa reaction của người dùng hiện tại, không hiện lên
          */

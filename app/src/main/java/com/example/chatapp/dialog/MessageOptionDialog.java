@@ -75,13 +75,13 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
         menuItems.add(MenuItem.builder()
                 .key("reply")
                 .imageResource(R.drawable.ic_round_reply_36)
-                .name("Phản hồi")
+                .name(context.getString(R.string.reply))
                 .build());
         if (messageDto.getSender() != null && user.getId().equals(messageDto.getSender().getId())) {
             menuItems.add(MenuItem.builder()
                     .key("deleteMessage")
                     .imageResource(R.drawable.ic_baseline_delete_forever_24)
-                    .name("Gỡ tin nhắn")
+                    .name(context.getString(R.string.remove))
                     .build());
         }
 

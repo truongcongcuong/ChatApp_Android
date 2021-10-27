@@ -23,7 +23,6 @@ import com.r0adkll.slidr.model.SlidrPosition;
 
 public class ViewVideoActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
     private MyVideoView videoView;
     private MessageDto messageDto;
     private ProgressBar progressBar;
@@ -40,8 +39,6 @@ public class ViewVideoActivity extends AppCompatActivity {
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
@@ -50,7 +47,7 @@ public class ViewVideoActivity extends AppCompatActivity {
         if (bundle != null)
             messageDto = (MessageDto) bundle.getSerializable("message");
 
-        toolbar = findViewById(R.id.toolbar_view_video_activity);
+        Toolbar toolbar = findViewById(R.id.toolbar_view_video_activity);
         videoView = findViewById(R.id.video_content_view_video_activity);
         progressBar = findViewById(R.id.progressbar_video_view_activity);
         progressBar.setVisibility(View.VISIBLE);

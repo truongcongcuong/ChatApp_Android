@@ -16,21 +16,16 @@ import com.example.chatapp.ui.signup.SignUpActivity;
 
 public class HomePageActivity extends AppCompatActivity {
 
-    private Button btn_home_page_sign_in;
-    private Button btn_home_page_sign_up;
-    private Button btn_home_page_language_english;
-    private Button btn_home_page_language_vietnamese;
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        btn_home_page_language_vietnamese = findViewById(R.id.btn_home_page_language_vietnamese);
-        btn_home_page_sign_in = findViewById(R.id.btn_home_page_sign_in);
-        btn_home_page_sign_up = findViewById(R.id.btn_home_page_sign_up);
-        btn_home_page_language_english = findViewById(R.id.btn_home_page_language_english);
+        Button btn_home_page_language_vietnamese = findViewById(R.id.btn_home_page_language_vietnamese);
+        Button btn_home_page_sign_in = findViewById(R.id.btn_home_page_sign_in);
+        Button btn_home_page_sign_up = findViewById(R.id.btn_home_page_sign_up);
+        Button btn_home_page_language_english = findViewById(R.id.btn_home_page_language_english);
 
         btn_home_page_language_vietnamese.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.gray)));
 

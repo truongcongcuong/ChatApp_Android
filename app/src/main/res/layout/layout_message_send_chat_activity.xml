@@ -59,7 +59,6 @@
                         android:id="@+id/send_message_reply_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="sender name"
                         android:textColor="#666666"
                         android:textSize="14sp">
 
@@ -69,7 +68,6 @@
                         android:id="@+id/send_message_reply_content"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="content"
                         android:textColor="#666666"
                         android:textSize="14sp">
 
@@ -132,7 +130,7 @@
             android:layout_below="@id/blank"
             android:layout_alignEnd="@id/blank"
             android:layout_alignParentEnd="true"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:layout_marginTop="-6dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/dark_background_reaction_circle"
@@ -147,7 +145,7 @@
                 android:id="@+id/send_rcv_reaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:layout_marginStart="0dp"
                 android:layout_marginEnd="0dp"
                 android:layoutDirection="rtl"

@@ -50,15 +50,9 @@ import java.util.Map;
 public class InfoFragment extends Fragment {
     private TextView txt_info_name;
     private ImageView image_info_image;
-
     private List<MenuItem> menuItems;
-    private MenuButtonAdapterVertical menuAdapter;
-    private ListView lv_info_fragment_menu;
     private NestedScrollView nestedScrollView;
-
     private Gson gson;
-    private UserSummaryDTO user;
-    private String token;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -98,36 +92,36 @@ public class InfoFragment extends Fragment {
 
         txt_info_name = view.findViewById(R.id.name_of_user_info_fragment);
         image_info_image = view.findViewById(R.id.image_user_info_fragment);
-        lv_info_fragment_menu = view.findViewById(R.id.lv_info_fragment_menu);
+        ListView lv_info_fragment_menu = view.findViewById(R.id.lv_info_fragment_menu);
         nestedScrollView = view.findViewById(R.id.nested_scroll_info_fragment);
 
         gson = new Gson();
-        SharedPreferences sharedPreferencesToken = getActivity().getSharedPreferences("token", Context.MODE_PRIVATE);
-        token = sharedPreferencesToken.getString("access-token", null);
+//        SharedPreferences sharedPreferencesToken = getActivity().getSharedPreferences("token", Context.MODE_PRIVATE);
+//        String token = sharedPreferencesToken.getString("access-token", null);
 
         menuItems = new ArrayList<>();
         menuItems.add(MenuItem.builder()
                 .key("viewProfile")
                 .imageResource(R.drawable.ic_baseline_profile_circle_24)
-                .name("Xem trang cá nhân")
+                .name(getString(R.string.view_profile))
                 .build());
 
         menuItems.add(MenuItem.builder()
                 .key("changePassword")
                 .imageResource(R.drawable.ic_baseline_key_24)
-                .name("Đổi mật khẩu")
+                .name(getString(R.string.change_password))
                 .build());
 
         menuItems.add(MenuItem.builder()
                 .key("signout")
                 .imageResource(R.drawable.ic_baseline_leave_24)
-                .name("Đăng xuất")
+                .name(getString(R.string.logout))
                 .build());
 
         menuItems.add(MenuItem.builder()
                 .key("infoApp")
                 .imageResource(R.drawable.ic_round_info_24_dark)
-                .name("Thông tin về ứng dụng")
+                .name(getString(R.string.app_info))
                 .build());
 
         for (int i = 0; i < 10; i++) {
@@ -137,7 +131,7 @@ public class InfoFragment extends Fragment {
                     .build());
         }
 
-        menuAdapter = new MenuButtonAdapterVertical(getActivity(), R.layout.line_item_menu_button_vertical, menuItems);
+        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(getActivity(), R.layout.line_item_menu_button_vertical, menuItems);
         lv_info_fragment_menu.setAdapter(menuAdapter);
         lv_info_fragment_menu.setOnItemClickListener((parent, view1, position, itemId) -> {
             MenuItem item = menuItems.get(position);
@@ -148,7 +142,7 @@ public class InfoFragment extends Fragment {
             } else if (item.getKey().equals("signout")) {
                 signout();
             } else if (item.getKey().equals("infoApp")) {
-                Toast.makeText(getActivity(), "Thông tin ứng dụng", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.app_info), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -205,9 +199,10 @@ public class InfoFragment extends Fragment {
 
     private void getUserInfo() {
         SharedPreferences sharedPreferencesUser = getActivity().getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
-        user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+        UserSummaryDTO user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         txt_info_name.setText(user.getDisplayName());
         Glide.with(this).load(user.getImageUrl())
+                .placeholder(R.drawable.image_placeholer)
                 .centerCrop().circleCrop().into(image_info_image);
     }
 
@@ -226,8 +221,8 @@ public class InfoFragment extends Fragment {
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setMessage("Đăng xuất không thành công. Vui lòng thử lại.")
-                                    .setPositiveButton("OK", (dialog, id) -> dialog.cancel());
+                            builder.setMessage(getString(R.string.logout_failed_try_again))
+                                    .setPositiveButton(getString(R.string.confirm_button), (dialog, id) -> dialog.cancel());
                             builder.setCancelable(false);
                             builder.create().show();
                         } catch (Exception e) {

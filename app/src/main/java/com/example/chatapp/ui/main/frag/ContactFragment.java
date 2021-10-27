@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -64,14 +63,10 @@ import java.util.stream.Collectors;
 
 public class ContactFragment extends Fragment {
 
-    private RecyclerView rcv_contact_list;
     private FriendListAdapter adapter;
     private String token;
     private Gson gson;
     private List<FriendDTO> list;
-    private ConstraintLayout ctl_contact_friend_request;
-    private ConstraintLayout ctl_contact_phone_book_friend;
-    private Button btn_contact_refresh;
     private List<FriendDTO> searchFriend;
     private NestedScrollView scrollView;
 
@@ -132,10 +127,10 @@ public class ContactFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_contact, container, false);
-        rcv_contact_list = view.findViewById(R.id.rcv_contact_list);
-        ctl_contact_phone_book_friend = view.findViewById(R.id.ctl_contact_phone_book_friend);
-        ctl_contact_friend_request = view.findViewById(R.id.ctl_contact_friend_request);
-        btn_contact_refresh = view.findViewById(R.id.btn_contact_refresh);
+        RecyclerView rcv_contact_list = view.findViewById(R.id.rcv_contact_list);
+        ConstraintLayout ctl_contact_phone_book_friend = view.findViewById(R.id.ctl_contact_phone_book_friend);
+        ConstraintLayout ctl_contact_friend_request = view.findViewById(R.id.ctl_contact_friend_request);
+        Button btn_contact_refresh = view.findViewById(R.id.btn_contact_refresh);
         ctl_contact_phone_book_friend.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), SyncContactActivity.class);
             startActivity(intent);
@@ -146,7 +141,7 @@ public class ContactFragment extends Fragment {
         });
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         this.adapter = new FriendListAdapter(list, getActivity());
-        this.rcv_contact_list.setAdapter(adapter);
+        rcv_contact_list.setAdapter(adapter);
 
         btn_contact_refresh.setOnClickListener(v -> updateListFriends());
 
@@ -208,7 +203,7 @@ public class ContactFragment extends Fragment {
         View actionView = menuItemSearch.getActionView();
 
         SearchView searchView = (SearchView) actionView;
-        searchView.setQueryHint("Search friend...");
+        searchView.setQueryHint(getString(R.string.search_friends));
         searchView.setIconifiedByDefault(false);
         searchView.setFocusable(true);
         searchView.requestFocus();
@@ -238,7 +233,6 @@ public class ContactFragment extends Fragment {
         editText.setPadding(50, 0, 50, 0);
 
         menuItemAdd.setOnMenuItemClickListener(item -> {
-            Toast.makeText(getActivity(), "add friend", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(getActivity().getApplicationContext(), AddFriendActivity.class));
             return true;
         });

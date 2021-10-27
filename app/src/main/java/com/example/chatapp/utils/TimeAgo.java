@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class TimeAgo {
     private static final SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat yearFormat = new SimpleDateFormat("dd/MM/yyyy");
-    private static final SimpleDateFormat monthFormatt = new SimpleDateFormat("dd/MM");
+    private static final SimpleDateFormat monthFormat = new SimpleDateFormat("dd/MM");
     private static final SimpleDateFormat onlyTimeFormat = new SimpleDateFormat("HH:mm");
 
     public static final List<Long> times = Arrays.asList(
@@ -46,11 +46,11 @@ public class TimeAgo {
             if ((i == 0 && temp > 0) || calendar1.get(Calendar.YEAR) - calendar2.get(Calendar.YEAR) > 0)
                 return yearFormat.format(d2);
             if ((i == 1 && temp > 0) || calendar1.get(Calendar.MONTH) - calendar2.get(Calendar.MONTH) > 0)
-                return monthFormatt.format(d2);
+                return monthFormat.format(d2);
             if (i == 2 && temp == 1)
                 return "hôm qua";
             if ((i == 2 && temp > 7) || calendar1.get(Calendar.DAY_OF_MONTH) - calendar2.get(Calendar.DAY_OF_MONTH) > 7)
-                return monthFormatt.format(d2);
+                return monthFormat.format(d2);
             if (temp > 0) {
                 res.append(temp)
                         .append(" ")

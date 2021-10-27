@@ -28,7 +28,6 @@
         android:gravity="center_vertical"
         android:maxLines="1"
         android:paddingEnd="5dp"
-        android:text="name"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/imv_item_menu_button"
         app:layout_constraintEnd_toEndOf="parent"

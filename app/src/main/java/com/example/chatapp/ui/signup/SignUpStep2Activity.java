@@ -2,11 +2,12 @@ package com.example.chatapp.ui.signup;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.ImageButton;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -15,22 +16,42 @@ import com.example.chatapp.cons.SendData;
 import com.example.chatapp.dto.UserSignUpDTO;
 import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.signup.frag.SignupEnterEmailFragment;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 public class SignUpStep2Activity extends AppCompatActivity implements SendData {
-    private ImageButton ibt_sign_up_back_step2;
-    private ImageButton ibt_sign_up_next_step2;
     private int screen = 1;
     private UserSignUpDTO user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_step2);
 
-        Fragment fragment = new SignupEnterEmailFragment();
+        SlidrConfig config = new SlidrConfig.Builder()
+                .position(SlidrPosition.LEFT)
+                .sensitivity(1f)
+                .velocityThreshold(2400)
+                .distanceThreshold(0.25f)
+                .build();
 
-        ibt_sign_up_next_step2 = findViewById(R.id.ibt_sign_up_next_step2);
-        ibt_sign_up_back_step2 = findViewById(R.id.ibt_sign_up_back_step2);
+        Slidr.attach(this, config);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_signup2_activity);
+        toolbar.setTitle(getString(R.string.create_account));
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+
+        /*
+        hiện nút mũi tên quay lại trên toolbar
+         */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        Fragment fragment = new SignupEnterEmailFragment();
 
         Bundle bundle = getIntent().getExtras();
         user = (UserSignUpDTO) bundle.getSerializable("user");
@@ -38,9 +59,6 @@ public class SignUpStep2Activity extends AppCompatActivity implements SendData {
 
         loadFragment(fragment);
 
-        ibt_sign_up_back_step2.setOnClickListener(v -> {
-            finish();
-        });
     }
 
     private void loadFragment(Fragment fragment) {
@@ -80,5 +98,20 @@ public class SignUpStep2Activity extends AppCompatActivity implements SendData {
         alertDialog.show();
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+    }
 }

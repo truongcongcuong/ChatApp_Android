@@ -24,7 +24,6 @@
         android:layout_toEndOf="@+id/img_line_friend_request_sent_avt"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="@string/test_text"
         android:textColor="@color/black"
         android:textSize="18sp">
 
@@ -37,7 +36,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:text="Thu hồi"
         android:textColor="@color/red">
 
     </Button>
@@ -52,7 +50,6 @@
         android:layout_toEndOf="@+id/img_line_friend_request_sent_avt"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="5"
         android:textSize="14sp">
 
     </TextView>

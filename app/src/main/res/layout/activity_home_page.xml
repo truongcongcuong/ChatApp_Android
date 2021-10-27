@@ -64,7 +64,6 @@
         app:layout_constraintGuide_percent="0.7" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout2"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline38"
@@ -79,7 +78,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"></ImageView>
+            app:layout_constraintTop_toTopOf="parent">
+
+        </ImageView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -93,17 +94,16 @@
         android:layout_marginBottom="10dp"
         android:background="@drawable/custom_button"
         android:text="@string/sign_in_button"
+        android:textStyle="bold"
         app:backgroundTint="@color/color_send"
         app:layout_constraintBottom_toTopOf="@+id/guideline42"
         app:layout_constraintEnd_toStartOf="@+id/guideline40"
         app:layout_constraintStart_toStartOf="@+id/guideline39"
-        app:layout_constraintTop_toTopOf="@+id/guideline41"
-        android:textStyle="bold">
+        app:layout_constraintTop_toTopOf="@+id/guideline41">
 
     </Button>
 
     <Button
-        android:textStyle="bold"
         android:id="@+id/btn_home_page_sign_up"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -113,6 +113,7 @@
         android:layout_marginBottom="10dp"
         android:background="@drawable/custom_button"
         android:text="@string/sign_up"
+        android:textStyle="bold"
         app:backgroundTint="@color/color_send"
         app:layout_constraintBottom_toTopOf="@+id/guideline44"
         app:layout_constraintEnd_toStartOf="@+id/guideline40"
@@ -150,46 +151,45 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <TextView
-        android:id="@+id/textView3"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center"
         android:text="@string/language"
+        android:textColor="@color/white"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/guideline46"
         app:layout_constraintEnd_toStartOf="@+id/guideline40"
         app:layout_constraintStart_toStartOf="@+id/guideline39"
-        app:layout_constraintTop_toTopOf="@+id/guideline45"
-        android:textColor="@color/white"/>
+        app:layout_constraintTop_toTopOf="@+id/guideline45" />
 
     <Button
         android:id="@+id/btn_home_page_language_english"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:text="English"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/custom_button"
+        android:text="@string/english_language"
         android:textStyle="bold"
+        app:backgroundTint="@color/color_send"
         app:layout_constraintBottom_toTopOf="@+id/guideline47"
         app:layout_constraintEnd_toStartOf="@+id/guideline48"
         app:layout_constraintStart_toStartOf="@+id/guideline39"
-        app:layout_constraintTop_toTopOf="@+id/guideline46"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/custom_button"
-        app:backgroundTint="@color/color_send"/>
+        app:layout_constraintTop_toTopOf="@+id/guideline46" />
 
     <Button
         android:id="@+id/btn_home_page_language_vietnamese"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
         android:background="@drawable/custom_button"
-        android:text="Vietnamese"
+        android:text="@string/vietnamese_language"
         android:textStyle="bold"
         app:backgroundTint="@color/color_send"
         app:layout_constraintBottom_toTopOf="@+id/guideline47"

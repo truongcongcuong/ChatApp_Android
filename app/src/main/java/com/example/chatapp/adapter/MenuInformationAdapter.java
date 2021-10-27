@@ -17,8 +17,6 @@ import java.util.List;
 public class MenuInformationAdapter extends ArrayAdapter<MenuItem> {
     private final Context context;
     private final List<MenuItem> items;
-    private TextView txt_lii_title;
-    private TextView txt_lii_infor;
 
     public MenuInformationAdapter(Context context, List<MenuItem> items, int resource) {
         super(context, resource, items);
@@ -35,8 +33,8 @@ public class MenuInformationAdapter extends ArrayAdapter<MenuItem> {
 
         MenuItem item = items.get(position);
 
-        txt_lii_title = view.findViewById(R.id.txt_lii_title);
-        txt_lii_infor = view.findViewById(R.id.txt_lii_infor);
+        TextView txt_lii_title = view.findViewById(R.id.txt_lii_title);
+        TextView txt_lii_infor = view.findViewById(R.id.txt_lii_infor);
 
         txt_lii_infor.setText(item.getName());
         txt_lii_title.setText(item.getKey());

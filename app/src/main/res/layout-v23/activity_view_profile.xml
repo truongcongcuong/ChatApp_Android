@@ -52,7 +52,7 @@
             android:minWidth="120dp"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:text="Nhắn tin"
+            android:text="@string/chat"
             android:textAlignment="center"
             app:backgroundTint="@null" />
 

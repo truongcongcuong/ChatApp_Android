@@ -54,7 +54,10 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
 
     public FriendRequestSentAdapter(Context context, List<FriendRequestSentDto> list, String token) {
         this.context = context;
-        this.list = list;
+        if (list == null)
+            this.list = new ArrayList<>();
+        else
+            this.list = list;
         this.token = token;
     }
 
@@ -71,11 +74,13 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
         FriendRequestSentDto friendDTO = list.get(position);
         if (friendDTO != null) {
             Glide.with(context).load(friendDTO.getTo().getImageUrl())
+                    .placeholder(R.drawable.image_placeholer)
                     .centerCrop().circleCrop().into(holder.img_line_friend_request_sent_avt);
 
             holder.txt_line_friend_request_sent_name.setText(friendDTO.getTo().getDisplayName());
             holder.txt_line_friend_request_sent_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
             holder.btn_line_friend_request_sent_cancel.setOnClickListener(v -> deleteSentRequest(position));
+            holder.btn_line_friend_request_sent_cancel.setText(context.getString(R.string.recall_button));
 
             holder.itemView.setOnClickListener(v -> {
                 ProfileDialog profileDialog = new ProfileDialog(context, friendDTO.getTo(), null);
@@ -87,6 +92,8 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
 
     @Override
     public int getItemCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 

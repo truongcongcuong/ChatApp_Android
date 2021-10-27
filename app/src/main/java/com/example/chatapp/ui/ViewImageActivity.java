@@ -20,8 +20,6 @@ import com.r0adkll.slidr.model.SlidrPosition;
 
 public class ViewImageActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    private ImageView imageView;
     private MessageDto messageDto;
 
     @Override
@@ -36,8 +34,6 @@ public class ViewImageActivity extends AppCompatActivity {
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
@@ -46,8 +42,8 @@ public class ViewImageActivity extends AppCompatActivity {
         if (bundle != null)
             messageDto = (MessageDto) bundle.getSerializable("message");
 
-        toolbar = findViewById(R.id.toolbar_view_image_activity);
-        imageView = findViewById(R.id.img_content_view_image_activity);
+        Toolbar toolbar = findViewById(R.id.toolbar_view_image_activity);
+        ImageView imageView = findViewById(R.id.img_content_view_image_activity);
 
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);

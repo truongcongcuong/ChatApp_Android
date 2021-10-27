@@ -54,7 +54,10 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
 
     public FriendRequestReceivedAdapter(Context context, List<FriendRequest> list, String token) {
         this.context = context;
-        this.list = list;
+        if (list == null)
+            this.list = new ArrayList<>();
+        else
+            this.list = list;
         this.token = token;
     }
 
@@ -72,16 +75,17 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
 
         if (friendDTO != null) {
             Glide.with(context).load(friendDTO.getFrom().getImageUrl())
+                    .placeholder(R.drawable.image_placeholer)
                     .centerCrop().circleCrop().into(holder.img_line_friend_request_avt);
             holder.txt_line_friend_request_name.setText(friendDTO.getFrom().getDisplayName());
             holder.txt_line_friend_request_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
             holder.btn_line_friend_request_cancel.setOnClickListener(v -> {
-                Log.d("--", "xoa loi moi");
+//                delete friend request
                 FriendRequestHandle(position, Request.Method.DELETE);
             });
 
             holder.btn_line_friend_request_accept.setOnClickListener(v -> {
-                Log.d("--", "chap nhan loi moi");
+//                accept friend request
                 FriendRequestHandle(position, Request.Method.PUT);
             });
 
@@ -95,6 +99,8 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
 
     @Override
     public int getItemCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 
@@ -131,10 +137,7 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     }
                     notifyDataChange(position);
-                }, error -> {
-            Log.e("error: ", error.toString());
-
-        }) {
+                }, error -> Log.e("error: ", error.toString())) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> map = new HashMap<>();

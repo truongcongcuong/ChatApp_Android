@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Danh sách lời mời đã gửi trống"
+        android:text="@string/friend_request_sent_empty"
         android:textSize="16sp"
         android:visibility="gone" />
 

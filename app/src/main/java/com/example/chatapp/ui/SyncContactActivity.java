@@ -7,13 +7,16 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
-import android.widget.ImageButton;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +38,9 @@ import com.example.chatapp.dto.PhoneBookFriendDTO;
 import com.example.chatapp.entity.Contact;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,33 +52,51 @@ import java.util.List;
 import java.util.Map;
 
 public class SyncContactActivity extends AppCompatActivity {
-    ImageButton ibt_sync_contact_back,ibt_sync_contact_setting;
-    RecyclerView rcv_sync_contact;
-    List<Contact> listContact = new ArrayList<>();
+    private RecyclerView rcv_sync_contact;
+    private List<Contact> listContact = new ArrayList<>();
     private static final int MY_PERMISSION_REQUEST_CODE = 123;
-    Gson gson = new Gson();
-    String token;
-    List<PhoneBookFriendDTO> listPhoneBookFriend = new ArrayList<>();
-    SyncContactAdapter adapter;
+    private Gson gson;
+    private String token;
+    private List<PhoneBookFriendDTO> listPhoneBookFriend = new ArrayList<>();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sync_contact);
 
-        ibt_sync_contact_back = findViewById(R.id.ibt_sync_contact_back);
-        ibt_sync_contact_setting = findViewById(R.id.ibt_sync_contact_setting);
+        // gạt ở cạnh trái để trở về
+        SlidrConfig config = new SlidrConfig.Builder()
+                .position(SlidrPosition.LEFT)
+                .sensitivity(1f)
+                .velocityThreshold(2400)
+                .distanceThreshold(0.25f)
+                .build();
+
+        Slidr.attach(this, config);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_sync_contact);
+        toolbar.setTitle(R.string.phone_book_friend);
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+
         rcv_sync_contact = findViewById(R.id.rcv_sync_contact);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
-        }else {
+        } else {
             getContacts();
         }
 
-        ibt_sync_contact_back.setOnClickListener(v->finish());
+        /*
+        hiện nút mũi tên quay lại trên toolbar
+        */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        gson = new Gson();
         GetNewAccessToken getNewAccessToken = new GetNewAccessToken(this);
         getNewAccessToken.sendGetNewTokenRequest();
 
@@ -92,18 +116,18 @@ public class SyncContactActivity extends AppCompatActivity {
         JSONArray jsonObject = null;
         try {
             jsonObject = new JSONArray(gson.toJson(listContact));
-            Log.e("json object contact",jsonObject.toString());
+            Log.e("json object contact", jsonObject.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, Constant.API_FRIEND_LIST+"/syncContact",
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, Constant.API_FRIEND_LIST + "/syncContact",
                 jsonObject,
                 response -> {
                     try {
-                        Log.e("resp",response.toString());
+                        Log.e("resp", response.toString());
                         JSONArray array = new JSONArray(response.toString());
-                        Log.e("res : ",array.toString());
+                        Log.e("res : ", array.toString());
                         Type listType = new TypeToken<List<PhoneBookFriendDTO>>() {
                         }.getType();
                         listPhoneBookFriend = gson.fromJson(array.toString(), listType);
@@ -124,7 +148,7 @@ public class SyncContactActivity extends AppCompatActivity {
                         }
 
                     }
-                }){
+                }) {
 
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -140,12 +164,12 @@ public class SyncContactActivity extends AppCompatActivity {
     }
 
     private void setDataToRCV() {
-        adapter = new SyncContactAdapter(listPhoneBookFriend,this,token);
+        SyncContactAdapter adapter = new SyncContactAdapter(listPhoneBookFriend, this, token);
         rcv_sync_contact.setAdapter(adapter);
         rcv_sync_contact.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    protected void getContacts(){
+    protected void getContacts() {
 
         Cursor contacts = getContentResolver().query(
                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -155,8 +179,7 @@ public class SyncContactActivity extends AppCompatActivity {
                 null
         );
 
-        while (contacts.moveToNext())
-        {
+        while (contacts.moveToNext()) {
             // Get the current contact name
             String name = contacts.getString(
                     contacts.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY));
@@ -166,20 +189,20 @@ public class SyncContactActivity extends AppCompatActivity {
                     contacts.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
             Log.d("number ", phoneNumber);
-            listContact.add(new Contact(name,phoneNumber));
+            listContact.add(new Contact(name, phoneNumber));
         }
         contacts.close();
     }
 
-    protected void checkPermission(){
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-            if(checkSelfPermission(Manifest.permission.READ_CONTACTS)!= PackageManager.PERMISSION_GRANTED){
-                if(shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)){
+    protected void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)) {
                     // show an alert dialog
                     AlertDialog.Builder builder = new AlertDialog.Builder(SyncContactActivity.this);
-                    builder.setMessage("Read Contacts permission is required.");
-                    builder.setTitle("Please grant permission");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    builder.setMessage(getString(R.string.permission_read_contact_is_required));
+                    builder.setTitle(getString(R.string.permission_needed_title));
+                    builder.setPositiveButton(getString(R.string.confirm_button), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             ActivityCompat.requestPermissions(
@@ -189,10 +212,10 @@ public class SyncContactActivity extends AppCompatActivity {
                             );
                         }
                     });
-                    builder.setNeutralButton("Cancel",null);
+                    builder.setNeutralButton(getString(R.string.cancel_button), null);
                     AlertDialog dialog = builder.create();
                     dialog.show();
-                }else {
+                } else {
                     // Request permission
                     ActivityCompat.requestPermissions(
                             SyncContactActivity.this,
@@ -200,7 +223,7 @@ public class SyncContactActivity extends AppCompatActivity {
                             MY_PERMISSION_REQUEST_CODE
                     );
                 }
-            }else {
+            } else {
                 // Permission already granted
                 getContacts();
             }
@@ -220,5 +243,29 @@ public class SyncContactActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_sync_contact_activity, menu);
+        MenuItem menuItem = menu.findItem(R.id.menu_setting_sync_contact_activity);
+        menuItem.setOnMenuItemClickListener(item -> {
+            Log.d("", "setting sync contact activity");
+            return true;
+        });
+
+        return super.onCreateOptionsMenu(menu);
     }
 }

@@ -49,17 +49,19 @@ public class MessageAdapter extends RecyclerView.Adapter {
     private static final int ITEM_SEND = 1;
     private static final int ITEM_RECEIVER = 2;
     private static final int ITEM_SYSTEM = 3;
-    private final Gson gson;
     private UserSummaryDTO user;
     private RecyclerView recyclerView;
 
-    public MessageAdapter(Context context, List<MessageDto> messageDtos) {
+    public MessageAdapter(Context context, List<MessageDto> list) {
         this.context = context;
-        gson = new Gson();
+        Gson gson = new Gson();
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         String userJson = sharedPreferencesUser.getString("user-info", null);
         user = gson.fromJson(userJson, UserSummaryDTO.class);
-        list = messageDtos;
+        if (list == null)
+            this.list = new ArrayList<>();
+        else
+            this.list = list;
     }
 
     // khi nhận được reaction notification thì cập nhật reaction vào message
@@ -449,7 +451,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private boolean showReactionCreateDialog(MessageDto messageDto) {
-        Log.d("message of userid", messageDto.getSender().getId());
+        Log.d("message of user id", messageDto.getSender().getId());
         MessageOptionDialog messageOptionDialog = new MessageOptionDialog(context, messageDto);
         messageOptionDialog.show();
         return true;

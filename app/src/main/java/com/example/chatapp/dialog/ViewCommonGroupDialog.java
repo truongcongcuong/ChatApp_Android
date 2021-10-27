@@ -74,7 +74,7 @@ public class ViewCommonGroupDialog extends Dialog {
 //        recyclerView.setOnItemClickListener((parent, view, pos, itemId) -> {
 //
 //        });
-        titleOfDialog.setText("Nhóm chung với " + userProfileDto.getDisplayName());
+        titleOfDialog.setText(context.getString(R.string.groups_in_common, userProfileDto.getDisplayName()));
 
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
         layoutParams.dimAmount = .5f;

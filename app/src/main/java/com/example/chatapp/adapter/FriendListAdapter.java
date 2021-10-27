@@ -1,7 +1,6 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
@@ -18,9 +17,9 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.FriendDTO;
-import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,19 +29,18 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
 
     private List<FriendDTO> list;
     private final Context context;
-    private final Gson gson;
-    private final String token;
-    private final SimpleDateFormat sdfFull;
-    private final SimpleDateFormat sdfYMD;
+    private static final SimpleDateFormat sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat sdfYMD = new SimpleDateFormat("yyyy-MM-dd");
 
     public FriendListAdapter(List<FriendDTO> list, Context context) {
-        this.list = list;
+        if (list == null)
+            this.list = new ArrayList<>();
+        else
+            this.list = list;
         this.context = context;
-        gson = new Gson();
-        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
-        token = sharedPreferencesToken.getString("access-token", null);
-        sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sdfYMD = new SimpleDateFormat("yyyy-MM-dd");
+//        Gson gson = new Gson();
+//        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+//        String token = sharedPreferencesToken.getString("access-token", null);
     }
 
     @NonNull
@@ -67,7 +65,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
 
             holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());
             Date dateCreate = sdfFull.parse(friend.getCreateAt());
-            holder.txt_list_contact_create_at.setText(String.format("%s%s", "Bạn bè từ ", sdfYMD.format(dateCreate)));
+            holder.txt_list_contact_create_at.setText(String.format("%s %s", context.getString(R.string.friend_from), sdfYMD.format(dateCreate)));
             holder.itemView.setOnClickListener(v -> {
                 ProfileDialog profileDialog = new ProfileDialog(context, friend.getFriend(), null);
                 profileDialog.show();

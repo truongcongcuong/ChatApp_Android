@@ -1,7 +1,6 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
@@ -19,9 +18,7 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.SendDataCreateRoomActivity;
 import com.example.chatapp.dto.UserProfileDto;
-import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.utils.TimeAgo;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +26,7 @@ import java.util.List;
 public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUserCreateGroupAdapter.ViewHolder> {
     private List<UserProfileDto> list;
     private List<UserProfileDto> selected;
-    private final Gson gson;
     private final Context context;
-    private final String token;
-    private final UserSummaryDTO user;
     private final SendDataCreateRoomActivity sendData;
 
     public SearchUserCreateGroupAdapter(Context context, List<UserProfileDto> list, List<UserProfileDto> selected) {
@@ -45,14 +39,14 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
             this.selected = new ArrayList<>(0);
         else
             this.selected = selected;
-        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-        String userJson = sharedPreferencesUser.getString("user-info", null);
+//        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+//        String userJson = sharedPreferencesUser.getString("user-info", null);
 
-        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
-        token = sharedPreferencesToken.getString("access-token", null);
+//        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+//        String token = sharedPreferencesToken.getString("access-token", null);
 
-        gson = new Gson();
-        user = gson.fromJson(userJson, UserSummaryDTO.class);
+//        Gson gson = new Gson();
+//        UserSummaryDTO user = gson.fromJson(userJson, UserSummaryDTO.class);
         sendData = (SendDataCreateRoomActivity) context;
 
     }
@@ -91,7 +85,7 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
                     .centerCrop().circleCrop()
                     .into(holder.item_create_group_user_img);
             holder.item_create_group_user_name.setText(user.getDisplayName());
-            holder.item_create_group_user_detail.setText("Truy cập: " + TimeAgo.getTime(user.getLastOnline()));
+            holder.item_create_group_user_detail.setText(String.format("%s: %s", context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
 
             /*
             sự kiện click trên item

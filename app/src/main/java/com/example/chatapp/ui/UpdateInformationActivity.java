@@ -7,16 +7,15 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -34,6 +33,9 @@ import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.dto.UserUpdateDTO;
 import com.google.gson.Gson;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,24 +52,45 @@ import java.util.Map;
 import lombok.SneakyThrows;
 
 public class UpdateInformationActivity extends AppCompatActivity {
-    private ImageButton ibt_edit_profile_back;
-    private ImageView img_edit_profile_avt;
     private EditText edt_edit_profile_display_name;
     private EditText edt_edit_profile_birthday;
-    private EditText edt_edit_profile_username;
     private RadioButton rbt_edit_profile_gender_male;
     private RadioButton rbt_edit_profile_gender_female;
-    private Button btn_edit_profile_save;
     private UserDetailDTO userDetailDTO;
     private DatePickerDialog.OnDateSetListener onDateSetListener;
     private String token;
     private Date birthday;
     private Gson gson;
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
+    @SneakyThrows
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information2);
+
+        // gạt ở cạnh trái để trở về
+        SlidrConfig config = new SlidrConfig.Builder()
+                .position(SlidrPosition.LEFT)
+                .sensitivity(1f)
+                .velocityThreshold(2400)
+                .distanceThreshold(0.25f)
+                .build();
+
+        Slidr.attach(this, config);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_update_information2_activity);
+        toolbar.setTitle(R.string.edit_profile);
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+
+        /*
+        hiện nút mũi tên quay lại trên toolbar
+         */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         gson = new Gson();
 
@@ -80,27 +103,25 @@ public class UpdateInformationActivity extends AppCompatActivity {
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
 
-        ibt_edit_profile_back = findViewById(R.id.ibt_edit_profile_back);
-        img_edit_profile_avt = findViewById(R.id.img_edit_profile_avt);
+        ImageView img_edit_profile_avt = findViewById(R.id.img_edit_profile_avt);
         edt_edit_profile_display_name = findViewById(R.id.edt_edit_profile_display_name);
         edt_edit_profile_birthday = findViewById(R.id.edt_edit_profile_birthday);
-        edt_edit_profile_username = findViewById(R.id.edt_edit_profile_username);
         rbt_edit_profile_gender_male = findViewById(R.id.rbt_edit_profile_gender_male);
         rbt_edit_profile_gender_female = findViewById(R.id.rbt_edit_profile_gender_female);
-        btn_edit_profile_save = findViewById(R.id.btn_edit_profile_save);
+        Button btn_edit_profile_save = findViewById(R.id.btn_edit_profile_save);
 
         Glide.with(this).load(userDetailDTO.getImageUrl())
+                .placeholder(R.drawable.image_placeholer)
                 .centerCrop().circleCrop().into(img_edit_profile_avt);
 
-        edt_edit_profile_birthday.setText(userDetailDTO.getDateOfBirth());
+        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (userDetailDTO.getDateOfBirth() != null)
+            edt_edit_profile_birthday.setText(sdf.format(sdf2.parse(userDetailDTO.getDateOfBirth())));
         edt_edit_profile_display_name.setText(userDetailDTO.getDisplayName());
-        if (userDetailDTO.getGender().equalsIgnoreCase("female"))
+        if ("female".equalsIgnoreCase(userDetailDTO.getGender()))
             rbt_edit_profile_gender_female.setChecked(true);
         else
             rbt_edit_profile_gender_male.setChecked(true);
-
-        if (userDetailDTO.getUsername() != null || !TextUtils.isEmpty(userDetailDTO.getUsername()))
-            edt_edit_profile_username.setText(userDetailDTO.getUsername());
 
         edt_edit_profile_birthday.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
@@ -120,7 +141,6 @@ public class UpdateInformationActivity extends AppCompatActivity {
             @SneakyThrows
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 birthday = sdf.parse(year + "-" + month + "-" + dayOfMonth);
                 Log.e("birthday : ", birthday.toString());
                 edt_edit_profile_birthday.setText(year + "-" + month + "-" + dayOfMonth);
@@ -137,14 +157,10 @@ public class UpdateInformationActivity extends AppCompatActivity {
                     .displayName(edt_edit_profile_display_name.getText().toString())
                     .email(userDetailDTO.getEmail())
                     .gender(gender)
-                    .username(edt_edit_profile_username.getText().toString())
                     .build();
             Log.e("user builder : ", dto.toString());
             updateInfo(dto);
         });
-
-        ibt_edit_profile_back.setOnClickListener(v -> finish());
-
 
     }
 
@@ -255,4 +271,17 @@ public class UpdateInformationActivity extends AppCompatActivity {
                 .create();
         dialog.show();
     }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+    }
+
 }

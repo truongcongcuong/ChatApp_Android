@@ -42,7 +42,7 @@ public class ReadbyDialogAdapter extends ArrayAdapter<ReadByDto> {
                 .into(imageOfUser);
 
         displayName.setText(readBy.getReadByUser().getDisplayName());
-        readAt.setText(String.format("Đã xem: %s", readBy.getReadAt()));
+        readAt.setText(String.format("%s: %s", context.getString(R.string.seen_at), readBy.getReadAt()));
 
         return view;
     }

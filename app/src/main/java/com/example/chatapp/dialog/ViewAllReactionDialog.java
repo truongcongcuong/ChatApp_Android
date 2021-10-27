@@ -40,7 +40,7 @@ public class ViewAllReactionDialog extends Dialog {
 //        listView.setOnItemClickListener((parent, view, pos, itemId) -> {
 //
 //        });
-        titleOfDialog.setText("Những người đã bày tỏ cảm xúc");
+        titleOfDialog.setText(context.getString(R.string.reaction));
 
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
         layoutParams.dimAmount = .5f;

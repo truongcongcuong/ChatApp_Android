@@ -11,20 +11,20 @@
         android:id="@+id/receiver_relative_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_marginEnd="50dp"
-        android:layout_toStartOf="@id/receiver_relative_read_one"
-        android:layout_alignParentStart="true">
+        android:layout_toStartOf="@id/receiver_relative_read_one">
 
         <LinearLayout
             android:id="@+id/blank"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
+            android:layout_toEndOf="@+id/receiver_sender_image"
             android:background="@drawable/background_message_receiver"
             android:orientation="vertical"
             android:paddingLeft="5dp"
             android:paddingTop="0dp"
-            android:layout_toEndOf="@+id/receiver_sender_image"
             android:paddingRight="5dp"
             android:paddingBottom="5dp">
 
@@ -60,7 +60,6 @@
                         android:id="@+id/receiver_message_reply_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="sender name"
                         android:textColor="#666666"
                         android:textSize="14sp">
 
@@ -70,7 +69,6 @@
                         android:id="@+id/receiver_message_reply_content"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="content"
                         android:textColor="#666666"
                         android:textSize="14sp">
 
@@ -140,7 +138,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/blank"
             android:layout_alignEnd="@id/blank"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:layout_marginTop="-6dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/dark_background_reaction_circle"
@@ -155,7 +153,7 @@
                 android:id="@+id/receiver_rcv_reaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:layout_marginStart="0dp"
                 android:layout_marginEnd="0dp"
                 android:layoutDirection="rtl"

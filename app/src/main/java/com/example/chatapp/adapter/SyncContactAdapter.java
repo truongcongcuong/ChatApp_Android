@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -59,32 +58,30 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PhoneBookFriendDTO dto = list.get(position);
         if (dto.getFriendStatus().equals(FriendStatus.SENT)) {
-            holder.btn_li_sync_contact_action.setText("Thu hồi");
+            holder.btn_li_sync_contact_action.setText(context.getString(R.string.recall_button));
             holder.btn_li_sync_contact_action.setOnClickListener(v -> {
-                Toast.makeText(context, "thu hoi loi moi", Toast.LENGTH_SHORT).show();
                 deleteSentRequest(dto);
             });
         } else if (dto.getFriendStatus().equals(FriendStatus.RECEIVED)) {
-            holder.btn_li_sync_contact_action.setText("Đồng ý");
+            holder.btn_li_sync_contact_action.setText(R.string.accept);
             holder.btn_li_sync_contact_action.setOnClickListener(v -> {
-                Toast.makeText(context, "chap nhan loi moi", Toast.LENGTH_SHORT).show();
                 acceptFriendRequest(dto);
             });
         } else if (dto.getFriendStatus().equals(FriendStatus.FRIEND)) {
-            holder.btn_li_sync_contact_action.setText("Đã kết bạn");
+            holder.btn_li_sync_contact_action.setText(context.getString(R.string.friend));
             holder.btn_li_sync_contact_action.setTextColor(Color.DKGRAY);
             holder.btn_li_sync_contact_action.setBackground(null);
             holder.btn_li_sync_contact_action.setBackgroundTintList(null);
 
         } else if (dto.getFriendStatus().equals(FriendStatus.NONE)) {
-            holder.btn_li_sync_contact_action.setText("Kết bạn");
+            holder.btn_li_sync_contact_action.setText(context.getString(R.string.add_friend));
             holder.btn_li_sync_contact_action.setOnClickListener(v -> {
-                Toast.makeText(context, "add friend", Toast.LENGTH_SHORT).show();
                 sendFriendRequest(dto);
             });
         }
 
         Glide.with(context).load(dto.getUser().getImageUrl())
+                .placeholder(R.drawable.image_placeholer)
                 .centerCrop().circleCrop()
                 .into(holder.img_li_sync_contact_avt);
         holder.txt_li_sync_contact_contact_name.setText(dto.getName());

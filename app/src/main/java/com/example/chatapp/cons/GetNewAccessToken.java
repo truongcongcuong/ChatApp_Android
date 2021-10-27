@@ -72,9 +72,11 @@ public class GetNewAccessToken {
             @Override
             public Map<String, String> getHeaders() {
                 SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+                String token = sharedPreferencesToken.getString("access-token", null);
                 String rfCookie = sharedPreferencesToken.getString("refresh-token", null);
                 HashMap<String, String> map = new HashMap<>();
                 map.put("Cookie", rfCookie);
+                map.put("Authorization", "Bearer " + token);
                 Log.i("cookie ==== ", rfCookie);
                 return map;
             }

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -59,6 +60,7 @@ import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -75,15 +77,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 public class CreateGroupActivity extends AppCompatActivity implements SendDataCreateRoomActivity {
     private static final int PICK_IMAGE = 1;
     private EditText txt_create_group_name;
-    private SearchView txt_create_room_find_user;
     private ImageView image_create_group;
     private ImageView image_create_group_delete;
-    private RecyclerView lv_create_group_user;
     private SimpleDateFormat sdfYMD;
     /*
     adapter tim kiếm user trong danh sách bạn bè
@@ -119,6 +121,9 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     private File imageGroupFile;
     private ProgressDialog progress;
 
+    private Timer timer;
+    private final long DELAY_SEARCH = 250;
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,11 +137,10 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
+        timer = new Timer();
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -149,7 +153,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
             usersSelected = new ArrayList<>(0);
 
         toolbar = findViewById(R.id.tlb_create_group_activity);
-        toolbar.setTitle(R.string.unname_group);
+        toolbar.setTitle(R.string.un_name_group);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
@@ -165,8 +169,8 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         image_create_group = findViewById(R.id.image_create_group_avt);
         image_create_group_delete = findViewById(R.id.create_group_selected_delete_image);
         txt_create_group_name = findViewById(R.id.txt_create_group_name);
-        txt_create_room_find_user = findViewById(R.id.txt_create_group_find_user);
-        lv_create_group_user = findViewById(R.id.rcv_create_group_user);
+        SearchView txt_create_room_find_user = findViewById(R.id.txt_create_group_find_user);
+        RecyclerView lv_create_group_user = findViewById(R.id.rcv_create_group_user);
 
         rcv_create_group_selected = findViewById(R.id.rcv_create_group_selected);
         create_group_continue = findViewById(R.id.create_group_continute);
@@ -178,6 +182,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         txt_create_room_find_user.setQueryHint(getResources().getString(R.string.find_by_name_or_phone));
         txt_create_room_find_user.setIconifiedByDefault(false);
         txt_create_room_find_user.setFocusable(true);
+        txt_create_room_find_user.setGravity(Gravity.CENTER_VERTICAL);
 
 //        txt_create_group_name.requestFocus();
         image_create_group_delete.setVisibility(View.GONE);
@@ -220,7 +225,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         ViewGroup.LayoutParams params = searchPlate.getLayoutParams();
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         searchPlate.setLayoutParams(params);
-        searchPlate.setPadding(0, 5, 0, 5);
+        searchPlate.setPadding(0, 4, 0, 7);
         searchPlate.setBackgroundResource(R.drawable.search_view_background);
 
         initImageCreate();
@@ -250,14 +255,29 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 nếu text không rỗng thì tìm, ngược lại xóa recyclerview
                  */
                 if (!newText.isEmpty()) {
-//                    search(newText);
-                    List<UserProfileDto> find = userFriends.stream()
-                            .filter(x -> x.getDisplayName().toLowerCase()
-                                    .contains(txt_create_room_find_user.getQuery().toString().trim().toLowerCase()))
-                            .collect(Collectors.toList());
-                    adapter.setList(find);
+                    timer.cancel();
+                    timer = new Timer();
+                    timer.schedule(
+                            new TimerTask() {
+                                @Override
+                                public void run() {
+                                    search(newText);
+                                }
+                            },
+                            DELAY_SEARCH
+                    );
                 } else {
-                    adapter.setList(userFriends);
+                    timer.cancel();
+                    timer = new Timer();
+                    timer.schedule(
+                            new TimerTask() {
+                                @Override
+                                public void run() {
+                                    loadFriendList();
+                                }
+                            },
+                            0
+                    );
                 }
                 return false;
             }
@@ -290,7 +310,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 khi tên rỗng thì disable button tạo nhóm
                  */
                 if (txt_create_group_name.getText().toString().trim().isEmpty()) {
-                    toolbar.setTitle(R.string.unname_group);
+                    toolbar.setTitle(R.string.un_name_group);
                     create_group_continue.setBackgroundTintList(backgroundTintList);
                     create_group_continue.setEnabled(false);
                 }
@@ -342,7 +362,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
             intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), PICK_IMAGE);
         });
 
         image_create_group_delete.setOnClickListener(v -> {
@@ -371,19 +391,24 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     /*
     tìm kiếm user theo tên hoặc số điện thoại
      */
-    /*private void search(String newText) {
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_USER + "search",
+    private void search(String newText) {
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST + "?query=" + newText,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        Type listType = new TypeToken<List<UserProfileDto>>() {
-                        }.getType();
-                        List<UserProfileDto> searchUserResult = new Gson().fromJson(res, listType);
+                        JSONArray array = new JSONArray(res);
+                        List<UserProfileDto> searchUserResult = new ArrayList<>();
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject object = (JSONObject) array.get(i);
+                            String friend = object.get("friend").toString();
+                            UserProfileDto userProfileDto = gson.fromJson(friend, UserProfileDto.class);
+                            searchUserResult.add(userProfileDto);
+                        }
                         Log.d("", searchUserResult.toString());
 
                         adapter.setList(searchUserResult);
 
-                    } catch (UnsupportedEncodingException e) {
+                    } catch (UnsupportedEncodingException | JSONException e) {
                         e.printStackTrace();
                     }
                 },
@@ -403,9 +428,8 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
             }
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        requestQueue.getCache().clear();
         requestQueue.add(request);
-    }*/
+    }
 
     /*
     load tất cả bạn bè để chọn thành viên
@@ -440,7 +464,6 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         request.setRetryPolicy(retryPolicy);
-        requestQueue.getCache().clear();
         requestQueue.add(request);
     }
 
@@ -641,7 +664,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
             toolbar.setSubtitle(R.string.no_member);
         } else {
             bottomLayout.setVisibility(View.VISIBLE);
-            toolbar.setSubtitle(String.format("%d%s", usersSelected.size(), " thành viên."));
+            toolbar.setSubtitle(String.format("%d %s", usersSelected.size(), getString(R.string.members)));
         }
     }
 }

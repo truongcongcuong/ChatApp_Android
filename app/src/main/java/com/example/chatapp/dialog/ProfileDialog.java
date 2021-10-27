@@ -66,12 +66,12 @@ public class ProfileDialog extends Dialog {
             menuItems = new ArrayList<>();
             menuItems.add(MenuItem.builder()
                     .key("chat")
-                    .name("Nhắn tin")
+                    .name(context.getString(R.string.chat))
                     .imageResource(R.drawable.ic_round_message_24_blue)
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("viewProfile")
-                    .name("Xem trang cá nhân")
+                    .name(context.getString(R.string.view_profile))
                     .imageResource(R.drawable.ic_baseline_profile_circle_24_orange)
                     .build());
         } else {

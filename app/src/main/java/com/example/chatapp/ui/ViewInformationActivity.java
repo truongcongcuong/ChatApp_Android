@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -20,7 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.NestedScrollView;
+import androidx.appcompat.widget.Toolbar;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -37,10 +36,12 @@ import com.example.chatapp.adapter.MenuInformationAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.UserDetailDTO;
-import com.example.chatapp.entity.User;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.google.gson.Gson;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,35 +51,57 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.SneakyThrows;
+
 public class ViewInformationActivity extends AppCompatActivity {
-    private ImageButton ibt_update_infor_back;
-    private ImageView img_update_infor_avt;
-    private Button btn_update_infor;
-    private ListView lsv_update_infor;
-    private List<MenuItem> items;
-    private NestedScrollView nsv_update_infor;
-    private String userToString, token;
-    private User user;
+    private ImageView img_update_info_avt;
+    private ListView lsv_update_info;
+    //    private String userToString;
+    private String token;
+    //    private User user;
     private Gson gson;
     private UserDetailDTO userDetailDTO;
     private static final int REQUEST_GALLERY = 1;
     private static final int REQUEST_IMAGE_CAPTURE = 0;
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information);
 
-        lsv_update_infor = findViewById(R.id.lsv_update_infor);
-        ibt_update_infor_back = findViewById(R.id.ibt_update_infor_back);
-        img_update_infor_avt = findViewById(R.id.img_update_infor_avt);
-        btn_update_infor = findViewById(R.id.btn_update_infor);
-        nsv_update_infor = findViewById(R.id.nsv_update_infor);
+        SlidrConfig config = new SlidrConfig.Builder()
+                .position(SlidrPosition.LEFT)
+                .sensitivity(1f)
+                .velocityThreshold(2400)
+                .distanceThreshold(0.25f)
+                .build();
+
+        Slidr.attach(this, config);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_update_info_activity);
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+
+        /*
+        hiện nút mũi tên quay lại trên toolbar
+         */
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        lsv_update_info = findViewById(R.id.lsv_update_infor);
+        img_update_info_avt = findViewById(R.id.img_update_infor_avt);
+        Button btn_update_info = findViewById(R.id.btn_update_infor);
+//        NestedScrollView nsv_update_infor = findViewById(R.id.nsv_update_infor);
 
 //        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
 //        userToString = sharedPreferencesUser.getString("user-infor",null);
@@ -89,9 +112,8 @@ public class ViewInformationActivity extends AppCompatActivity {
         token = sharedPreferencesToken.getString("access-token", null);
 
         getInformationDetail();
-        ibt_update_infor_back.setOnClickListener(v -> finish());
-        img_update_infor_avt.setOnClickListener(v -> showDialogChangeAvt());
-        btn_update_infor.setOnClickListener(v -> {
+        img_update_info_avt.setOnClickListener(v -> showDialogChangeAvt());
+        btn_update_info.setOnClickListener(v -> {
             Intent intent = new Intent(ViewInformationActivity.this, UpdateInformationActivity.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("user", userDetailDTO);
@@ -163,8 +185,10 @@ public class ViewInformationActivity extends AppCompatActivity {
         queue.add(request);
     }
 
+    @SneakyThrows
     private void updateItems() {
-        items = new ArrayList<>();
+        setTitle(userDetailDTO.getDisplayName());
+        List<MenuItem> items = new ArrayList<>();
         items.add(MenuItem.builder()
                 .key(getResources().getString(R.string.name))
                 .name(userDetailDTO.getDisplayName())
@@ -177,20 +201,23 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .key(getResources().getString(R.string.gender))
                 .name(userDetailDTO.getGender())
                 .build());
-        items.add(MenuItem.builder()
-                .key(getResources().getString(R.string.birthday))
-                .name(userDetailDTO.getDateOfBirth())
-                .build());
+        if (userDetailDTO.getDateOfBirth() != null) {
+            items.add(MenuItem.builder()
+                    .key(getResources().getString(R.string.birthday))
+                    .name(sdf.format(sdfFull.parse(userDetailDTO.getDateOfBirth())))
+                    .build());
+        }
+
         items.add(MenuItem.builder()
                 .key(getResources().getString(R.string.mobile))
                 .name(userDetailDTO.getPhoneNumber())
                 .build());
         MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button_vertical);
-        lsv_update_infor.setAdapter(adapter);
+        lsv_update_info.setAdapter(adapter);
         Glide.with(this)
                 .load(userDetailDTO.getImageUrl())
                 .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
-                .into(img_update_infor_avt);
+                .into(img_update_info_avt);
 
     }
 
@@ -207,16 +234,16 @@ public class ViewInformationActivity extends AppCompatActivity {
                     Bitmap selectedImage = (Bitmap) extras.get("data");
                     Log.e("uri camera", selectedImage.toString());
                     Glide.with(this).load(selectedImage)
-                            .centerCrop().circleCrop().into(img_update_infor_avt);
+                            .centerCrop().circleCrop().into(img_update_info_avt);
                     files.add(new File(PathUtil.getPath(this, getImageUri(this, selectedImage))));
-                    userDetailDTO.setImageUrl(getImageUri(this,selectedImage).toString());
+                    userDetailDTO.setImageUrl(getImageUri(this, selectedImage).toString());
                 }
                 break;
             case 1:
                 if (resultCode == RESULT_OK) {
                     Uri selectedImage = data.getData();
                     Glide.with(this).load(selectedImage)
-                            .centerCrop().circleCrop().into(img_update_infor_avt);
+                            .centerCrop().circleCrop().into(img_update_info_avt);
                     Log.e("gallery", "done");
                     files.add(new File(PathUtil.getPath(this, selectedImage)));
                 }
@@ -236,7 +263,7 @@ public class ViewInformationActivity extends AppCompatActivity {
                         error -> {
                             Log.i("upload error", "error");
                             NetworkResponse response = error.networkResponse;
-                            if (error != null && error instanceof ServerError) {
+                            if (error instanceof ServerError) {
                                 try {
                                     String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
 //                                    JSONObject object = new JSONObject(res);
@@ -272,6 +299,18 @@ public class ViewInformationActivity extends AppCompatActivity {
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
         return Uri.parse(path);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
 
 }

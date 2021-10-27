@@ -22,7 +22,6 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="0dp"
         android:layout_toEndOf="@id/img_li_sync_contact_avt"
-        android:text="@string/test_text"
         android:textColor="@color/black"
         android:textSize="18sp"
         android:textStyle="bold">
@@ -37,7 +36,6 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="5dp"
         android:layout_toEndOf="@+id/img_li_sync_contact_avt"
-        android:text="@string/test_text"
         android:textStyle="bold">
 
     </TextView>

@@ -33,7 +33,7 @@
                 android:gravity="center_horizontal"
                 android:paddingStart="4dp"
                 android:singleLine="true"
-                android:text="Những người đã xem"
+                android:text="@string/read_by"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 

@@ -156,8 +156,6 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
@@ -212,7 +210,6 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         access_token = sharedPreferencesToken.getString("access-token", null);
-        Log.d("accessssss", access_token);
 
         MyLinerLayoutManager linearLayoutManager = new MyLinerLayoutManager(ChatActivity.this);
         linearLayoutManager.setStackFromEnd(true);
@@ -260,13 +257,13 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     new AlertDialog.Builder(this)
-                            .setTitle("Permission Needed")
-                            .setMessage("Permission is needed to access files from your device...")
-                            .setPositiveButton("OK", (dialog, which) ->
+                            .setTitle(getString(R.string.permission_needed_title))
+                            .setMessage(getString(R.string.permission_needed_message))
+                            .setPositiveButton(getString(R.string.confirm_button), (dialog, which) ->
                                     ActivityCompat.requestPermissions(ChatActivity.this,
                                             new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                                             REQUEST_PERMISSION))
-                            .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel()).create().show();
+                            .setNegativeButton(getString(R.string.cancel_button), (dialog, which) -> dialog.cancel()).create().show();
                 } else {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
                 }
@@ -371,16 +368,16 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
             displayName = inboxDto.getRoom().getName();
             url = inboxDto.getRoom().getImageUrl();
             if (inboxDto.getRoom().getMembers() != null)
-                detail = String.format("%d%s", inboxDto.getRoom().getMembers().size(), " thành viên");
+                detail = String.format("%d %s", inboxDto.getRoom().getMembers().size(), getString(R.string.members));
             else
-                detail = String.format("%d%s", 0, " thành viên");
+                detail = String.format("%d %s", 0, getString(R.string.members));
         } else {
             displayName = inboxDto.getRoom().getTo().getDisplayName();
             url = inboxDto.getRoom().getTo().getImageUrl();
             if (inboxDto.getRoom().getTo().getOnlineStatus().equals(OnlineStatus.ONLINE))
-                detail = "Đang truy cập";
+                detail = getString(R.string.present_online);
             else
-                detail = String.format("%s%s", "Truy cập ", TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
+                detail = String.format("%s %s", getString(R.string.online), TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
         }
         txt_chat_user_name.setText(displayName);
         txt_chat_detail.setText(detail);
@@ -730,7 +727,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
     public void reply(MessageDto messageDto) {
         layout_reply_chat_activity.setVisibility(View.VISIBLE);
         txt_content_reply_chat_activity.setText(messageDto.getContent());
-        txt_name_reply_chat_activity.setText("Đang trả lời " + messageDto.getSender().getDisplayName());
+        txt_name_reply_chat_activity.setText(String.format("%s %s", getString(R.string.reply), messageDto.getSender().getDisplayName()));
         replyMessageId = messageDto.getId();
         edt_chat_message_send.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -783,7 +780,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 openFileChoose();
             } else {
-                Toast.makeText(this, "Please allow the Permission", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.allow_permission), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -794,7 +791,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
         intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), PICK_IMAGE);
     }
 
 }

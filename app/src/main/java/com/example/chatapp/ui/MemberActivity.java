@@ -49,7 +49,6 @@ public class MemberActivity extends AppCompatActivity {
     private String token;
     private Gson gson;
     private InboxDto inboxDto;
-    private Toolbar toolbar;
     private MemberAdapter adapter;
     private List<MemberDto> members;
 
@@ -65,13 +64,11 @@ public class MemberActivity extends AppCompatActivity {
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
 
-        toolbar = findViewById(R.id.tlb_member);
+        Toolbar toolbar = findViewById(R.id.tlb_member);
         lv_members = findViewById(R.id.lv_member);
         members = new ArrayList<>();
 
@@ -82,7 +79,7 @@ public class MemberActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
-        setTitle("Thành viên");
+        setTitle(getString(R.string.member));
 
         /*
         hiện nút mũi tên quay lại trên toolbar

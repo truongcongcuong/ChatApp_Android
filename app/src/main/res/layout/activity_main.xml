@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/gray"
     tools:context=".ui.main.MainActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tlb_main_activity"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginTop="0dp"
+        android:background="@color/purple_200" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <!--<androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:background="@color/bg_app"
-        android:padding="10dp">
+        android:padding="10dp"
+        >
 
         <SearchView
             android:id="@+id/main_search_view"
@@ -40,36 +49,39 @@
             android:orientation="vertical"
             app:layout_constraintGuide_begin="20dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <FrameLayout
-        android:id="@+id/fla_content"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2"
-        app:layout_behavior = "@string/appbar_scrolling_view_behavior"
-        android:layout_gravity="center">
-
-    </FrameLayout>
+-->
 
 
+    <!--    <FrameLayout-->
+    <!--        android:id="@+id/fla_content"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:layout_above="@+id/bnv_bot"-->
+    <!--        app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
 
+    <!--    </FrameLayout>-->
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bnv_bot"
+        android:layout_below="@+id/tlb_main_activity"
+        android:background="@color/background_material_light" />
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bnv_bot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:background="?android:attr/windowBackground"
-        app:itemBackground="@color/bg_app"
         android:foreground="?attr/selectableItemBackground"
+        app:itemBackground="@color/bg_app"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white"
-        app:menu="@menu/navigation"></com.google.android.material.bottomnavigation.BottomNavigationView>
+        app:menu="@menu/navigation" />
 
 
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</RelativeLayout>

@@ -68,7 +68,6 @@ import java.util.stream.Collectors;
 
 public class AddMemberActivity extends AppCompatActivity implements SendDataCreateRoomActivity {
     private SearchView txt_add_member_find_user;
-    private RecyclerView rcv_user_add_member_activity;
     private SimpleDateFormat sdfYMD;
     private InboxDto inboxDto;
     /*
@@ -113,22 +112,20 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Slidr.attach(this, config);
 
         txt_add_member_find_user = findViewById(R.id.txt_add_member_find_user);
-        rcv_user_add_member_activity = findViewById(R.id.rcv_user_add_member_activity);
+        RecyclerView rcv_user_add_member_activity = findViewById(R.id.rcv_user_add_member_activity);
 
         rcv_add_member_selected = findViewById(R.id.rcv_add_member_selected);
         add_member_continue = findViewById(R.id.add_member_continue);
         bottomLayout = findViewById(R.id.add_member_bottom_layout);
 
         toolbar = findViewById(R.id.tlb_add_member_activity);
-        toolbar.setTitle("Thêm thành viên");
-        toolbar.setSubtitle("Đã chọn: 0");
+        toolbar.setTitle(getString(R.string.title_add_member));
+        toolbar.setSubtitle(String.format("%s: %d", getString(R.string.add_member_selected), 0));
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
@@ -286,8 +283,8 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
                         Log.d("new room", room.toString());
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("Thêm thành viên thành công")
-                            .setPositiveButton("Ok", (dialog, id) -> {
+                    builder.setMessage(getString(R.string.add_member_success))
+                            .setPositiveButton(getString(R.string.confirm_button), (dialog, id) -> {
                                 dialog.cancel();
                                 finish();
                             });
@@ -412,7 +409,7 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
 
         rcv_add_member_selected.getLayoutManager().smoothScrollToPosition(rcv_add_member_selected,
                 new RecyclerView.State(), selectedUserAdapter.getItemCount());
-        toolbar.setSubtitle(String.format("%s%d", "Đã chọn: ", usersSelected.size()));
+        toolbar.setSubtitle(String.format("%s: %d", getString(R.string.add_member_selected), usersSelected.size()));
 
         if (!usersSelected.isEmpty()) {
             bottomLayout.setVisibility(View.VISIBLE);
@@ -431,10 +428,10 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         adapter.uncheckForUser(idToDelete);
         selectedUserAdapter.notifyDataSetChanged();
 
-        toolbar.setSubtitle(String.format("%s%d", "Đã chọn: ", usersSelected.size()));
+        toolbar.setSubtitle(String.format("%s: %d", getString(R.string.add_member_selected), usersSelected.size()));
         if (usersSelected.isEmpty()) {
             bottomLayout.setVisibility(View.GONE);
-            toolbar.setSubtitle(String.format("%s%d", "Đã chọn: ", 0));
+            toolbar.setSubtitle(String.format("%s: %d", getString(R.string.add_member_selected), 0));
             add_member_continue.setBackgroundTintList(backgroundTintList);
             add_member_continue.setEnabled(false);
         }
@@ -445,9 +442,9 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         if (!txt_add_member_find_user.getQuery().toString().trim().isEmpty()
                 || !usersSelected.isEmpty()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Bạn có muốn hủy việc thêm thành viên")
-                    .setPositiveButton("Tiếp tục thêm thành viên", (dialog, id) -> dialog.dismiss())
-                    .setNegativeButton("Hủy", (dialog, id) -> {
+            builder.setMessage(getString(R.string.add_member_cancel))
+                    .setPositiveButton(getString(R.string.add_member_continue), (dialog, id) -> dialog.dismiss())
+                    .setNegativeButton(getString(R.string.cancel_button), (dialog, id) -> {
                         dialog.cancel();
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("dto", inboxDto);

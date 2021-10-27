@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -72,7 +71,7 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         Toolbar toolbar_friend_request = findViewById(R.id.toolbar_friend_request);
         toolbar_friend_request.setTitleTextColor(Color.WHITE);
         toolbar_friend_request.setSubtitleTextColor(Color.WHITE);
-        toolbar_friend_request.setTitle("Friend request");
+        toolbar_friend_request.setTitle(getString(R.string.friend_request));
         setSupportActionBar(toolbar_friend_request);
 
         /*
@@ -87,8 +86,8 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         viewPager_friend_request.setPageTransformer(new ZoomOutPageTransformer());
         viewPager_friend_request.setOffscreenPageLimit(NUM_PAGES);
 
-        tabLayout_friend_request.addTab(tabLayout_friend_request.newTab().setText("Đã nhận"));
-        tabLayout_friend_request.addTab(tabLayout_friend_request.newTab().setText("Đã gửi"));
+        tabLayout_friend_request.addTab(tabLayout_friend_request.newTab().setText(getString(R.string.received)));
+        tabLayout_friend_request.addTab(tabLayout_friend_request.newTab().setText(getString(R.string.sent)));
         tabLayout_friend_request.setSelectedTabIndicatorColor(getResources().getColor(R.color.purple_200));
 
         new TabLayoutMediator(tabLayout_friend_request, viewPager_friend_request, (tab, position) -> {
@@ -189,9 +188,9 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
 
                         if (firstTab != null) {
                             if (countReceived != 0)
-                                firstTab.setText("Đã nhận(" + countReceived + ")");
+                                firstTab.setText(String.format("%s(%d)", getString(R.string.received), countReceived));
                             else
-                                firstTab.setText("Đã nhận");
+                                firstTab.setText(getString(R.string.received));
                         } else
                             Log.d("--firstTab", "null");
 
@@ -226,9 +225,9 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
                         Log.d("--countReceived", countSent + "");
                         if (secondTab != null) {
                             if (countSent != 0)
-                                secondTab.setText("Đã gửi(" + countSent + ")");
+                                secondTab.setText(String.format("%s(%d)", getString(R.string.sent), countSent));
                             else
-                                secondTab.setText("Đã gửi");
+                                secondTab.setText(getString(R.string.sent));
                         } else
                             Log.d("--firstTab", "null");
 

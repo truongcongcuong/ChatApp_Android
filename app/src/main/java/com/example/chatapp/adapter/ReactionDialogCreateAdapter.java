@@ -34,7 +34,6 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
     private final Context context;
     private MessageDto messageDto;
     private final UserSummaryDTO user;
-    private final Gson gson;
     private Dialog dialog;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -60,7 +59,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
         types.add(ReactionType.ANGRY);
         types.add(ReactionType.LIKE);
 
-        gson = new Gson();
+        Gson gson = new Gson();
         SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
     }

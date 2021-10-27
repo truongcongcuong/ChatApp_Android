@@ -38,7 +38,7 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserProfileDto;
-import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.ui.AddFriendActivity;
 import com.example.chatapp.ui.CreateGroupActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -60,7 +60,6 @@ public class MessageFragment extends Fragment {
     private RecyclerView rcv_list_message;
     private ListMessageAdapter adapter;
     private Gson gson;
-    private UserSummaryDTO user;
     private String token;
     private int page = 0;
     private int size = 20;
@@ -73,17 +72,20 @@ public class MessageFragment extends Fragment {
      */
     private SwipeRefreshLayout refreshLayout;
 
+    private Context context;
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
     private String mParam1;
     private String mParam2;
 
-    public MessageFragment() {
+    public MessageFragment(Context context) {
+        this.context = context;
     }
 
-    public static MessageFragment newInstance(String param1, String param2) {
-        MessageFragment fragment = new MessageFragment();
+    public static MessageFragment newInstance(String param1, String param2, Context context) {
+        MessageFragment fragment = new MessageFragment(context);
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -108,12 +110,12 @@ public class MessageFragment extends Fragment {
         SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
 
-        SharedPreferences sharedPreferencesUser = getActivity().getSharedPreferences("user", Context.MODE_PRIVATE);
-        String userJson = sharedPreferencesUser.getString("user-info", null);
-        user = gson.fromJson(userJson, UserSummaryDTO.class);
+//        SharedPreferences sharedPreferencesUser = getActivity().getSharedPreferences("user", Context.MODE_PRIVATE);
+//        String userJson = sharedPreferencesUser.getString("user-info", null);
+//        UserSummaryDTO user = gson.fromJson(userJson, UserSummaryDTO.class);
 
         searchUserResult = new ArrayList<>(0);
-        searchUserAdapter = new SearchUserAdapter(getActivity().getApplicationContext(), searchUserResult);
+        searchUserAdapter = new SearchUserAdapter(context, searchUserResult);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -185,7 +187,7 @@ public class MessageFragment extends Fragment {
 //                }
                 if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                     // scroll to bottom
-                    Log.d("--", "on recylerview scroll event ");
+                    Log.d("--", "on recyclerview scroll event ");
                     loadMoreData();
                 }
 //                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
@@ -219,7 +221,7 @@ public class MessageFragment extends Fragment {
                         e.printStackTrace();
                     }
                 },
-                error -> Log.i("mesage fragment error", error.toString())) {
+                error -> Log.i("message fragment error", error.toString())) {
             @Override
             public Map<String, String> getHeaders() {
                 HashMap<String, String> map = new HashMap<>();
@@ -263,7 +265,7 @@ public class MessageFragment extends Fragment {
                         e.printStackTrace();
                     }
                 },
-                error -> Log.i("mesage fragment error", error.toString())) {
+                error -> Log.i("message fragment error", error.toString())) {
             @Override
             public Map<String, String> getHeaders() {
                 HashMap<String, String> map = new HashMap<>();
@@ -289,7 +291,7 @@ public class MessageFragment extends Fragment {
         View actionView = menuItem.getActionView();
 
         SearchView searchView = (SearchView) actionView;
-        searchView.setQueryHint("Search user...");
+        searchView.setQueryHint(getString(R.string.search_more));
         searchView.setIconifiedByDefault(false);
         searchView.setFocusable(true);
         searchView.requestFocus();
@@ -334,6 +336,10 @@ public class MessageFragment extends Fragment {
                                 Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
                                 getActivity().startActivity(intent);
                                 break;
+                            case R.id.action_add_friend:
+                                Intent intent2 = new Intent(getActivity(), AddFriendActivity.class);
+                                getActivity().startActivity(intent2);
+                                break;
                         }
                         return true;
                     }
@@ -352,7 +358,7 @@ public class MessageFragment extends Fragment {
                 searchUserResult.clear();
                 searchUserAdapter.setList(searchUserResult);
             } catch (Exception e) {
-                searchUserAdapter = new SearchUserAdapter(getActivity().getApplicationContext(), null);
+                searchUserAdapter = new SearchUserAdapter(context, null);
             }
             editText.setText("");
         });
@@ -379,7 +385,7 @@ public class MessageFragment extends Fragment {
                         searchUserResult.clear();
                         searchUserAdapter.setList(searchUserResult);
                     } catch (Exception e) {
-                        searchUserAdapter = new SearchUserAdapter(getActivity().getApplicationContext(), null);
+                        searchUserAdapter = new SearchUserAdapter(context, null);
                     }
                 }
 
@@ -424,7 +430,7 @@ public class MessageFragment extends Fragment {
     }
 
     private void search(String newText) {
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_USER + "search",
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_USER + "searchPhone",
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");

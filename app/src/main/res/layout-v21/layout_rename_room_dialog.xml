@@ -27,7 +27,7 @@
             android:gravity="center_horizontal"
             android:paddingStart="4dp"
             android:singleLine="true"
-            android:text="Đổi tên"
+            android:text="@string/rename_group_title"
             android:textColor="@color/white"
             android:textSize="16sp" />
 
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:ems="10"
-            android:hint="New name"
+            android:hint="@string/new_group_name"
             android:inputType="textPersonName"
             android:minHeight="40dp"
             android:textColor="@color/white"
@@ -54,12 +54,12 @@
                 android:id="@+id/btn_rename_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="10dp"
-                android:layout_toLeftOf="@id/view4"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/view4"
                 android:minHeight="50dp"
-                android:text="Hủy"
+                android:text="@string/cancel_button"
                 app:backgroundTint="@color/red" />
 
             <View
@@ -75,13 +75,13 @@
                 android:id="@+id/btn_rename_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/view4"
-                android:layout_alignParentRight="true"
+                android:layout_alignStart="@id/view4"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:background="@null"
                 android:minHeight="50dp"
-                android:text="Ok"
+                android:text="@string/rename_group_title"
                 android:textColor="@color/white" />
         </RelativeLayout>
 

@@ -96,8 +96,6 @@ public class RoomDetailActivity extends AppCompatActivity {
                 .sensitivity(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
-                .edge(true)
-                .edgeSize(1f)
                 .build();
 
         Gson gson = new Gson();
@@ -115,7 +113,7 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
-        toolbar.setTitle("Tùy chọn");
+        toolbar.setTitle(getString(R.string.options));
         setSupportActionBar(toolbar);
 
         /*
@@ -137,9 +135,9 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         menuItems = new ArrayList<>();
         menuItems.add(MenuItem.builder()
-                .key("viewRepo")
+                .key("viewStoredMedia")
                 .imageResource(R.drawable.ic_baseline_folder_open_24)
-                .name("Kho lưu trữ")
+                .name(getString(R.string.stored_media))
                 .build());
 
         if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.ONE)) {
@@ -153,22 +151,22 @@ public class RoomDetailActivity extends AppCompatActivity {
             menuItems.add(MenuItem.builder()
                     .key("viewCommonGroup")
                     .imageResource(R.drawable.ic_baseline_groups_24)
-                    .name("Xem nhóm chung -- đã xong")
+                    .name(getString(R.string.view_groups_in_common))
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("createRoomWithThisUser")
                     .imageResource(R.drawable.ic_baseline_group_create_24_black)
-                    .name("Tạo nhóm với người này -- đã xong")
+                    .name(getString(R.string.create_group_with_this_user))
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("viewProfile")
                     .imageResource(R.drawable.ic_baseline_profile_circle_24)
-                    .name("Xem trang cá nhân -- đã xong")
+                    .name(getString(R.string.view_profile))
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("block")
                     .imageResource(R.drawable.ic_baseline_block_24)
-                    .name("Chặn tin nhắn")
+                    .name(getString(R.string.block_messages))
                     .build());
         } else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             Glide.with(RoomDetailActivity.this)
@@ -177,27 +175,27 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .placeholder(R.drawable.image_placeholer)
                     .into(imageOfRoom);
             nameOfRoom.setText(inboxDto.getRoom().getName());
-            room_detail_create_at.setText("Đã tạo: " + inboxDto.getRoom().getCreateAt());
+            room_detail_create_at.setText(String.format("%s: %s", getString(R.string.created), inboxDto.getRoom().getCreateAt()));
             menuItems.add(MenuItem.builder()
                     .key("viewMembers")
                     .imageResource(R.drawable.ic_baseline_groups_24)
-                    .name("Xem thành viên -- đã xong")
+                    .name(getString(R.string.view_members))
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("addMember")
                     .imageResource(R.drawable.ic_baseline_group_create_24_black)
-                    .name("Thêm thành viên --  đã xong")
+                    .name(getString(R.string.title_add_member))
                     .build());
             menuItems.add(MenuItem.builder()
                     .key("leaveRoom")
                     .imageResource(R.drawable.ic_baseline_leave_24)
-                    .name("Rời khỏi nhóm -- đã xong")
+                    .name(getString(R.string.leave_group))
                     .build());
             if (user.getId().equals(inboxDto.getRoom().getCreateByUserId())) {
                 menuItems.add(MenuItem.builder()
                         .key("deleteGroup")
                         .imageResource(R.drawable.ic_baseline_delete_forever_24)
-                        .name("Giải tán nhóm")
+                        .name(getString(R.string.delete_group))
                         .build());
             }
             btn_change_image_of_room.setPadding(3, 0, 3, 3);
@@ -212,13 +210,13 @@ public class RoomDetailActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                         new AlertDialog.Builder(this)
-                                .setTitle("Permission Needed")
-                                .setMessage("Permission is needed to access files from your device...")
-                                .setPositiveButton("OK", (dialog, which) ->
+                                .setTitle(getString(R.string.permission_needed_title))
+                                .setMessage(getString(R.string.permission_needed_message))
+                                .setPositiveButton(getString(R.string.confirm_button), (dialog, which) ->
                                         ActivityCompat.requestPermissions(RoomDetailActivity.this,
                                                 new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                                                 REQUEST_PERMISSION))
-                                .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel()).create().show();
+                                .setNegativeButton(getString(R.string.cancel_button), (dialog, which) -> dialog.cancel()).create().show();
                     } else {
                         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
                     }
@@ -240,13 +238,13 @@ public class RoomDetailActivity extends AppCompatActivity {
         menuItems.add(MenuItem.builder()
                 .key("deleteInbox")
                 .imageResource(R.drawable.ic_baseline_delete_forever_24)
-                .name("Xóa cuộc trò chuyện --đã xong")
+                .name(getString(R.string.delete_chat_history))
                 .build());
 
         menuItems.add(MenuItem.builder()
                 .key("report")
                 .imageResource(R.drawable.ic_baseline_report_24)
-                .name("Báo cáo")
+                .name(getString(R.string.report))
                 .build());
         for (int i = 0; i < 10; i++) {
             menuItems.add(MenuItem.builder()
@@ -276,9 +274,9 @@ public class RoomDetailActivity extends AppCompatActivity {
                 }
                 case "leaveRoom": {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("Rời khỏi nhóm " + inboxDto.getRoom().getName())
-                            .setPositiveButton("Hủy", (dialog, id) -> dialog.cancel())
-                            .setNegativeButton("Rời khỏi nhóm", (dialog, id) -> {
+                    builder.setMessage(getString(R.string.leave_group_confirm, inboxDto.getRoom().getName()))
+                            .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
+                            .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
                                 leaveGroup();
                             });
                     builder.create().show();
@@ -286,9 +284,9 @@ public class RoomDetailActivity extends AppCompatActivity {
                 }
                 case "deleteInbox": {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("Xóa lịch sử cuộc trò chuyện này?")
-                            .setPositiveButton("Hủy", (dialog, id) -> dialog.cancel())
-                            .setNegativeButton("Xóa", (dialog, id) -> {
+                    builder.setMessage(getString(R.string.delete_chat_history_confirm))
+                            .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
+                            .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
                                 deleteInbox();
                             });
                     builder.create().show();
@@ -328,7 +326,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), PICK_IMAGE);
     }
 
     private void deleteInbox() {
@@ -393,14 +391,14 @@ public class RoomDetailActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void afterTextChanged(Editable s) {
-                if (!newName.getText().toString().isEmpty()) {
+                if (!newName.getText().toString().equals(inboxDto.getRoom().getName())) {
                     btn_ok.setEnabled(true);
                     btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
                 } else {
                     btn_ok.setEnabled(false);
                     btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark)));
                 }
-                if (!newName.getText().toString().equals(inboxDto.getRoom().getName())) {
+                if (!newName.getText().toString().isEmpty()) {
                     btn_ok.setEnabled(true);
                     btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
                 } else {
@@ -410,7 +408,7 @@ public class RoomDetailActivity extends AppCompatActivity {
             }
         });
 
-        title.setText("Đổi tên");
+        title.setText(getString(R.string.rename_group_title));
 
         WindowManager.LayoutParams layoutParams = dialog.getWindow().getAttributes();
         layoutParams.dimAmount = .5f;
@@ -607,7 +605,7 @@ public class RoomDetailActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 openFileChoose();
             } else {
-                Toast.makeText(this, "Please allow the Permission", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.allow_permission), Toast.LENGTH_SHORT).show();
             }
         }
     }

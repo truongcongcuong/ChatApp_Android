@@ -49,18 +49,18 @@ import java.util.Map;
 public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.ViewHolder> {
     private final Context context;
     private List<InboxDto> list;
-    private final int maxMessageSizeDisplay = 5;
+    private static final int maxMessageSizeDisplay = 5;
     private final Gson gson;
     private final UserSummaryDTO user;
-    private static final SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private String access_token;
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final String access_token;
 
-    public ListMessageAdapter(Context context, List<InboxDto> dtos) {
+    public ListMessageAdapter(Context context, List<InboxDto> list) {
         this.context = context;
-        if (dtos != null)
-            this.list = dtos;
+        if (list == null)
+            this.list = new ArrayList<>();
         else
-            list = new ArrayList<>();
+            this.list = list;
         gson = new Gson();
 
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
@@ -69,7 +69,6 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
 
         SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
         access_token = sharedPreferencesToken.getString("access-token", null);
-        Log.d("accessssss", access_token);
     }
 
     @NonNull
@@ -85,93 +84,87 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         StrictMode.setThreadPolicy(policy);
 
         InboxDto inboxDto = list.get(position);
-        String url;
-        String displayName;
+        if (inboxDto != null) {
+            String url;
+            String displayName;
         /*
         lấy tên và imageurl nếu là chat group
          */
-        if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
-            displayName = inboxDto.getRoom().getName();
-            url = inboxDto.getRoom().getImageUrl();
-        } else {
+            if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+                displayName = inboxDto.getRoom().getName();
+                url = inboxDto.getRoom().getImageUrl();
+            } else {
             /*
             lấy tên và iamgeurl nếu là chat one
              */
-            displayName = inboxDto.getRoom().getTo().getDisplayName();
-            url = inboxDto.getRoom().getTo().getImageUrl();
-        }
+                displayName = inboxDto.getRoom().getTo().getDisplayName();
+                url = inboxDto.getRoom().getTo().getImageUrl();
+            }
 
-        // load image
-        Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
-                .centerCrop().circleCrop().into(holder.img_lim_avt);
+            // load image
+            Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
+                    .centerCrop().circleCrop().into(holder.img_lim_avt);
 
-        MessageDto lastMessage = inboxDto.getLastMessage();
-        if (lastMessage != null) {
-            holder.txt_lim_last_message.setText(lastMessage.getContent());
-            holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
-            String content = lastMessage.getContent();
-            if (lastMessage.getSender() != null) {
-                if (!lastMessage.getType().equals(MessageType.TEXT))
-                    content = String.format("%s%s%s", "[", lastMessage.getType().toString(), "]");
+            MessageDto lastMessage = inboxDto.getLastMessage();
+            if (lastMessage != null) {
+                holder.txt_lim_last_message.setText(lastMessage.getContent());
+                holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
+                String content = lastMessage.getContent();
+                if (lastMessage.getSender() != null) {
+                    if (!lastMessage.getType().equals(MessageType.TEXT))
+                        content = String.format("[%s]", lastMessage.getType().toString());
                 /*
                 nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
                  */
-                if (user.getId().equals(lastMessage.getSender().getId()))
-                    content = String.format("%s%s", "Bạn: ", content);
-                else {
-                    if (inboxDto.getRoom().getType().equals(RoomType.GROUP))
-                        content = String.format("%s: %s", lastMessage.getSender().getDisplayName(), content);
+                    if (user.getId().equals(lastMessage.getSender().getId()))
+                        content = String.format("%s: %s", context.getString(R.string.you), content);
+                    else {
+                        if (inboxDto.getRoom().getType().equals(RoomType.GROUP))
+                            content = String.format("%s: %s", lastMessage.getSender().getDisplayName(), content);
+                    }
                 }
+                holder.txt_lim_last_message.setText(content);
             }
-            holder.txt_lim_last_message.setText(content);
-        }
-        holder.txt_lim_display_name.setText(displayName);
+            holder.txt_lim_display_name.setText(displayName);
 
         /*
         số tin nhắn chưa đọc lớn hơn 0
          */
-        if (inboxDto.getCountNewMessage() > 0) {
-            /*
-            set padding và background cho icon số tin nhắn mới
-             */
-            holder.txt_lim_unread_message.setPadding(30, 10, 30, 10);
-            holder.txt_lim_unread_message.setBackgroundResource(R.drawable.background_unreadmessage);
-            if (inboxDto.getCountNewMessage() <= maxMessageSizeDisplay)
-                holder.txt_lim_unread_message.setText(String.format("%d", inboxDto.getCountNewMessage()));
-            else
-                holder.txt_lim_unread_message.setText(String.format("%d%s", maxMessageSizeDisplay, "+"));
+            if (inboxDto.getCountNewMessage() > 0) {
+                holder.txt_lim_unread_message.setVisibility(View.VISIBLE);
+                if (inboxDto.getCountNewMessage() <= maxMessageSizeDisplay)
+                    holder.txt_lim_unread_message.setText(String.format("%d", inboxDto.getCountNewMessage()));
+                else
+                    holder.txt_lim_unread_message.setText(String.format("%d%s", maxMessageSizeDisplay, "+"));
             /*
             khi có tin nhắn mới thì set font in đậm
              */
-            holder.txt_lim_last_message.setTypeface(null, Typeface.BOLD);
-            holder.txt_lim_time_last_message.setTypeface(null, Typeface.BOLD);
-            holder.txt_lim_display_name.setTypeface(null, Typeface.BOLD);
-        } else {
-            /*
-            xóa text về rỗng khi đã đọc tin nhắn, set phông chữ bình thường
-             */
-            holder.txt_lim_unread_message.setPadding(0, 0, 0, 0);
-            holder.txt_lim_unread_message.setText("");
-            holder.txt_lim_display_name.setTypeface(null, Typeface.NORMAL);
-            holder.txt_lim_last_message.setTypeface(null, Typeface.NORMAL);
-            holder.txt_lim_time_last_message.setTypeface(null, Typeface.NORMAL);
-        }
+                holder.txt_lim_last_message.setTypeface(null, Typeface.BOLD);
+                holder.txt_lim_time_last_message.setTypeface(null, Typeface.BOLD);
+                holder.txt_lim_display_name.setTypeface(null, Typeface.BOLD);
+            } else {
+                holder.txt_lim_unread_message.setVisibility(View.GONE);
+                holder.txt_lim_display_name.setTypeface(null, Typeface.NORMAL);
+                holder.txt_lim_last_message.setTypeface(null, Typeface.NORMAL);
+                holder.txt_lim_time_last_message.setTypeface(null, Typeface.NORMAL);
+            }
 
-        holder.itemView.setOnClickListener(v -> {
+            holder.itemView.setOnClickListener(v -> {
             /*
             khi click vào inbox để xem tin nhắn thì set số tin nhắn mới về 0
              */
-            inboxDto.setCountNewMessage(0);
-            list.set(position, inboxDto);
-            notifyItemChanged(position);
+                inboxDto.setCountNewMessage(0);
+                list.set(position, inboxDto);
+                notifyItemChanged(position);
 
-            Intent intent = new Intent(context, ChatActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("dto", inboxDto);
-            intent.putExtras(bundle);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        });
+                Intent intent = new Intent(context, ChatActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("dto", inboxDto);
+                intent.putExtras(bundle);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            });
+        }
 
     }
 
@@ -179,8 +172,8 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     cập nhật thêm inbox khi cuộn
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void updateList(List<InboxDto> inboxs) {
-        list.addAll(inboxs);
+    public void updateList(List<InboxDto> newList) {
+        list.addAll(newList);
         sortTimeLastMessage();
         notifyDataSetChanged();
     }
@@ -288,6 +281,8 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             txt_lim_display_name = itemView.findViewById(R.id.txt_lim_display_name);
             txt_lim_time_last_message = itemView.findViewById(R.id.txt_lim_time_last_message);
             txt_lim_unread_message = itemView.findViewById(R.id.txt_lim_unread_message);
+
+            txt_lim_unread_message.setVisibility(View.GONE);
         }
     }
 

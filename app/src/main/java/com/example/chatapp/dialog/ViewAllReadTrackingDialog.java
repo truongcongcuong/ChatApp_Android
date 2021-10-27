@@ -41,7 +41,7 @@ public class ViewAllReadTrackingDialog extends Dialog {
         listView.setOnItemClickListener((parent, view, pos, itemId) -> {
 
         });
-        titleOfDialog.setText("Những người đã xem");
+        titleOfDialog.setText(context.getString(R.string.read_by));
 
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
         layoutParams.dimAmount = .5f;

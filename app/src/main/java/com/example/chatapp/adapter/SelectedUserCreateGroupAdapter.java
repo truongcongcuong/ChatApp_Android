@@ -1,7 +1,6 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
@@ -18,18 +17,13 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.SendDataCreateRoomActivity;
 import com.example.chatapp.dto.UserProfileDto;
-import com.example.chatapp.dto.UserSummaryDTO;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectedUserCreateGroupAdapter extends RecyclerView.Adapter<SelectedUserCreateGroupAdapter.ViewHolder> {
     private List<UserProfileDto> list;
-    private final Gson gson;
     private final Context context;
-    private final String token;
-    private final UserSummaryDTO user;
     private final SendDataCreateRoomActivity sendDataCreateRoomActivity;
 
     public SelectedUserCreateGroupAdapter(Context context, List<UserProfileDto> list) {
@@ -38,14 +32,14 @@ public class SelectedUserCreateGroupAdapter extends RecyclerView.Adapter<Selecte
             this.list = new ArrayList<>(0);
         else
             this.list = list;
-        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-        String userJson = sharedPreferencesUser.getString("user-info", null);
+//        SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+//        String userJson = sharedPreferencesUser.getString("user-info", null);
 
-        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
-        token = sharedPreferencesToken.getString("access-token", null);
+//        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
+//        String token = sharedPreferencesToken.getString("access-token", null);
 
-        gson = new Gson();
-        user = gson.fromJson(userJson, UserSummaryDTO.class);
+//        Gson gson = new Gson();
+//        UserSummaryDTO user = gson.fromJson(userJson, UserSummaryDTO.class);
         sendDataCreateRoomActivity = (SendDataCreateRoomActivity) context;
     }
 

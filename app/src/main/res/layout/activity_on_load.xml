@@ -82,7 +82,9 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline33"
         app:layout_constraintTop_toTopOf="@+id/guideline49"
-        app:layout_constraintVertical_bias="0.0"></TextView>
+        app:layout_constraintVertical_bias="0.0">
+
+    </TextView>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline52"
@@ -96,13 +98,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
         android:paddingTop="10dp"
-        android:text="Mai Kien Cuong \nTruong Cong Cuong \nNguyen Cong Thanh Dat \nLuu Tuan Kha"
+        android:text="@string/develop_team"
         android:textColor="@color/gray"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/guideline51"
         app:layout_constraintStart_toStartOf="@+id/guideline52"
-        app:layout_constraintTop_toTopOf="@+id/guideline50"></TextView>
+        app:layout_constraintTop_toTopOf="@+id/guideline50">
+
+    </TextView>
 </androidx.constraintlayout.widget.ConstraintLayout>

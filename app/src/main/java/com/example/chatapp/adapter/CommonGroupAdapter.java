@@ -54,10 +54,10 @@ public class CommonGroupAdapter extends RecyclerView.Adapter<CommonGroupAdapter.
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private List<InboxDto> list;
 
-    public CommonGroupAdapter(Context context, List<InboxDto> dtos) {
+    public CommonGroupAdapter(Context context, List<InboxDto> listDto) {
         this.context = context;
-        if (dtos != null)
-            this.list = dtos;
+        if (listDto != null)
+            this.list = listDto;
         else
             list = new ArrayList<>();
         gson = new Gson();
@@ -68,7 +68,6 @@ public class CommonGroupAdapter extends RecyclerView.Adapter<CommonGroupAdapter.
 
         SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
         access_token = sharedPreferencesToken.getString("access-token", null);
-        Log.d("accessssss", access_token);
     }
 
     @NonNull
@@ -84,94 +83,94 @@ public class CommonGroupAdapter extends RecyclerView.Adapter<CommonGroupAdapter.
         StrictMode.setThreadPolicy(policy);
 
         InboxDto inboxDto = list.get(position);
-        String url;
-        String displayName;
-        /*
-        lấy tên và imageurl nếu là chat group
-         */
-        if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
-            displayName = inboxDto.getRoom().getName();
-            url = inboxDto.getRoom().getImageUrl();
-        } else {
+        if (inboxDto != null) {
+            String url;
+            String displayName;
             /*
-            lấy tên và iamgeurl nếu là chat one
+            lấy tên và imageurl nếu là chat group
              */
-            displayName = inboxDto.getRoom().getTo().getDisplayName();
-            url = inboxDto.getRoom().getTo().getImageUrl();
-        }
-
-        // load image
-        Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
-                .centerCrop().circleCrop().into(holder.img_common_group_avt);
-
-        MessageDto lastMessage = inboxDto.getLastMessage();
-        if (lastMessage != null) {
-            holder.txt_common_group_last_message.setText(lastMessage.getContent());
-            holder.txt_common_group_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
-            String content = lastMessage.getContent();
-            if (lastMessage.getSender() != null) {
-                if (!lastMessage.getType().equals(MessageType.TEXT))
-                    content = String.format("%s%s%s", "[", lastMessage.getType().toString(), "]");
+            if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+                displayName = inboxDto.getRoom().getName();
+                url = inboxDto.getRoom().getImageUrl();
+            } else {
                 /*
-                nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
+                lấy tên và iamgeurl nếu là chat one
                  */
-                if (user.getId().equals(lastMessage.getSender().getId()))
-                    content = String.format("%s%s", "Bạn: ", content);
-                else {
-                    if (inboxDto.getRoom().getType().equals(RoomType.GROUP))
-                        content = String.format("%s: %s", lastMessage.getSender().getDisplayName(), content);
-                }
+                displayName = inboxDto.getRoom().getTo().getDisplayName();
+                url = inboxDto.getRoom().getTo().getImageUrl();
             }
-            holder.txt_common_group_last_message.setText(content);
-        }
-        holder.txt_common_group_display_name.setText(displayName);
+
+            // load image
+            Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
+                    .centerCrop().circleCrop().into(holder.img_common_group_avt);
+
+            MessageDto lastMessage = inboxDto.getLastMessage();
+            if (lastMessage != null) {
+                holder.txt_common_group_last_message.setText(lastMessage.getContent());
+                holder.txt_common_group_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
+                String content = lastMessage.getContent();
+                if (lastMessage.getSender() != null) {
+                    if (!lastMessage.getType().equals(MessageType.TEXT))
+                        content = String.format("[%s]", lastMessage.getType().toString());
+                    /*
+                    nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
+                     */
+                    if (user.getId().equals(lastMessage.getSender().getId()))
+                        content = String.format("%s: %s", context.getString(R.string.you), content);
+                    else {
+                        if (inboxDto.getRoom().getType().equals(RoomType.GROUP))
+                            content = String.format("%s: %s", lastMessage.getSender().getDisplayName(), content);
+                    }
+                }
+                holder.txt_common_group_last_message.setText(content);
+            }
+            holder.txt_common_group_display_name.setText(displayName);
 
         /*
         số tin nhắn chưa đọc lớn hơn 0
          */
-        if (inboxDto.getCountNewMessage() > 0) {
+            if (inboxDto.getCountNewMessage() > 0) {
             /*
             set padding và background cho icon số tin nhắn mới
              */
-            holder.txt_common_group_unread_message.setPadding(30, 10, 30, 10);
-            holder.txt_common_group_unread_message.setBackgroundResource(R.drawable.background_unreadmessage);
-            int maxMessageSizeDisplay = 5;
-            if (inboxDto.getCountNewMessage() <= maxMessageSizeDisplay)
-                holder.txt_common_group_unread_message.setText(String.format("%d", inboxDto.getCountNewMessage()));
-            else
-                holder.txt_common_group_unread_message.setText(String.format("%d%s", maxMessageSizeDisplay, "+"));
+                holder.txt_common_group_unread_message.setVisibility(View.VISIBLE);
+                int maxMessageSizeDisplay = 5;
+                if (inboxDto.getCountNewMessage() <= maxMessageSizeDisplay)
+                    holder.txt_common_group_unread_message.setText(String.format("%d", inboxDto.getCountNewMessage()));
+                else
+                    holder.txt_common_group_unread_message.setText(String.format("%d%s", maxMessageSizeDisplay, "+"));
             /*
             khi có tin nhắn mới thì set font in đậm
              */
-            holder.txt_common_group_last_message.setTypeface(null, Typeface.BOLD);
-            holder.txt_common_group_time_last_message.setTypeface(null, Typeface.BOLD);
-            holder.txt_common_group_display_name.setTypeface(null, Typeface.BOLD);
-        } else {
+                holder.txt_common_group_last_message.setTypeface(null, Typeface.BOLD);
+                holder.txt_common_group_time_last_message.setTypeface(null, Typeface.BOLD);
+                holder.txt_common_group_display_name.setTypeface(null, Typeface.BOLD);
+            } else {
             /*
             xóa text về rỗng khi đã đọc tin nhắn, set phông chữ bình thường
              */
-            holder.txt_common_group_unread_message.setPadding(0, 0, 0, 0);
-            holder.txt_common_group_unread_message.setText("");
-            holder.txt_common_group_display_name.setTypeface(null, Typeface.NORMAL);
-            holder.txt_common_group_last_message.setTypeface(null, Typeface.NORMAL);
-            holder.txt_common_group_time_last_message.setTypeface(null, Typeface.NORMAL);
-        }
+                holder.txt_common_group_unread_message.setVisibility(View.GONE);
+                holder.txt_common_group_display_name.setTypeface(null, Typeface.NORMAL);
+                holder.txt_common_group_last_message.setTypeface(null, Typeface.NORMAL);
+                holder.txt_common_group_time_last_message.setTypeface(null, Typeface.NORMAL);
+            }
 
-        holder.itemView.setOnClickListener(v -> {
+            holder.itemView.setOnClickListener(v -> {
             /*
             khi click vào inbox để xem tin nhắn thì set số tin nhắn mới về 0
              */
-            inboxDto.setCountNewMessage(0);
-            list.set(position, inboxDto);
-            notifyItemChanged(position);
+                inboxDto.setCountNewMessage(0);
+                list.set(position, inboxDto);
+                notifyItemChanged(position);
 
-            Intent intent = new Intent(context, ChatActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("dto", inboxDto);
-            intent.putExtras(bundle);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        });
+                Intent intent = new Intent(context, ChatActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("dto", inboxDto);
+                intent.putExtras(bundle);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            });
+        }
 
     }
 
@@ -278,6 +277,8 @@ public class CommonGroupAdapter extends RecyclerView.Adapter<CommonGroupAdapter.
             txt_common_group_display_name = itemView.findViewById(R.id.txt_common_group_display_name);
             txt_common_group_time_last_message = itemView.findViewById(R.id.txt_common_group_time_last_message);
             txt_common_group_unread_message = itemView.findViewById(R.id.txt_common_group_unread_message);
+
+            txt_common_group_unread_message.setVisibility(View.GONE);
         }
     }
 

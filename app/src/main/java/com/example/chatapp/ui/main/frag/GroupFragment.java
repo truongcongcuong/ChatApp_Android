@@ -209,7 +209,7 @@ public class GroupFragment extends Fragment {
         View actionView = menuItemSearch.getActionView();
 
         SearchView searchView = (SearchView) actionView;
-        searchView.setQueryHint("Search group...");
+        searchView.setQueryHint(getString(R.string.search_group));
         searchView.setIconifiedByDefault(false);
         searchView.setFocusable(true);
         searchView.requestFocus();

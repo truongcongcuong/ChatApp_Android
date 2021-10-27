@@ -28,6 +28,7 @@ import com.example.chatapp.dto.MemberDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,20 +36,22 @@ import java.util.Map;
 public class MemberAdapter extends ArrayAdapter<MemberDto> {
     private final Context context;
     private List<MemberDto> members;
-    private Gson gson;
     private UserSummaryDTO user;
     private boolean currentUserIsAdmin;
-    private String access_token;
+    private final String access_token;
     private InboxDto inboxDto;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public MemberAdapter(Context context, int resource, List<MemberDto> members, InboxDto inboxDto) {
         super(context, resource, members);
-        this.members = members;
+        if (members == null)
+            this.members = new ArrayList<>();
+        else
+            this.members = members;
         this.context = context;
         this.inboxDto = inboxDto;
 
-        gson = new Gson();
+        Gson gson = new Gson();
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
@@ -76,7 +79,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
             members.add(0, memberDto);
 
             Log.d("isAdmin", currentUserIsAdmin + "");
-            Log.d("currentmember", memberDto.toString());
+            Log.d("current member", memberDto.toString());
         }
     }
 
@@ -94,83 +97,78 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
         ImageButton delete = view.findViewById(R.id.ibt_member_delete);
 
         MemberDto member = members.get(position);
-        try {
-            nameOfMember.setText(member.getUser().getDisplayName());
-            Glide.with(context).load(member.getUser().getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
-                    .centerCrop()
-                    .circleCrop()
-                    .into(imageOfMember);
+        if (member != null) {
+            try {
+                nameOfMember.setText(member.getUser().getDisplayName());
+                Glide.with(context).load(member.getUser().getImageUrl())
+                        .placeholder(R.drawable.image_placeholer)
+                        .centerCrop()
+                        .circleCrop()
+                        .into(imageOfMember);
 
-            String creatorId = inboxDto.getRoom().getCreateByUserId();
+                String creatorId = inboxDto.getRoom().getCreateByUserId();
             /*
             nếu người dùng hiện tại là người tạo nhóm, có quyền cao nhất
              */
-            if (creatorId != null && creatorId.equals(user.getId())) {
+                if (creatorId != null && creatorId.equals(user.getId())) {
                 /*
                 hiện icon set admin và xóa trên các thành viên còn lại
                  */
-                if (!member.getUser().getId().equals(user.getId())) {
-                    if (!member.isAdmin()) {
+                    if (!member.getUser().getId().equals(user.getId())) {
+                        if (!member.isAdmin()) {
                         /*
                         nếu thành viên k phải admin thì hiện thêm icon set admin
                          */
-                        setAdmin.setImageResource(R.drawable.ic_baseline_admin_panel_settings_24);
-                        setAdmin.setOnClickListener(v -> {
-                            setAdminForMember(member);
-                        });
-                    } else {
+                            setAdmin.setImageResource(R.drawable.ic_baseline_admin_panel_settings_24);
+                            setAdmin.setOnClickListener(v -> setAdminForMember(member));
+                        } else {
                         /*
                         nếu thành viên là admin rồi thì k hiện icon set admin
                          */
-                        setAdmin.setImageDrawable(null);
-                        setAdmin.setClickable(false);
+                            setAdmin.setImageDrawable(null);
+                            setAdmin.setClickable(false);
+                        }
+                        delete.setImageResource(R.drawable.ic_baseline_delete_forever_24);
+                        delete.setOnClickListener(v -> deleteMember(member));
                     }
-                    delete.setImageResource(R.drawable.ic_baseline_delete_forever_24);
-                    delete.setOnClickListener(v -> {
-                        deleteMember(member);
-                    });
-                }
-            } else {
+                } else {
                 /*
                 nếu người dùng hiện tại  k phải người tạo nhóm nhưng là admin
                  */
-                if (currentUserIsAdmin) {
+                    if (currentUserIsAdmin) {
                     /*
                     thêm icon set admin và xóa trên những người còn lại
                      */
-                    if (!member.isAdmin() && creatorId != null && !creatorId.equals(member.getUser().getId())) {
-                        setAdmin.setImageResource(R.drawable.ic_baseline_admin_panel_settings_24);
-                        delete.setImageResource(R.drawable.ic_baseline_delete_forever_24);
+                        if (!member.isAdmin() && creatorId != null && !creatorId.equals(member.getUser().getId())) {
+                            setAdmin.setImageResource(R.drawable.ic_baseline_admin_panel_settings_24);
+                            delete.setImageResource(R.drawable.ic_baseline_delete_forever_24);
 
-                        setAdmin.setOnClickListener(v -> {
-                            setAdminForMember(member);
-                        });
+                            setAdmin.setOnClickListener(v -> setAdminForMember(member));
 
-                        delete.setOnClickListener(v -> {
-                            deleteMember(member);
-                        });
+                            delete.setOnClickListener(v -> deleteMember(member));
+                        }
                     }
                 }
-            }
 
-            if (member.isAdmin()) {
-                String dt = "Quản trị viên.";
-                if (creatorId != null && creatorId.equals(member.getUser().getId())) {
-                    dt += " Người tạo nhóm.";
+                if (member.isAdmin()) {
+                    String dt = context.getString(R.string.group_admin);
+                    if (creatorId != null && creatorId.equals(member.getUser().getId())) {
+                        dt += " " + context.getString(R.string.group_creator);
+                    }
+                    detail.setText(dt);
+                } else {
+                    try {
+                        String s = context.getString(R.string.member_add_by, member.getAddByUser().getDisplayName(), member.getAddTime());
+                        detail.setText(s);
+                    } catch (Exception ignored) {
+                        detail.setText(context.getString(R.string.member_add_by_undefine));
+                    }
                 }
-                detail.setText(dt);
-            } else {
-                try {
-                    String s = "Thêm bởi " + member.getAddByUser().getDisplayName() + " vào " + member.getAddTime();
-                    detail.setText(s);
-                } catch (Exception ignored) {
-                    detail.setText("Thêm bởi chưa xác định");
-                }
-            }
-        } catch (Exception ignored) {
+            } catch (Exception ignored) {
 
+            }
         }
+
         return view;
     }
 
@@ -180,9 +178,10 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void deleteMember(MemberDto member) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("Xóa " + member.getUser().getDisplayName() + " khỏi nhóm?")
-                .setPositiveButton("Hủy", (dialog, id) -> dialog.cancel())
-                .setNegativeButton("Xóa", (dialog, id) -> {
+        String message = context.getString(R.string.delete_member, member.getUser().getDisplayName());
+        builder.setMessage(message)
+                .setPositiveButton(R.string.cancel_button, (dialog, id) -> dialog.cancel())
+                .setNegativeButton(R.string.delete, (dialog, id) -> {
                     StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_ROOM + inboxDto.getRoom().getId() + "/" + member.getUser().getId(),
                             response -> {
                                 Log.d("delete ok", "--------");
@@ -192,7 +191,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                                 Log.d("after delete ", inboxDto.getRoom().getMembers().toString());
                                 notifyDataSetChanged();
                             },
-                            error -> Log.i("detete error", error.toString())) {
+                            error -> Log.i("delete error", error.toString())) {
                         @Override
                         public Map<String, String> getHeaders() {
                             HashMap<String, String> map = new HashMap<>();
@@ -213,9 +212,10 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
      */
     private void setAdminForMember(MemberDto member) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("Thêm " + member.getUser().getDisplayName() + " làm quản trị viên?")
-                .setPositiveButton("Hủy", (dialog, id) -> dialog.cancel())
-                .setNegativeButton("Thêm", (dialog, id) -> {
+        String message = context.getString(R.string.set_member_to_admin, member.getUser().getDisplayName());
+        builder.setMessage(message)
+                .setPositiveButton(R.string.cancel_button, (dialog, id) -> dialog.cancel())
+                .setNegativeButton(R.string.confirm_button, (dialog, id) -> {
                     StringRequest request = new StringRequest(Request.Method.POST, Constant.API_ROOM + "admin/" + inboxDto.getRoom().getId() + "/" + member.getUser().getId(),
                             response -> {
                                 for (MemberDto m : members) {
@@ -224,8 +224,8 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                                 }
                                 notifyDataSetChanged();
                                 AlertDialog.Builder alert = new AlertDialog.Builder(context);
-                                alert.setMessage("Thêm thành công " + member.getUser().getDisplayName() + " làm quản trị viên")
-                                        .setPositiveButton("OK", (dial, identify) -> dialog.cancel());
+                                alert.setMessage(context.getString(R.string.set_member_to_admin_success))
+                                        .setPositiveButton(R.string.confirm_button, (dial, identify) -> dialog.cancel());
                                 alert.setCancelable(false);
                                 alert.create().show();
                             },

@@ -41,11 +41,9 @@ public class MainActivity extends AppCompatActivity {
     private RecentFragment recentFragment;
     private InfoFragment infoFragment;
     private Gson gson;
-    private UserSummaryDTO user;
 
     private static final int NUM_PAGES = 5;
     private ViewPager2 viewPager;
-    private FragmentStateAdapter pagerAdapter;
 
     private int mCurrentPosition;
     private int mScrollState;
@@ -64,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
         bnv_menu = findViewById(R.id.bnv_bot);
         gson = new Gson();
         SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
-        user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
-        messageFragment = new MessageFragment();
+        UserSummaryDTO user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+        messageFragment = new MessageFragment(this);
 //        contactFragment = new ContactFragment();
 //        groupFragment = new GroupFragment();
 //        recentFragment = new RecentFragment();
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         bnv_menu.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         viewPager = findViewById(R.id.pager);
-        pagerAdapter = new ScreenSlidePagerAdapter(this);
+        FragmentStateAdapter pagerAdapter = new ScreenSlidePagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
         viewPager.setPageTransformer(new ZoomOutPageTransformer());
         /*

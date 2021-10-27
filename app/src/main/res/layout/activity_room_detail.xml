@@ -33,7 +33,6 @@
             android:orientation="vertical">
 
             <RelativeLayout
-                android:id="@+id/top_room_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
@@ -76,7 +75,6 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
                         android:paddingStart="25dp"
-                        android:text="room name"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 

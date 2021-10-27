@@ -17,12 +17,7 @@ import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.main.MainActivity;
 
 public class OnLoadActivity extends AppCompatActivity {
-    private TextView txt_on_load_app_name;
-    private TextView txt_on_load_members;
-    private ImageView img_on_load_logo;
-    private Animation top_animation;
-    private Animation bottom_animation;
-    private static int TIME_OUT = 2500;
+    private static final int TIME_OUT = 2500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +25,12 @@ public class OnLoadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_on_load);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        top_animation = AnimationUtils.loadAnimation(this, R.anim.top_animation);
-        bottom_animation = AnimationUtils.loadAnimation(this, R.anim.bot_animation);
+        Animation top_animation = AnimationUtils.loadAnimation(this, R.anim.top_animation);
+        Animation bottom_animation = AnimationUtils.loadAnimation(this, R.anim.bot_animation);
 
-        txt_on_load_app_name = findViewById(R.id.txt_on_load_app_name);
-        txt_on_load_members = findViewById(R.id.txt_on_load_members);
-        img_on_load_logo = findViewById(R.id.img_on_load_logo);
+        TextView txt_on_load_app_name = findViewById(R.id.txt_on_load_app_name);
+        TextView txt_on_load_members = findViewById(R.id.txt_on_load_members);
+        ImageView img_on_load_logo = findViewById(R.id.img_on_load_logo);
 
         img_on_load_logo.setAnimation(top_animation);
         txt_on_load_app_name.setAnimation(bottom_animation);

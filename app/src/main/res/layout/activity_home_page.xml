@@ -151,6 +151,7 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <TextView
+        android:id="@+id/txt_home_page_language"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center"

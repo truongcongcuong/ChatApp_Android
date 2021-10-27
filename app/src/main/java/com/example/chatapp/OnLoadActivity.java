@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.main.MainActivity;
+import com.example.chatapp.utils.LanguageUtils;
 
 public class OnLoadActivity extends AppCompatActivity {
     private static final int TIME_OUT = 2500;
@@ -41,6 +42,8 @@ public class OnLoadActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                LanguageUtils languageUtils = new LanguageUtils(OnLoadActivity.this);
+                languageUtils.loadLocale();
                 if (sharedPreferencesIsLogin.getBoolean("status-login", false)) {
                     Intent intent = new Intent(OnLoadActivity.this, MainActivity.class);
                     startActivity(intent);

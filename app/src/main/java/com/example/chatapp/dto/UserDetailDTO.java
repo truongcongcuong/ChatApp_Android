@@ -31,4 +31,5 @@ public class UserDetailDTO implements Serializable {
 
     private OnlineStatus onlineStatus;
     private String lastOnline;
+    private String accessToken;
 }

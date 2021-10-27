@@ -105,9 +105,11 @@ public class SigninActivity extends AppCompatActivity {
     }
 
     private void sendSignInRequest() {
+        Log.e("signin","request");
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_AUTH + "signin",
                 response -> {
                     try {
+                        Log.e("signin-res",response.toString());
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
 
@@ -140,6 +142,7 @@ public class SigninActivity extends AppCompatActivity {
 
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
+                        Log.e("signin-err",e.getMessage());
                     }
                 },
                 error -> {

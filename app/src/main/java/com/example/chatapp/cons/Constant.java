@@ -45,4 +45,12 @@ public class Constant {
 //    public static final String API_FILE = "http://3.1.20.128:8080/api/file";
 //    public static final String API_FRIEND_REQUEST = "http://3.1.20.128:8080/api/friend-request";
 
+    public class Value {
+        public static final int DEFAULT_LANGUAGE_ID = 0;
+    }
+
+    public class RequestCode {
+        public static final int CHANGE_LANGUAGE = 10000;
+    }
+
 }

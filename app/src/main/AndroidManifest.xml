@@ -71,10 +71,8 @@
         <activity
             android:name=".ui.signup.SignUpActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
-
         <activity android:name=".ui.HomePageActivity" />
         <activity android:name=".ui.main.MainActivity" />
-
         <activity android:name=".OnLoadActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

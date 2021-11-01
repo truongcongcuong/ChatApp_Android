@@ -1,8 +1,13 @@
 package com.example.chatapp.ui.main.frag;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
@@ -32,11 +39,14 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.cons.SendData;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.entity.Language;
 import com.example.chatapp.ui.ChangePasswordActivity;
 import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.ViewInformationActivity;
+import com.example.chatapp.utils.LanguageUtils;
 import com.google.gson.Gson;
 
 import java.io.UnsupportedEncodingException;
@@ -113,6 +123,12 @@ public class InfoFragment extends Fragment {
                 .build());
 
         menuItems.add(MenuItem.builder()
+                .key("changeLanguage")
+                .imageResource(R.drawable.language)
+                .name(getString(R.string.language))
+                .build());
+
+        menuItems.add(MenuItem.builder()
                 .key("signout")
                 .imageResource(R.drawable.ic_baseline_leave_24)
                 .name(getString(R.string.logout))
@@ -131,6 +147,7 @@ public class InfoFragment extends Fragment {
                     .build());
         }
 
+
         MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(getActivity(), R.layout.line_item_menu_button_vertical, menuItems);
         lv_info_fragment_menu.setAdapter(menuAdapter);
         lv_info_fragment_menu.setOnItemClickListener((parent, view1, position, itemId) -> {
@@ -143,6 +160,8 @@ public class InfoFragment extends Fragment {
                 signout();
             } else if (item.getKey().equals("infoApp")) {
                 Toast.makeText(getActivity(), getString(R.string.app_info), Toast.LENGTH_SHORT).show();
+            } else if(item.getKey().equals("changeLanguage")){
+                showDialogChangeLanguage();
             }
         });
 
@@ -150,6 +169,50 @@ public class InfoFragment extends Fragment {
         setListViewHeightBasedOnChildren(lv_info_fragment_menu);
         nestedScrollView.post(() -> nestedScrollView.scrollTo(0, 0));
         return view;
+    }
+
+    private void showDialogChangeLanguage() {
+        TextView txt_change_language_english,txt_change_language_vietnamese;
+        Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.dialog_change_language);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        txt_change_language_english = dialog.findViewById(R.id.txt_change_language_english);
+        txt_change_language_vietnamese = dialog.findViewById(R.id.txt_change_language_vietnamese);
+        LanguageUtils languageUtils = new LanguageUtils(getContext());
+        Language languageVI = new Language(Constant.RequestCode.CHANGE_LANGUAGE,
+                getString(R.string.language_vietnamese),
+                getString(R.string.language_vietnamese_code));
+
+        Language languageEN = new Language(Constant.Value.DEFAULT_LANGUAGE_ID,
+                getString(R.string.language_english),
+                getString(R.string.language_english_code));
+
+        SharedPreferences sharedPreferencesLanguage = getContext().getSharedPreferences("multi-language", Context.MODE_PRIVATE);
+        Language currentLanguage = gson.fromJson(sharedPreferencesLanguage.getString("language",null),Language.class);
+        if (currentLanguage.getCode().equals("en"))
+            txt_change_language_english.setCompoundDrawablesWithIntrinsicBounds(R.drawable.united_kingdom,0,R.drawable.ic_baseline_check_circle_outline_24,0);
+        else
+            txt_change_language_vietnamese.setCompoundDrawablesWithIntrinsicBounds(R.drawable.vietnam,0,R.drawable.ic_baseline_check_circle_outline_24,0);
+
+        txt_change_language_english.setOnClickListener(v->{
+            languageUtils.changeLanguage(languageEN);
+            reloadActivity();
+            dialog.dismiss();
+        });
+
+        txt_change_language_vietnamese.setOnClickListener(v->{
+            languageUtils.changeLanguage(languageVI);
+            reloadActivity();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void reloadActivity() {
+
+        SendData sendData = (SendData) getContext();
+        sendData.SendingData("true");
     }
 
     // set dynamic height for list view

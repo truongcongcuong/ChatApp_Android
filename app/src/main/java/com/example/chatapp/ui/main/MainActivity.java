@@ -22,6 +22,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.chatapp.R;
+import com.example.chatapp.cons.SendData;
 import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -33,7 +34,7 @@ import com.example.chatapp.ui.main.frag.RecentFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SendData {
     private BottomNavigationView bnv_menu;
     private MessageFragment messageFragment;
     private ContactFragment contactFragment;
@@ -166,6 +167,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {
             }
         });
+
+        int page = getIntent().getIntExtra("page",0);
+        Log.e("page : ====== : ",page+"");
+        viewPager.setCurrentItem(page);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -197,6 +202,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d("resume", "main activity resume");
+    }
+
+    @Override
+    public void SendingData(String s) {
+        if(Boolean.parseBoolean(s)){
+            Intent intent = getIntent();
+            intent.putExtra("page",4);
+            finish();
+            startActivity(intent);
+        }
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStateAdapter {
@@ -283,5 +298,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
 
 }

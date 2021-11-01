@@ -148,4 +148,5 @@
     <string name="common_groups">Nhóm chung</string>
     <string name="type_verification_code">Nhập mã xác nhận của bạn</string>
     <string name="present_online">Đang truy cập</string>
+    <string name="change_language">Thay đổi ngôn ngữ</string>
 </resources>

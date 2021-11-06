@@ -13,9 +13,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -52,19 +55,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GroupFragment extends Fragment {
 
-    private RecyclerView rcv_list_group;
     private ListMessageAdapter adapter;
     private List<InboxDto> list;
     private List<InboxDto> searchGroup;
     private Gson gson;
     private String token;
-    private int page = 0;
-    private int size = 20;
+    private int page = 100;
+    private int size = 1;
     private final String type = RoomType.GROUP.toString();
+
+    private Button btnLoadMore;
+    private int pageSearch = 0;
+    private Timer timer;
+    private final int DELAY_SEARCH = 250;
+    private LinearLayout layout_search;
+    private LinearLayout layout_content;
+    private TextView search_message;
+    private String message;
+    private String no_result;
 
     /*
     kéo để làm mới
@@ -103,6 +116,9 @@ public class GroupFragment extends Fragment {
         }
         searchGroup = new ArrayList<>(0);
         gson = new Gson();
+        timer = new Timer();
+        message = getString(R.string.search_group);
+        no_result = getString(R.string.no_result);
         GetNewAccessToken getNewAccessToken = new GetNewAccessToken(getActivity().getApplicationContext());
         getNewAccessToken.sendGetNewTokenRequest();
         SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
@@ -122,18 +138,36 @@ public class GroupFragment extends Fragment {
         refreshLayout.setColorSchemeColors(Color.RED);
         refreshLayout.setOnRefreshListener(() -> {
             page = 0;
+            pageSearch = 0;
             refreshListInboxGroup();
         });
 
-        rcv_list_group = view.findViewById(R.id.rcv_list_group);
+        RecyclerView rcv_list_group = view.findViewById(R.id.rcv_list_group);
+        btnLoadMore = view.findViewById(R.id.group_frg_btn_load_more);
+        btnLoadMore.setVisibility(View.GONE);
+
+        layout_search = view.findViewById(R.id.layout_search);
+        layout_search.setVisibility(View.GONE);
+        search_message = view.findViewById(R.id.txt_search_notify);
+        search_message.setText(message);
+
+        layout_content = view.findViewById(R.id.group_fragment_layout_recyclerview);
+        hideLayoutSearch();
+
+        list = new ArrayList<>();
         rcv_list_group.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), new ArrayList<>(0));
-        this.rcv_list_group.setAdapter(adapter);
+        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), null);
+        rcv_list_group.setAdapter(adapter);
         updateListInboxGroup();
+
         return view;
     }
 
     private void refreshListInboxGroup() {
+        btnLoadMore.setOnClickListener(v -> {
+            page++;
+            updateListInboxGroup();
+        });
         list = new ArrayList<>();
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size + "&type=" + type,
                 response -> {
@@ -142,9 +176,14 @@ public class GroupFragment extends Fragment {
 
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
+                        boolean last = (boolean) object.get("last");
+                        visibleBtnLoadMore(last);
                         Type listType = new TypeToken<List<InboxDto>>() {
                         }.getType();
                         list = gson.fromJson(array.toString(), listType);
+                        if (!list.isEmpty()) {
+                            hideLayoutSearch();
+                        }
                         adapter.setList(list);
                         refreshLayout.setRefreshing(false);
                     } catch (JSONException | UnsupportedEncodingException e) {
@@ -165,9 +204,29 @@ public class GroupFragment extends Fragment {
         requestQueue.add(request);
     }
 
+    private void hideLayoutSearch() {
+        layout_content.setVisibility(View.VISIBLE);
+        layout_search.setVisibility(View.GONE);
+    }
+
+    private void showLayoutSearch() {
+        layout_content.setVisibility(View.GONE);
+        layout_search.setVisibility(View.VISIBLE);
+    }
+
+    private void visibleBtnLoadMore(boolean last) {
+        if (last)
+            btnLoadMore.setVisibility(View.GONE);
+        else
+            btnLoadMore.setVisibility(View.VISIBLE);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void updateListInboxGroup() {
-        list = new ArrayList<>();
+        btnLoadMore.setOnClickListener(v -> {
+            page++;
+            updateListInboxGroup();
+        });
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "?page=" + page + "&size=" + size + "&type=" + type,
                 response -> {
                     try {
@@ -175,10 +234,20 @@ public class GroupFragment extends Fragment {
 
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
+                        boolean last = (boolean) object.get("last");
+                        visibleBtnLoadMore(last);
                         Type listType = new TypeToken<List<InboxDto>>() {
                         }.getType();
-                        list = gson.fromJson(array.toString(), listType);
-                        adapter.setList(list);
+                        List<InboxDto> newList = gson.fromJson(array.toString(), listType);
+                        System.out.println(newList);
+                        if (!newList.isEmpty()) {
+                            if (page == 0) {
+                                list = newList;
+                            } else {
+                                list.addAll(newList);
+                            }
+                            adapter.setList(list);
+                        }
 //                        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), list);
 //                        this.rcv_list_group.setAdapter(adapter);
 
@@ -248,8 +317,14 @@ public class GroupFragment extends Fragment {
         sự kiện click icon close trên search view
          */
         closeIcon.setOnClickListener(v -> {
-            adapter.setList(list);
+            try {
+                searchGroup.clear();
+            } catch (Exception ignore) {
+            }
+//            adapter.setList(list);
             editText.setText("");
+            showLayoutSearch();
+            search_message.setText(message);
         });
 
         /*
@@ -270,9 +345,27 @@ public class GroupFragment extends Fragment {
                 Log.d("---change", newText);
 
                 if (!newText.isEmpty()) {
-                    search(newText);
+                    timer.cancel();
+                    timer = new Timer();
+                    timer.schedule(
+                            new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        searchGroup.clear();
+                                    } catch (Exception ignore) {
+
+                                    }
+                                    search(newText);
+                                }
+                            },
+                            DELAY_SEARCH
+                    );
                 } else {
-                    adapter.setList(list);
+                    timer.cancel();
+//                    adapter.setList(list);
+                    showLayoutSearch();
+                    search_message.setText(message);
                 }
 
                 return false;
@@ -291,6 +384,7 @@ public class GroupFragment extends Fragment {
                 if (adapter != null) {
                     adapter.setList(list);
                 }
+                hideLayoutSearch();
                 return true;
             }
 
@@ -302,10 +396,10 @@ public class GroupFragment extends Fragment {
                  */
                 try {
                     searchGroup.clear();
-//                    adapter.setList(searchFriend);
                 } catch (Exception e) {
 
                 }
+                showLayoutSearch();
                 return true;
             }
         };
@@ -317,10 +411,57 @@ public class GroupFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void search(String newText) {
-        searchGroup = list.stream().filter(x -> x.getRoom().getName().toLowerCase()
-                .contains(newText.toLowerCase()))
-                .collect(Collectors.toList());
-        adapter.setList(searchGroup);
+        btnLoadMore.setOnClickListener(v -> {
+            pageSearch++;
+            search(newText);
+        });
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX
+                + "?page=" + pageSearch + "&size=" + size + "&type=" + type + "&query=" + newText,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+
+                        JSONObject object = new JSONObject(res);
+                        JSONArray array = (JSONArray) object.get("content");
+                        boolean last = (boolean) object.get("last");
+                        visibleBtnLoadMore(last);
+                        Type listType = new TypeToken<List<InboxDto>>() {
+                        }.getType();
+                        List<InboxDto> newList = gson.fromJson(array.toString(), listType);
+                        System.out.println(newList);
+                        if (!newList.isEmpty()) {
+                            if (pageSearch == 0) {
+                                searchGroup = newList;
+                            } else {
+                                searchGroup.addAll(newList);
+                            }
+                        }
+                        adapter.setList(searchGroup);
+                        if (searchGroup.isEmpty()) {
+                            showLayoutSearch();
+                            search_message.setText(no_result);
+                        } else {
+                            hideLayoutSearch();
+                        }
+//                        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), list);
+//                        this.rcv_list_group.setAdapter(adapter);
+
+                    } catch (JSONException | UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.i("group list error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        requestQueue.add(request);
     }
 
     /*

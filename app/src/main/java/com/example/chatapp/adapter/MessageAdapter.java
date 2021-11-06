@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -259,11 +260,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     .into(senderViewHolder.contentImage);
 
                             senderViewHolder.contentImage.setOnClickListener(v -> {
-                                Intent intent = new Intent(context, ViewImageActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putSerializable("message", messageDto);
-                                intent.putExtras(bundle);
-                                context.startActivity(intent);
+                                showImageViewActivity(messageDto);
                             });
                             senderViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                             break;
@@ -375,11 +372,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     .into(receiverViewHolder.contentImage);
 
                             receiverViewHolder.contentImage.setOnClickListener(v -> {
-                                Intent intent = new Intent(context, ViewImageActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putSerializable("message", messageDto);
-                                intent.putExtras(bundle);
-                                context.startActivity(intent);
+                                showImageViewActivity(messageDto);
                             });
                             receiverViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                             break;
@@ -449,11 +442,21 @@ public class MessageAdapter extends RecyclerView.Adapter {
         holder.setIsRecyclable(false);
     }
 
+    private void showImageViewActivity(MessageDto messageDto) {
+        Intent intent = new Intent(context, ViewImageActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("activityTitle", messageDto.getSender().getDisplayName());
+        bundle.putString("activitySubTitle", messageDto.getCreateAt());
+        bundle.putString("imageUrl", messageDto.getContent());
+        intent.putExtras(bundle);
+        context.startActivity(intent);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     private boolean showReactionCreateDialog(MessageDto messageDto) {
         Log.d("message of user id", messageDto.getSender().getId());
         MessageOptionDialog messageOptionDialog = new MessageOptionDialog(context, messageDto);
-        messageOptionDialog.show();
+        messageOptionDialog.show(((AppCompatActivity) context).getSupportFragmentManager(), messageOptionDialog.getTag());
         return true;
     }
 

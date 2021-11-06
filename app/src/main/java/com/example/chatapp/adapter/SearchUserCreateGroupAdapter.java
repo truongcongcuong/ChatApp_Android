@@ -20,6 +20,7 @@ import com.example.chatapp.cons.SendDataCreateRoomActivity;
 import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.utils.TimeAgo;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,7 +86,11 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
                     .centerCrop().circleCrop()
                     .into(holder.item_create_group_user_img);
             holder.item_create_group_user_name.setText(user.getDisplayName());
-            holder.item_create_group_user_detail.setText(String.format("%s: %s", context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
+            try {
+                holder.item_create_group_user_detail.setText(String.format("%s: %s", context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
+            } catch (ParseException e) {
+                holder.item_create_group_user_detail.setText("");
+            }
 
             /*
             sự kiện click trên item

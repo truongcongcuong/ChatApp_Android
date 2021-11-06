@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.chatapp.R;
-import com.example.chatapp.cons.SendData;
+import com.example.chatapp.cons.SendingData;
 import com.example.chatapp.dto.UserSignUpDTO;
 import com.example.chatapp.ui.HomePageActivity;
 import com.example.chatapp.ui.signup.frag.SignupEnterEmailFragment;
@@ -20,7 +20,7 @@ import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
 
-public class SignUpStep2Activity extends AppCompatActivity implements SendData {
+public class SignUpStep2Activity extends AppCompatActivity implements SendingData {
     private int screen = 1;
     private UserSignUpDTO user;
 
@@ -72,7 +72,7 @@ public class SignUpStep2Activity extends AppCompatActivity implements SendData {
     }
 
     @Override
-    public void SendingData(String o) {
+    public void sendString(String o) {
         String s = (String) o;
         if (s.equals("sign-up-success"))
             showDialogSignupSuccess(SignUpStep2Activity.this);

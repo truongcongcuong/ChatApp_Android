@@ -140,7 +140,7 @@
     <string name="create_group">Tạo nhóm</string>
     <string name="type_a_message">Nhập tin nhắn</string>
     <string name="new_group_name">Tên mới</string>
-    <string name="english_language">EngLish</string>
+    <string name="english_language">English</string>
     <string name="vietnamese_language">Tiếng Việt</string>
     <string name="develop_team">Mai Kiên Cường \nTrương Công Cường \nNguyễn Công Thành Đạt \nLưu Tuấn Kha</string>
     <string name="friend_request_received_empty">Danh sách lời mời đã nhận trống.</string>
@@ -148,4 +148,12 @@
     <string name="common_groups">Nhóm chung</string>
     <string name="type_verification_code">Nhập mã xác nhận của bạn</string>
     <string name="present_online">Đang truy cập</string>
+    <string name="load_more">Xem thêm</string>
+
+    <string name="message_type_image">Hình ảnh</string>
+    <string name="message_type_video">Video</string>
+    <string name="message_type_link">Link</string>
+    <string name="message_type_file">File</string>
+    <string name="avatar">Avatar</string>
+    <string name="no_group">You don\'t have any groups.</string>
 </resources>

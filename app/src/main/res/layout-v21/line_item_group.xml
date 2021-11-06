@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/line_item_group_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="1dp"
     android:background="@color/white">
 
     <ImageView
-        android:id="@+id/img_search_user_avt"
+        android:id="@+id/line_item_group_img"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="10dp"
@@ -23,12 +24,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/img_search_user_avt"
+        android:layout_toEndOf="@+id/line_item_group_img"
         android:orientation="vertical"
         android:paddingTop="5dp">
 
         <TextView
-            android:id="@+id/txt_search_user_display_name"
+            android:id="@+id/line_item_group_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -36,10 +37,10 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/txt_search_user_detail"
+            android:id="@+id/line_item_group_detail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"

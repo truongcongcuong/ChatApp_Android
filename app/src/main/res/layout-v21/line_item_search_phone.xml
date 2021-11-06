@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:layout_margin="10dp">
+
+    <ImageView
+        android:id="@+id/img_li_search_phone_avt"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerVertical="true"
+        android:background="@drawable/border_for_circle_image"
+        android:padding="1dp">
+
+    </ImageView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/img_li_search_phone_avt"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_li_search_phone_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/black"
+                android:textSize="18sp">
+
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_li_search_phone_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="16sp">
+
+            </TextView>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_li_search_phone_action"
+            android:layout_width="90dp"
+            android:layout_height="40dp"
+            android:background="@drawable/background_btn_friend_phonebook"
+            android:gravity="center_vertical|center_horizontal"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:textAlignment="center"
+            app:backgroundTint="@null" />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -144,11 +144,15 @@
     <string name="type_verification_code">Your verification code</string>
     <string name="present_online">Online</string>
 
+    <string name="message_type_image">Image</string>
+    <string name="message_type_video">Video</string>
+    <string name="message_type_link">Link</string>
+    <string name="message_type_file">File</string>
 
 
     <!--untranslatable-->
-    <string name="language_english" translatable="false">English</string>
-    <string name="language_vietnamese" translatable="false">Tiếng Việt</string>
+    <string name="language_english" translatable="false">@string/english_language</string>
+    <string name="language_vietnamese" translatable="false">@string/vietnamese_language</string>
 
     <string-array name="language_names">
         <item>@string/language_english</item>
@@ -157,6 +161,9 @@
 
     <string name="language_english_code" translatable="false">en</string>
     <string name="language_vietnamese_code" translatable="false">vi</string>
+    <string name="load_more">Load more</string>
+    <string name="avatar">Avatar</string>
+    <string name="no_group">You don\'t have any groups.</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

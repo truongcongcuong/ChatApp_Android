@@ -12,15 +12,14 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
-import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.utils.TimeAgo;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
 
-public class ViewImageActivity extends AppCompatActivity {
+import java.text.ParseException;
 
-    private MessageDto messageDto;
+public class ViewImageActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +37,6 @@ public class ViewImageActivity extends AppCompatActivity {
 
         Slidr.attach(this, config);
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null)
-            messageDto = (MessageDto) bundle.getSerializable("message");
-
         Toolbar toolbar = findViewById(R.id.toolbar_view_image_activity);
         ImageView imageView = findViewById(R.id.img_content_view_image_activity);
 
@@ -49,22 +44,29 @@ public class ViewImageActivity extends AppCompatActivity {
         toolbar.setSubtitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            String activityTitle = bundle.getString("activityTitle");
+            String activitySubTitle = bundle.getString("activitySubTitle");
+            String imageUrl = bundle.getString("imageUrl");
+
+            setTitle(activityTitle);
+
+            try {
+                toolbar.setSubtitle(TimeAgo.getTime(activitySubTitle));
+            } catch (ParseException e) {
+                toolbar.setSubtitle(activitySubTitle);
+            }
+            Glide.with(this)
+                    .load(imageUrl)
+                    .into(imageView);
+        }
+
         /*
         hiện nút mũi tên quay lại trên toolbar
          */
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        if (messageDto != null) {
-            if (messageDto.getSender() != null) {
-                toolbar.setTitle(messageDto.getSender().getDisplayName());
-                setTitle(messageDto.getSender().getDisplayName());
-            }
-            toolbar.setSubtitle(TimeAgo.getTime(messageDto.getCreateAt()));
-            Glide.with(this)
-                    .load(messageDto.getContent())
-                    .into(imageView);
-        }
 
     }
 

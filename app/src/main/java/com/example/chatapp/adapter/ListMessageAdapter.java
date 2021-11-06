@@ -108,11 +108,23 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             MessageDto lastMessage = inboxDto.getLastMessage();
             if (lastMessage != null) {
                 holder.txt_lim_last_message.setText(lastMessage.getContent());
-                holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
+                try {
+                    holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
+                } catch (ParseException e) {
+                    holder.txt_lim_time_last_message.setText("");
+                }
                 String content = lastMessage.getContent();
                 if (lastMessage.getSender() != null) {
-                    if (!lastMessage.getType().equals(MessageType.TEXT))
-                        content = String.format("[%s]", lastMessage.getType().toString());
+                    if (!lastMessage.getType().equals(MessageType.TEXT)) {
+                        if (lastMessage.getType().equals(MessageType.IMAGE))
+                            content = String.format("[%s]", context.getString(R.string.message_type_image));
+                        else if (lastMessage.getType().equals(MessageType.VIDEO))
+                            content = String.format("[%s]", context.getString(R.string.message_type_video));
+                        else if (lastMessage.getType().equals(MessageType.LINK))
+                            content = String.format("[%s]", context.getString(R.string.message_type_link));
+                        else if (lastMessage.getType().equals(MessageType.FILE))
+                            content = String.format("[%s]", context.getString(R.string.message_type_file));
+                    }
                 /*
                 nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
                  */

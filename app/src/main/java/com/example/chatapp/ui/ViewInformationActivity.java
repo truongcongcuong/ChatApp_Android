@@ -1,12 +1,10 @@
 package com.example.chatapp.ui;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,8 +12,6 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuInformationAdapter;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.dialog.ChangeAvatarDialog;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.utils.MultiPartFileRequest;
@@ -122,37 +119,11 @@ public class ViewInformationActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-
     }
 
-
     private void showDialogChangeAvt() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_change_avatar);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        TextView txt_change_avt_view = dialog.findViewById(R.id.txt_change_avt_view);
-        TextView txt_change_avt_take_photo = dialog.findViewById(R.id.txt_change_avt_take_photo);
-        TextView txt_change_avt_from_gallery = dialog.findViewById(R.id.txt_change_avt_from_gallery);
-
-        txt_change_avt_view.setOnClickListener(v -> {
-//            txt_change_avt_view.setBackgroundColor(getResources().getColor(R.color.gray));
-            Toast.makeText(this, "Action View photo active", Toast.LENGTH_LONG).show();
-        });
-        txt_change_avt_from_gallery.setOnClickListener(v -> {
-            Toast.makeText(this, "Action take photo active", Toast.LENGTH_LONG).show();
-            Intent galleryIntent = new Intent();
-            galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
-            galleryIntent.setType("image/*");
-            startActivityForResult(galleryIntent, REQUEST_GALLERY);
-        });
-        txt_change_avt_take_photo.setOnClickListener(v -> {
-            Toast.makeText(this, "Action take photo from gallery active", Toast.LENGTH_LONG).show();
-            Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
-        });
-
-
-        dialog.show();
+        ChangeAvatarDialog changeAvatarDialog = new ChangeAvatarDialog(this, REQUEST_GALLERY, REQUEST_IMAGE_CAPTURE, null, userDetailDTO);
+        changeAvatarDialog.show();
     }
 
     private void getInformationDetail() {

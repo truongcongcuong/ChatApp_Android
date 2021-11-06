@@ -24,7 +24,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
-import com.example.chatapp.cons.SendData;
+import com.example.chatapp.cons.SendingData;
 import com.example.chatapp.dto.UserSignUpDTO;
 
 import org.json.JSONObject;
@@ -41,12 +41,12 @@ public class SignupEnterEmailFragment extends Fragment {
     private TextView txt_sign_up_verify;
     private TextView txt_sign_up_check_verification_code;
     private TextView txt_sign_up_check_email;
-    private SendData sendData;
+    private SendingData sendingData;
     private UserSignUpDTO user;
 
     @Override
     public void onAttach(@NonNull Context context) {
-        sendData = (SendData) context;
+        sendingData = (SendingData) context;
         super.onAttach(context);
     }
 
@@ -122,7 +122,7 @@ public class SignupEnterEmailFragment extends Fragment {
                         JSONObject object = new JSONObject(res);
                         txt_sign_up_check_verification_code.setText(object.getString("message"));
                         txt_sign_up_check_verification_code.setTextColor(getResources().getColor(R.color.susscess));
-                        sendData.SendingData("sign-up-success");
+                        sendingData.sendString("sign-up-success");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

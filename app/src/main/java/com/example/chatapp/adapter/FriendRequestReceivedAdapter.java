@@ -30,6 +30,7 @@ import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.utils.TimeAgo;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +66,7 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.line_item_friend_request_received, parent, false);
-        return new ViewHolder(view, this);
+        return new ViewHolder(view);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -78,7 +79,11 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
                     .placeholder(R.drawable.image_placeholer)
                     .centerCrop().circleCrop().into(holder.img_line_friend_request_avt);
             holder.txt_line_friend_request_name.setText(friendDTO.getFrom().getDisplayName());
-            holder.txt_line_friend_request_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
+            try {
+                holder.txt_line_friend_request_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
+            } catch (ParseException e) {
+                holder.txt_line_friend_request_create_at.setText("");
+            }
             holder.btn_line_friend_request_cancel.setOnClickListener(v -> {
 //                delete friend request
                 FriendRequestHandle(position, Request.Method.DELETE);
@@ -105,16 +110,14 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        FriendRequestReceivedAdapter adapter;
         ImageView img_line_friend_request_avt;
         TextView txt_line_friend_request_name;
         TextView txt_line_friend_request_create_at;
         Button btn_line_friend_request_cancel;
         Button btn_line_friend_request_accept;
 
-        public ViewHolder(@NonNull View itemView, FriendRequestReceivedAdapter adapter) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.adapter = adapter;
             img_line_friend_request_avt = itemView.findViewById(R.id.img_line_friend_request_avt);
             txt_line_friend_request_name = itemView.findViewById(R.id.txt_line_friend_request_name);
             btn_line_friend_request_cancel = itemView.findViewById(R.id.btn_line_friend_request_cancel);

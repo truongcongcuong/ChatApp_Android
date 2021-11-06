@@ -1,6 +1,5 @@
 package com.example.chatapp.adapter;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -20,6 +19,7 @@ import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReactionSend;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.ReactionType;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -34,10 +34,10 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
     private final Context context;
     private MessageDto messageDto;
     private final UserSummaryDTO user;
-    private Dialog dialog;
+    private final BottomSheetDialogFragment dialog;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public ReactionDialogCreateAdapter(MessageDto messageDto, Context context, Dialog dialog) {
+    public ReactionDialogCreateAdapter(MessageDto messageDto, Context context, BottomSheetDialogFragment dialog) {
         this.context = context;
         this.messageDto = messageDto;
         this.dialog = dialog;
@@ -93,7 +93,7 @@ public class ReactionDialogCreateAdapter extends RecyclerView.Adapter<ReactionDi
                     .subscribe(() -> {
 
                     });
-            dialog.cancel();
+            dialog.dismiss();
         });
     }
 

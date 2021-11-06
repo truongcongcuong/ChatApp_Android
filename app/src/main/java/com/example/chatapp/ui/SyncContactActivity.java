@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -83,6 +84,8 @@ public class SyncContactActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         rcv_sync_contact = findViewById(R.id.rcv_sync_contact);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcv_sync_contact.getContext(), DividerItemDecoration.VERTICAL);
+        rcv_sync_contact.addItemDecoration(dividerItemDecoration);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();

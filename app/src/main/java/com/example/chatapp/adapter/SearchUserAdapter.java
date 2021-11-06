@@ -17,7 +17,9 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.UserProfileDto;
+import com.example.chatapp.utils.TimeAgo;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +62,12 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
                     .centerCrop().circleCrop()
                     .into(holder.img_search_user_avt);
             holder.txt_search_user_display_name.setText(user.getDisplayName());
+            try {
+                holder.txt_search_user_detail.setText(String.format("%s: %s",
+                        context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
+            } catch (ParseException e) {
+                holder.txt_search_user_detail.setText("");
+            }
 
             holder.itemView.setOnClickListener(v -> {
                 ProfileDialog profileDialog = new ProfileDialog(context, user, null);
@@ -83,11 +91,13 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView img_search_user_avt;
         TextView txt_search_user_display_name;
+        TextView txt_search_user_detail;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             img_search_user_avt = itemView.findViewById(R.id.img_search_user_avt);
             txt_search_user_display_name = itemView.findViewById(R.id.txt_search_user_display_name);
+            txt_search_user_detail = itemView.findViewById(R.id.txt_search_user_detail);
         }
     }
 

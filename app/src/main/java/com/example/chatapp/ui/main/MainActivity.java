@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -23,6 +22,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.chatapp.R;
 import com.example.chatapp.cons.WebSocketClient;
+import com.example.chatapp.cons.ZoomOutPageTransformer;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.main.frag.ContactFragment;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private InfoFragment infoFragment;
     private Gson gson;
 
-    private static final int NUM_PAGES = 5;
+    private final int NUM_PAGES = 5;
     private ViewPager2 viewPager;
 
     private int mCurrentPosition;
@@ -239,48 +239,6 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
         } else {
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
-        }
-    }
-
-    /*
-    hiệu ứng chuyển trang khi cuộn
-     */
-    static class ZoomOutPageTransformer implements ViewPager2.PageTransformer {
-        private static final float MIN_SCALE = 1f;
-        private static final float MIN_ALPHA = 1f;
-
-        public void transformPage(View view, float position) {
-            int pageWidth = view.getWidth();
-            int pageHeight = view.getHeight();
-
-            if (position < -1) { // [-Infinity,-1)
-                // This page is way off-screen to the left.
-                view.setAlpha(0f);
-
-            } else if (position <= 1) { // [-1,1]
-                // Modify the default slide transition to shrink the page as well
-                float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
-                float vertMargin = pageHeight * (1 - scaleFactor) / 2;
-                float horzMargin = pageWidth * (1 - scaleFactor) / 2;
-                if (position < 0) {
-                    view.setTranslationX(horzMargin - vertMargin / 2);
-                } else {
-                    view.setTranslationX(-horzMargin + vertMargin / 2);
-                }
-
-                // Scale the page down (between MIN_SCALE and 1)
-                view.setScaleX(scaleFactor);
-                view.setScaleY(scaleFactor);
-
-                // Fade the page relative to its size.
-                view.setAlpha(MIN_ALPHA +
-                        (scaleFactor - MIN_SCALE) /
-                                (1 - MIN_SCALE) * (1 - MIN_ALPHA));
-
-            } else { // (1,+Infinity]
-                // This page is way off-screen to the right.
-                view.setAlpha(0f);
-            }
         }
     }
 

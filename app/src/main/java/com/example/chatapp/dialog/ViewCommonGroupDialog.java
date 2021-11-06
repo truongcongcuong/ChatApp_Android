@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
@@ -11,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +23,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
-import com.example.chatapp.adapter.CommonGroupAdapter;
+import com.example.chatapp.adapter.LineItemGroupAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.UserProfileDto;
@@ -45,7 +48,7 @@ public class ViewCommonGroupDialog extends Dialog {
     private Gson gson;
     private String token;
     private Context context;
-    private CommonGroupAdapter commonGroupAdapter;
+    private LineItemGroupAdapter itemGroupAdapter;
 
     private ViewCommonGroupDialog(@NonNull Context context) {
         super(context);
@@ -68,9 +71,13 @@ public class ViewCommonGroupDialog extends Dialog {
 
         imv_close.setOnClickListener(v -> cancel());
 
-        commonGroupAdapter = new CommonGroupAdapter(context, commonGroup);
+        itemGroupAdapter = new LineItemGroupAdapter(context, commonGroup,
+                AppCompatResources.getDrawable(context, R.drawable.dark_background_dialog_circle), Color.WHITE);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(commonGroupAdapter);
+        recyclerView.setAdapter(itemGroupAdapter);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
 //        recyclerView.setOnItemClickListener((parent, view, pos, itemId) -> {
 //
 //        });
@@ -102,7 +109,7 @@ public class ViewCommonGroupDialog extends Dialog {
                         }.getType();
                         commonGroup = gson.fromJson(array.toString(), listType);
                         Log.d("===", commonGroup.toString());
-                        commonGroupAdapter.setList(commonGroup);
+                        itemGroupAdapter.setList(commonGroup);
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }

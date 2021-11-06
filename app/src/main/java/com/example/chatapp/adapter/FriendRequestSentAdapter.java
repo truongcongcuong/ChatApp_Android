@@ -30,6 +30,7 @@ import com.example.chatapp.dto.FriendRequestSentDto;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.utils.TimeAgo;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,12 +74,18 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FriendRequestSentDto friendDTO = list.get(position);
         if (friendDTO != null) {
-            Glide.with(context).load(friendDTO.getTo().getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
-                    .centerCrop().circleCrop().into(holder.img_line_friend_request_sent_avt);
+            if (friendDTO.getTo() != null) {
+                Glide.with(context).load(friendDTO.getTo().getImageUrl())
+                        .placeholder(R.drawable.image_placeholer)
+                        .centerCrop().circleCrop().into(holder.img_line_friend_request_sent_avt);
+                holder.txt_line_friend_request_sent_name.setText(friendDTO.getTo().getDisplayName());
+            }
 
-            holder.txt_line_friend_request_sent_name.setText(friendDTO.getTo().getDisplayName());
-            holder.txt_line_friend_request_sent_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
+            try {
+                holder.txt_line_friend_request_sent_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
+            } catch (ParseException e) {
+                holder.txt_line_friend_request_sent_create_at.setText("");
+            }
             holder.btn_line_friend_request_sent_cancel.setOnClickListener(v -> deleteSentRequest(position));
             holder.btn_line_friend_request_sent_cancel.setText(context.getString(R.string.recall_button));
 
@@ -115,25 +122,27 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void deleteSentRequest(int position) {
         FriendRequestSentDto friendRequest = list.get(position);
-        StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_FRIEND_REQUEST + "/" + friendRequest.getTo().getId(),
-                response -> {
-                    Log.e("response: ", response);
-                    notifyDataChange(position);
-                }, error -> {
-            Log.e("error: ", error.toString());
+        if (friendRequest != null && friendRequest.getTo() != null) {
+            StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_FRIEND_REQUEST + "/" + friendRequest.getTo().getId(),
+                    response -> {
+                        Log.e("response: ", response);
+                        notifyDataChange(position);
+                    }, error -> {
+                Log.e("error: ", error.toString());
 
-        }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
-                return map;
-            }
-        };
-        RequestQueue queue = Volley.newRequestQueue(context);
-        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        request.setRetryPolicy(retryPolicy);
-        queue.add(request);
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("Authorization", "Bearer " + token);
+                    return map;
+                }
+            };
+            RequestQueue queue = Volley.newRequestQueue(context);
+            DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            request.setRetryPolicy(retryPolicy);
+            queue.add(request);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -102,6 +103,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     danh sách bạn bè
      */
     private List<UserProfileDto> userFriends;
+    private List<UserProfileDto> userSearch;
 
     /*
     adpater những người đã được chọn để tạo nhóm
@@ -109,6 +111,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     private SelectedUserCreateGroupAdapter selectedUserAdapter;
     private RecyclerView rcv_create_group_selected;
     private Button create_group_continue;
+    private Button create_group_btn_load_more;
     private RelativeLayout bottomLayout;
     private Toolbar toolbar;
     /*
@@ -123,6 +126,9 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
 
     private Timer timer;
     private final long DELAY_SEARCH = 250;
+    private final int size = 5;
+    private int page = 0;
+    private int pageSearch = 0;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -151,6 +157,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
             usersSelected.add(user);
         } else
             usersSelected = new ArrayList<>(0);
+        userSearch = new ArrayList<>();
 
         toolbar = findViewById(R.id.tlb_create_group_activity);
         toolbar.setTitle(R.string.un_name_group);
@@ -172,8 +179,13 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         SearchView txt_create_room_find_user = findViewById(R.id.txt_create_group_find_user);
         RecyclerView lv_create_group_user = findViewById(R.id.rcv_create_group_user);
 
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(lv_create_group_user.getContext(), DividerItemDecoration.VERTICAL);
+        lv_create_group_user.addItemDecoration(dividerItemDecoration);
+
         rcv_create_group_selected = findViewById(R.id.rcv_create_group_selected);
         create_group_continue = findViewById(R.id.create_group_continute);
+        create_group_btn_load_more = findViewById(R.id.create_group_btn_load_more);
+        create_group_btn_load_more.setVisibility(View.GONE);
         bottomLayout = findViewById(R.id.create_group_bottom_layout);
 
         create_group_continue.setEnabled(false);
@@ -213,6 +225,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         ImageView closeIcon = txt_create_room_find_user.findViewById(closeIconId);
         closeIcon.setImageResource(R.drawable.ic_baseline_close_circle_24);
         closeIcon.setOnClickListener(v -> {
+            pageSearch = 0;
             editText.setText("");
             adapter.notifyDataSetChanged();
         });
@@ -254,19 +267,22 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 /*
                 nếu text không rỗng thì tìm, ngược lại xóa recyclerview
                  */
-                if (!newText.isEmpty()) {
+                if (!newText.trim().isEmpty()) {
                     timer.cancel();
                     timer = new Timer();
                     timer.schedule(
                             new TimerTask() {
                                 @Override
                                 public void run() {
+                                    pageSearch = 0;
                                     search(newText);
                                 }
                             },
                             DELAY_SEARCH
                     );
                 } else {
+                    pageSearch = 0;
+                    loadFriendList();
                     timer.cancel();
                     timer = new Timer();
                     timer.schedule(
@@ -374,6 +390,48 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         loadFriendList();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void loadMoreFriendList() {
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST + "?size=" + size + "&page=" + page,
+                response -> {
+                    try {
+                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+
+                        JSONObject object = new JSONObject(res);
+                        JSONArray array = (JSONArray) object.get("content");
+                        boolean last = (boolean) object.get("last");
+                        if (last)
+                            create_group_btn_load_more.setVisibility(View.GONE);
+                        else
+                            create_group_btn_load_more.setVisibility(View.VISIBLE);
+                        Type listType = new TypeToken<List<FriendDTO>>() {
+                        }.getType();
+                        List<FriendDTO> friendDTOList = gson.fromJson(array.toString(), listType);
+                        if (page == 0) {
+                            userFriends = friendDTOList.stream().map(FriendDTO::getFriend).collect(Collectors.toList());
+                            adapter.setList(userFriends);
+                        } else {
+                            userFriends.addAll(friendDTOList.stream().map(FriendDTO::getFriend).collect(Collectors.toList()));
+                            adapter.notifyDataSetChanged();
+                        }
+                    } catch (UnsupportedEncodingException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> Log.i("search friend error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        requestQueue.add(request);
+    }
+
     private void initImageCreate() {
         Glide.with(this)
                 .load(R.drawable.ic_baseline_camera_64)
@@ -391,23 +449,34 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     /*
     tìm kiếm user theo tên hoặc số điện thoại
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void search(String newText) {
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST + "?query=" + newText,
+        create_group_btn_load_more.setOnClickListener(v -> {
+            pageSearch++;
+            search(newText);
+        });
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST + "?query=" + newText + "&size=" + size + "&page=" + pageSearch,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        JSONArray array = new JSONArray(res);
-                        List<UserProfileDto> searchUserResult = new ArrayList<>();
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject object = (JSONObject) array.get(i);
-                            String friend = object.get("friend").toString();
-                            UserProfileDto userProfileDto = gson.fromJson(friend, UserProfileDto.class);
-                            searchUserResult.add(userProfileDto);
+
+                        JSONObject object = new JSONObject(res);
+                        JSONArray array = (JSONArray) object.get("content");
+                        boolean last = (boolean) object.get("last");
+                        if (last)
+                            create_group_btn_load_more.setVisibility(View.GONE);
+                        else
+                            create_group_btn_load_more.setVisibility(View.VISIBLE);
+                        Type listType = new TypeToken<List<FriendDTO>>() {
+                        }.getType();
+                        List<FriendDTO> searchList = gson.fromJson(array.toString(), listType);
+                        if (pageSearch == 0) {
+                            userSearch = searchList.stream().map(FriendDTO::getFriend).collect(Collectors.toList());
+                            adapter.setList(userSearch);
+                        } else {
+                            userSearch.addAll(searchList.stream().map(FriendDTO::getFriend).collect(Collectors.toList()));
+                            adapter.notifyDataSetChanged();
                         }
-                        Log.d("", searchUserResult.toString());
-
-                        adapter.setList(searchUserResult);
-
                     } catch (UnsupportedEncodingException | JSONException e) {
                         e.printStackTrace();
                     }
@@ -419,15 +488,10 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 map.put("Authorization", "Bearer " + token);
                 return map;
             }
-
-            @Override
-            protected Map<String, String> getParams() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("textToSearch", newText);
-                return map;
-            }
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
     }
 
@@ -436,17 +500,25 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void loadFriendList() {
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST,
+        create_group_btn_load_more.setOnClickListener(v -> {
+            page++;
+            loadMoreFriendList();
+        });
+        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST + "?size=" + size + "&page=" + page,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                        JSONObject object = new JSONObject(res);
+                        JSONArray array = (JSONArray) object.get("content");
+                        boolean last = (boolean) object.get("last");
+                        if (last)
+                            create_group_btn_load_more.setVisibility(View.GONE);
+                        else
+                            create_group_btn_load_more.setVisibility(View.VISIBLE);
                         Type listType = new TypeToken<List<FriendDTO>>() {
                         }.getType();
-                        JSONObject jsonObject = new JSONObject(res);
-                        List<FriendDTO> friendList = new Gson().fromJson(jsonObject.get("content").toString(), listType);
-                        Log.d("", friendList.toString());
-
-                        userFriends = friendList.stream().map(FriendDTO::getFriend).collect(Collectors.toList());
+                        List<FriendDTO> friendDTOList = gson.fromJson(array.toString(), listType);
+                        userFriends = friendDTOList.stream().map(FriendDTO::getFriend).collect(Collectors.toList());
                         adapter.setList(userFriends);
 
                     } catch (UnsupportedEncodingException | JSONException e) {

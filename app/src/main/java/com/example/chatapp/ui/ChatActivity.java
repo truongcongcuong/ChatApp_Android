@@ -48,8 +48,8 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.MessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
-import com.example.chatapp.cons.SendData;
 import com.example.chatapp.cons.SendDataReplyMessage;
+import com.example.chatapp.cons.SendingData;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
@@ -79,6 +79,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -95,7 +96,7 @@ import ua.naiksoftware.stomp.dto.StompCommand;
 import ua.naiksoftware.stomp.dto.StompHeader;
 import ua.naiksoftware.stomp.dto.StompMessage;
 
-public class ChatActivity extends AppCompatActivity implements SendData, SendDataReplyMessage {
+public class ChatActivity extends AppCompatActivity implements SendingData, SendDataReplyMessage {
 
     private static final int PICK_IMAGE = 1;
     private static final int VIEW_ROOM_DETAIL = 2;
@@ -376,8 +377,13 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
             url = inboxDto.getRoom().getTo().getImageUrl();
             if (inboxDto.getRoom().getTo().getOnlineStatus().equals(OnlineStatus.ONLINE))
                 detail = getString(R.string.present_online);
-            else
-                detail = String.format("%s %s", getString(R.string.online), TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
+            else {
+                try {
+                    detail = String.format("%s %s", getString(R.string.online), TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
+                } catch (ParseException e) {
+                    detail = "";
+                }
+            }
         }
         txt_chat_user_name.setText(displayName);
         txt_chat_detail.setText(detail);
@@ -558,7 +564,7 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
     }
 
     @Override
-    public void SendingData(String s) {
+    public void sendString(String s) {
 //        MessageDto messageDto = gson.fromJson(s, MessageDto.class);
 //        updateMessageRealTime(messageDto);
     }
@@ -600,42 +606,51 @@ public class ChatActivity extends AppCompatActivity implements SendData, SendDat
     gửi tin nhắn file, hình ảnh, video
      */
     private void checkInboxExistsAndSendFileMessage(List<File> files) {
-        if (inboxDto.getId() == null) {
-            StringRequest request = new StringRequest(Request.Method.POST, Constant.API_INBOX + "/with/" + inboxDto.getRoom().getTo().getId(),
-                    response -> {
-                        try {
-                            String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                            inboxDto = gson.fromJson(res, InboxDto.class);
-                            sendFileMessage(files);
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                    },
-                    error -> Log.i("chat activ send mes err", error.toString())) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    HashMap<String, String> map = new HashMap<>();
-                    map.put("Authorization", "Bearer " + access_token);
-                    return map;
-                }
-            };
+        Log.d("--", inboxDto.toString());
+        if (inboxDto.getId() != null) {
+            if (inboxDto.getRoom().getType().equals(RoomType.ONE)) {
+                StringRequest request = new StringRequest(Request.Method.POST, Constant.API_INBOX + "/with/" + inboxDto.getRoom().getTo().getId(),
+                        response -> {
+                            try {
+                                Log.d("--", "sad");
+                                String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                                inboxDto = gson.fromJson(res, InboxDto.class);
+                                sendFileMessage(files);
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        },
+                        error -> Log.i("chat activ send mes err", error.toString())) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + access_token);
+                        return map;
+                    }
+                };
 
-            RequestQueue requestQueue = Volley.newRequestQueue(this);
-            DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-            request.setRetryPolicy(retryPolicy);
-            requestQueue.add(request);
+                RequestQueue requestQueue = Volley.newRequestQueue(this);
+                DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                request.setRetryPolicy(retryPolicy);
+                requestQueue.add(request);
+            } else if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+                sendFileMessage(files);
+            }
         }
     }
 
     private void sendFileMessage(List<File> files) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("roomId", inboxDto.getRoom().getId());
+        Log.d("--", "send mes");
         MultiPartFileRequest<String> restApiMultiPartRequest =
                 new MultiPartFileRequest<String>(Request.Method.POST, Constant.API_FILE,
                         params, // danh sách request param
                         files,
                         response -> {
+                            Log.d("--", "respone");
                             try {
+                                Log.d("--", "try");
                                 String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                                 Type listType = new TypeToken<List<String>>() {
                                 }.getType();

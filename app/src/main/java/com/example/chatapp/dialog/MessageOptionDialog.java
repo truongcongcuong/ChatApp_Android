@@ -1,16 +1,16 @@
 package com.example.chatapp.dialog;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.util.DisplayMetrics;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -30,6 +30,7 @@ import com.example.chatapp.cons.SendDataReplyMessage;
 import com.example.chatapp.dto.MenuItem;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -37,29 +38,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MessageOptionDialog extends Dialog implements View.OnClickListener {
+public class MessageOptionDialog extends BottomSheetDialogFragment implements View.OnClickListener {
 
     private MessageDto messageDto;
     private RecyclerView rcvMenuOption;
     private List<MenuItem> menuItems;
     private String token;
-    private Context context;
+    private final Context context;
 
-    private MessageOptionDialog(@NonNull Context context) {
-        super(context);
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.CustomBottomSheetDialogTheme);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public MessageOptionDialog(@NonNull Context context, MessageDto messageDto) {
-        super(context);
-        this.messageDto = messageDto;
-        this.context = context;
-        setContentView(R.layout.layout_message_option_dialog);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.layout_message_option_dialog, container, false);
 
-        RecyclerView rcvReaction = findViewById(R.id.rcv_reaction_dialog_create);
-        rcvMenuOption = findViewById(R.id.rcv_message_option_menu);
+        RecyclerView rcvReaction = view.findViewById(R.id.rcv_reaction_dialog_create);
+        rcvMenuOption = view.findViewById(R.id.rcv_message_option_menu);
 
-        ConstraintLayout layout_menu_in_message_option_dialog = findViewById(R.id.layout_menu_in_message_option_dialog);
+        ConstraintLayout layout_menu_in_message_option_dialog = view.findViewById(R.id.layout_menu_in_message_option_dialog);
 
         Gson gson = new Gson();
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
@@ -77,6 +79,7 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
                 .imageResource(R.drawable.ic_round_reply_36)
                 .name(context.getString(R.string.reply))
                 .build());
+
         if (messageDto.getSender() != null && user.getId().equals(messageDto.getSender().getId())) {
             menuItems.add(MenuItem.builder()
                     .key("deleteMessage")
@@ -95,20 +98,13 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
         rcvMenuOption.setLayoutManager(gridLayoutManager);
         rcvMenuOption.setAdapter(menuButtonAdapterHorizontal);
 
-        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
-        layoutParams.dimAmount = .5f;
-        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-//        layoutParams.gravity = Gravity.BOTTOM;
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        getWindow().setAttributes(layoutParams);
+        return view;
+    }
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int displayHeight = displayMetrics.heightPixels;
-
-        layout_menu_in_message_option_dialog.setMaxHeight((int) (displayHeight * 0.22f));
-
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public MessageOptionDialog(@NonNull Context context, MessageDto messageDto) {
+        this.messageDto = messageDto;
+        this.context = context;
     }
 
     @Override
@@ -117,11 +113,11 @@ public class MessageOptionDialog extends Dialog implements View.OnClickListener 
         MenuItem menuItem = menuItems.get(position);
         if (menuItem.getKey().equals("deleteMessage")) {
             deleteMessage();
-            this.cancel();
+            dismiss();
         } else if (menuItem.getKey().equals("reply")) {
             SendDataReplyMessage sendDataReplyMessage = (SendDataReplyMessage) context;
             sendDataReplyMessage.reply(messageDto);
-            this.cancel();
+            dismiss();
         }
     }
 

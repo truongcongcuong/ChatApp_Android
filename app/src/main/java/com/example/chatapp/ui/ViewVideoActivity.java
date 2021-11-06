@@ -21,6 +21,8 @@ import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
 
+import java.text.ParseException;
+
 public class ViewVideoActivity extends AppCompatActivity {
 
     private MyVideoView videoView;
@@ -67,7 +69,11 @@ public class ViewVideoActivity extends AppCompatActivity {
                 toolbar.setTitle(messageDto.getSender().getDisplayName());
                 setTitle(messageDto.getSender().getDisplayName());
             }
-            toolbar.setSubtitle(TimeAgo.getTime(messageDto.getCreateAt()));
+            try {
+                toolbar.setSubtitle(TimeAgo.getTime(messageDto.getCreateAt()));
+            } catch (ParseException e) {
+                toolbar.setSubtitle("");
+            }
 
             MediaController mediaController = new MediaController(this);
             mediaController.setMediaPlayer(videoView);

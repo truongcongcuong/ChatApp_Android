@@ -53,29 +53,6 @@
         android:background="@color/white"
         android:visibility="gone" />
 
-    <LinearLayout
-        android:id="@+id/add_friend_layout_search"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingTop="50dp"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="160dp"
-            android:layout_height="130dp"
-            android:background="@drawable/search_empty"
-            android:foregroundGravity="center_horizontal" />
-
-        <TextView
-            android:id="@+id/add_friend_txt_notify"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center_horizontal"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-    </LinearLayout>
+    <include layout="@layout/search_layout"/>
 
 </LinearLayout>

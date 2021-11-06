@@ -17,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,7 +27,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
-import com.example.chatapp.adapter.SearchUserAdapter;
+import com.example.chatapp.adapter.SearchPhoneAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserProfileDto;
 import com.google.gson.Gson;
@@ -39,7 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class AddFriendActivity extends AppCompatActivity {
     private Timer timer;
     private String token;
     private RecyclerView recyclerView;
-    private SearchUserAdapter searchUserAdapter;
+    private SearchPhoneAdapter searchPhoneAdapter;
     private List<UserProfileDto> searchUserResult;
     private LinearLayout add_friend_layout_search;
     private TextView add_friend_txt_notify;
@@ -74,8 +75,8 @@ public class AddFriendActivity extends AppCompatActivity {
         Slidr.attach(this, config);
 
         timer = new Timer();
-        searchUserResult = Collections.emptyList();
-        searchUserAdapter = new SearchUserAdapter(this, searchUserResult);
+        searchUserResult = new ArrayList<>();
+        searchPhoneAdapter = new SearchPhoneAdapter(searchUserResult, this);
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
@@ -84,9 +85,12 @@ public class AddFriendActivity extends AppCompatActivity {
         SearchView searchView = findViewById(R.id.add_friend_search_view);
         recyclerView = findViewById(R.id.add_friend_recyclerview);
         recyclerView.setVisibility(View.GONE);
-        add_friend_layout_search = findViewById(R.id.add_friend_layout_search);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
+
+        add_friend_layout_search = findViewById(R.id.layout_search);
         add_friend_layout_search.setVisibility(View.VISIBLE);
-        add_friend_txt_notify = findViewById(R.id.add_friend_txt_notify);
+        add_friend_txt_notify = findViewById(R.id.txt_search_notify);
         add_friend_txt_notify.setText(message);
         Toolbar toolbar = findViewById(R.id.add_friend_toolbar);
         toolbar.setTitle(R.string.add_friend_title);
@@ -132,9 +136,9 @@ public class AddFriendActivity extends AppCompatActivity {
         closeIcon.setOnClickListener(v -> {
             try {
                 searchUserResult.clear();
-                searchUserAdapter.setList(searchUserResult);
+                searchPhoneAdapter.setList(searchUserResult);
             } catch (Exception e) {
-                searchUserAdapter = new SearchUserAdapter(this, null);
+                searchPhoneAdapter = new SearchPhoneAdapter(null, this);
             }
             editText.setText("");
             recyclerView.setVisibility(View.GONE);
@@ -194,11 +198,11 @@ public class AddFriendActivity extends AppCompatActivity {
                                 public void run() {
                                     try {
                                         searchUserResult.clear();
-                                        searchUserAdapter.setList(searchUserResult);
+                                        searchPhoneAdapter.setList(searchUserResult);
                                         add_friend_layout_search.setVisibility(View.VISIBLE);
                                         add_friend_txt_notify.setText(message);
                                     } catch (Exception e) {
-                                        searchUserAdapter = new SearchUserAdapter(AddFriendActivity.this, null);
+                                        searchPhoneAdapter = new SearchPhoneAdapter(null, AddFriendActivity.this);
                                     }
                                 }
                             },
@@ -237,8 +241,8 @@ public class AddFriendActivity extends AppCompatActivity {
                             recyclerView.setLayoutManager(layoutManager);
                         recyclerView.setVisibility(View.VISIBLE);
                         add_friend_layout_search.setVisibility(View.GONE);
-                        recyclerView.setAdapter(searchUserAdapter);
-                        searchUserAdapter.setList(searchUserResult);
+                        recyclerView.setAdapter(searchPhoneAdapter);
+                        searchPhoneAdapter.setList(searchUserResult);
                         visibleOrGoneSearchLayout();
 
                     } catch (UnsupportedEncodingException e) {

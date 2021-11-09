@@ -1,17 +1,20 @@
 package com.example.chatapp.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -25,6 +28,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.SendDataFriendRequest;
 import com.example.chatapp.cons.ZoomOutPageTransformer;
+import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.main.frag.FriendRequestReceivedFragment;
 import com.example.chatapp.ui.main.frag.FriendRequestSentFragment;
 import com.google.android.material.tabs.TabLayout;
@@ -44,7 +48,77 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
     private FriendRequestReceivedFragment friendRequestReceivedFragment;
     private FriendRequestSentFragment friendRequestSentFragment;
     private final int NUM_PAGES = 2;
+    private final int POSITION_OF_RECEIVED = 0;
+    private final int POSITION_OF_SENT = 1;
     private String token;
+    private int[] counts = new int[NUM_PAGES];
+    private String[] title = new String[NUM_PAGES];
+
+    private final BroadcastReceiver friendRequestReceived = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                friendRequestReceivedFragment.receivedFriendRequest(dto);
+                counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] + 1;
+                updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestAccept = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                friendRequestSentFragment.acceptFriendRequest(dto);
+                counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] - 1;
+                updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestRecall = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                friendRequestReceivedFragment.recallFriendRequest(dto);
+                counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] - 1;
+                updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestDelete = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                friendRequestSentFragment.deleteFriendRequest(dto);
+                counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] - 1;
+                updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+            }
+        }
+    };
+
+    public void updateCountSearchResult(int position, int count) {
+        if (position < NUM_PAGES && tabLayout_friend_request.getTabAt(position) != null) {
+            counts[position] = count;
+            if (count != 0)
+                tabLayout_friend_request.getTabAt(position).setText(String.format("%s(%d)", title[position], count));
+            else
+                tabLayout_friend_request.getTabAt(position).setText(title[position]);
+        }
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -52,6 +126,11 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_request);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestReceived, new IntentFilter("friendRequest/received"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestAccept, new IntentFilter("friendRequest/accept"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestRecall, new IntentFilter("friendRequest/recall"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestDelete, new IntentFilter("friendRequest/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -64,6 +143,15 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
                 .build();
 
         Slidr.attach(this, config);
+
+        title[0] = getString(R.string.received);
+        title[1] = getString(R.string.sent);
+
+        if (friendRequestReceivedFragment == null)
+            friendRequestReceivedFragment = new FriendRequestReceivedFragment(this);
+
+        if (friendRequestSentFragment == null)
+            friendRequestSentFragment = new FriendRequestSentFragment(this);
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
@@ -91,10 +179,14 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         tabLayout_friend_request.setSelectedTabIndicatorColor(getResources().getColor(R.color.purple_200));
 
         new TabLayoutMediator(tabLayout_friend_request, viewPager_friend_request, (tab, position) -> {
+            if (counts[position] == 0)
+                tab.setText(title[position]);
+            else
+                tab.setText(String.format("%s(%d)", title[position], counts[position]));
         }).attach();
 
-        countFriendRequestReceived();
-        countFriendRequestSent();
+//        countFriendRequestReceived();
+//        countFriendRequestSent();
 
     }
 
@@ -106,12 +198,8 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         @Override
         public Fragment createFragment(int position) {
             if (position == 0) {
-                if (friendRequestReceivedFragment == null)
-                    friendRequestReceivedFragment = new FriendRequestReceivedFragment();
                 return friendRequestReceivedFragment;
             }
-            if (friendRequestSentFragment == null)
-                friendRequestSentFragment = new FriendRequestSentFragment();
             return friendRequestSentFragment;
         }
 
@@ -141,16 +229,8 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         int countReceived = Integer.parseInt(res);
-                        TabLayout.Tab firstTab = tabLayout_friend_request.getTabAt(0);
-                        Log.d("--countReceived", countReceived + "");
-
-                        if (firstTab != null) {
-                            if (countReceived != 0)
-                                firstTab.setText(String.format("%s(%d)", getString(R.string.received), countReceived));
-                            else
-                                firstTab.setText(getString(R.string.received));
-                        } else
-                            Log.d("--firstTab", "null");
+                        counts[POSITION_OF_RECEIVED] = countReceived;
+                        updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
 
                     } catch (NumberFormatException | UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -179,15 +259,8 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         int countSent = Integer.parseInt(res);
-                        TabLayout.Tab secondTab = tabLayout_friend_request.getTabAt(1);
-                        Log.d("--countReceived", countSent + "");
-                        if (secondTab != null) {
-                            if (countSent != 0)
-                                secondTab.setText(String.format("%s(%d)", getString(R.string.sent), countSent));
-                            else
-                                secondTab.setText(getString(R.string.sent));
-                        } else
-                            Log.d("--firstTab", "null");
+                        counts[POSITION_OF_SENT] = countSent;
+                        updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
 
                     } catch (NumberFormatException | UnsupportedEncodingException e) {
                         e.printStackTrace();

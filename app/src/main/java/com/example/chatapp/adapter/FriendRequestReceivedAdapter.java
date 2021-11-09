@@ -32,6 +32,7 @@ import com.example.chatapp.utils.TimeAgo;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,7 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Collections.sort(list);
         FriendRequest friendDTO = list.get(position);
 
         if (friendDTO != null) {
@@ -132,13 +134,13 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
         StringRequest request = new StringRequest(method, Constant.API_FRIEND_REQUEST + "/" + friendRequest.getFrom().getId(),
                 response -> {
                     Log.e("response: ", response);
-                    if (method == Request.Method.PUT) {
+//                    if (method == Request.Method.PUT) {
                         /*
                         khi đồng ý thêm bạn bè thì sẽ thông báo đến contact fragment để update lại list friend
                          */
-                        Intent intent = new Intent("accept_friend");
-                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                    }
+//                        Intent intent = new Intent("accept_friend");
+//                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+//                    }
                     notifyDataChange(position);
                 }, error -> Log.e("error: ", error.toString())) {
             @Override
@@ -164,8 +166,8 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
         khi có thay đổi thì gửi thông báo đến cho FriendRequestActivity,
         nếu list trống thì hiện dòng text lên để thông báo
          */
-        Intent intent = new Intent("received_adapter_empty");
-        intent.putExtra("empty", list.isEmpty());
+        Intent intent = new Intent("friendRequest/received/empty");
+        intent.putExtra("dto", list.isEmpty());
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
         /*

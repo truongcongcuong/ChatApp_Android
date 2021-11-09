@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -29,7 +31,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.FriendRequestSentAdapter;
 import com.example.chatapp.cons.Constant;
-import com.example.chatapp.dto.FriendRequestSentDto;
+import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -58,19 +60,22 @@ public class FriendRequestSentFragment extends Fragment {
     private String token;
     private Gson gson;
     private FriendRequestSentAdapter adapter;
-    private List<FriendRequestSentDto> list;
+    private List<FriendRequest> list;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout friend_request_sent_refresh_layout;
     private TextView txt_friend_request_sent_no_request;
     private int page = 0;
     private final int size = 20;
     private boolean scroll = false;
+    private final FriendRequestActivity parent;
+    private final int POSITION_OF_SENT = 1;
 
-    public FriendRequestSentFragment() {
+    public FriendRequestSentFragment(FriendRequestActivity parent) {
+        this.parent = parent;
     }
 
-    public static FriendRequestReceivedFragment newInstance(String param1, String param2) {
-        FriendRequestReceivedFragment fragment = new FriendRequestReceivedFragment();
+    public static FriendRequestSentFragment newInstance(String param1, String param2, FriendRequestActivity parent) {
+        FriendRequestSentFragment fragment = new FriendRequestSentFragment(parent);
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -84,13 +89,13 @@ public class FriendRequestSentFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                boolean empty = intent.getBooleanExtra("empty", true);
+                boolean empty = intent.getBooleanExtra("dto", true);
                 if (empty)
                     txt_friend_request_sent_no_request.setVisibility(View.VISIBLE);
                 else
                     txt_friend_request_sent_no_request.setVisibility(View.GONE);
             }
-        }, new IntentFilter("sent_adapter_empty"));
+        }, new IntentFilter("friendRequest/sent/empty"));
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -167,7 +172,9 @@ public class FriendRequestSentFragment extends Fragment {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        Type listType = new TypeToken<List<FriendRequestSentDto>>() {
+                        int totalElements = (int) object.get("totalElements");
+                        parent.updateCountSearchResult(POSITION_OF_SENT, totalElements);
+                        Type listType = new TypeToken<List<FriendRequest>>() {
                         }.getType();
                         list = gson.fromJson(array.toString(), listType);
                         Log.d("--sent", list.toString());
@@ -205,7 +212,9 @@ public class FriendRequestSentFragment extends Fragment {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        Type listType = new TypeToken<List<FriendRequestSentDto>>() {
+                        int totalElements = (int) object.get("totalElements");
+                        parent.updateCountSearchResult(POSITION_OF_SENT, totalElements);
+                        Type listType = new TypeToken<List<FriendRequest>>() {
                         }.getType();
                         list = gson.fromJson(array.toString(), listType);
                         Log.d("--sent", list.toString());
@@ -242,6 +251,18 @@ public class FriendRequestSentFragment extends Fragment {
         DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         request.setRetryPolicy(retryPolicy);
         queue.add(request);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void deleteFriendRequest(FriendRequest friendRequest) {
+        list.removeIf(x -> x.getTo() != null && x.getTo().getId().equals(friendRequest.getTo().getId()));
+        adapter.setList(list);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void acceptFriendRequest(FriendRequest friendRequest) {
+        list.removeIf(x -> x.getTo() != null && x.getTo().getId().equals(friendRequest.getTo().getId()));
+        adapter.setList(list);
     }
 
 }

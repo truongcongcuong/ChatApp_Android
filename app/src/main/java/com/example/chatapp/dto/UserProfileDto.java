@@ -1,5 +1,6 @@
 package com.example.chatapp.dto;
 
+import com.example.chatapp.enumvalue.FriendStatus;
 import com.example.chatapp.enumvalue.OnlineStatus;
 
 import java.io.Serializable;
@@ -15,5 +16,7 @@ public class UserProfileDto implements Serializable {
     private String imageUrl;
     private OnlineStatus onlineStatus;
     private String lastOnline;
+    private FriendStatus friendStatus;
+    private String phoneNumber;
 
 }

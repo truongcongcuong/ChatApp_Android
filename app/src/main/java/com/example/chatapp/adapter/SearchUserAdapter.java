@@ -65,7 +65,7 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
             try {
                 holder.txt_search_user_detail.setText(String.format("%s: %s",
                         context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
-            } catch (ParseException e) {
+            } catch (ParseException | NullPointerException e) {
                 holder.txt_search_user_detail.setText("");
             }
 

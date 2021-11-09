@@ -132,7 +132,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
-                MessageDto newMessage = (MessageDto) bundle.getSerializable("newMessage");
+                MessageDto newMessage = (MessageDto) bundle.getSerializable("dto");
                 Log.d("-new mess in chat acti", newMessage.toString());
 
                 if (newMessage.getSender() != null)
@@ -149,7 +149,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("new_message"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("messages/new"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()

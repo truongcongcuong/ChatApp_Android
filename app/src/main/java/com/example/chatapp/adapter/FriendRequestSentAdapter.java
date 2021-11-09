@@ -26,34 +26,35 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dialog.ProfileDialog;
-import com.example.chatapp.dto.FriendRequestSentDto;
+import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.utils.TimeAgo;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequestSentAdapter.ViewHolder> {
     private final Context context;
-    private List<FriendRequestSentDto> list;
+    private List<FriendRequest> list;
     private final String token;
 
-    public void setList(List<FriendRequestSentDto> list) {
+    public void setList(List<FriendRequest> list) {
         this.list = list;
         notifyDataSetChanged();
     }
 
-    public void updateList(List<FriendRequestSentDto> list) {
+    public void updateList(List<FriendRequest> list) {
         if (this.list == null)
             this.list = new ArrayList<>();
         this.list.addAll(list);
         notifyDataSetChanged();
     }
 
-    public FriendRequestSentAdapter(Context context, List<FriendRequestSentDto> list, String token) {
+    public FriendRequestSentAdapter(Context context, List<FriendRequest> list, String token) {
         this.context = context;
         if (list == null)
             this.list = new ArrayList<>();
@@ -72,7 +73,8 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        FriendRequestSentDto friendDTO = list.get(position);
+        Collections.sort(list);
+        FriendRequest friendDTO = list.get(position);
         if (friendDTO != null) {
             if (friendDTO.getTo() != null) {
                 Glide.with(context).load(friendDTO.getTo().getImageUrl())
@@ -121,7 +123,7 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void deleteSentRequest(int position) {
-        FriendRequestSentDto friendRequest = list.get(position);
+        FriendRequest friendRequest = list.get(position);
         if (friendRequest != null && friendRequest.getTo() != null) {
             StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_FRIEND_REQUEST + "/" + friendRequest.getTo().getId(),
                     response -> {
@@ -147,7 +149,7 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void notifyDataChange(int position) {
-        FriendRequestSentDto friendRequest = list.get(position);
+        FriendRequest friendRequest = list.get(position);
         list.removeIf(x -> x.getTo().getId().equals(friendRequest.getTo().getId()));
         notifyDataSetChanged();
 
@@ -155,8 +157,8 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
         khi có thay đổi thì gửi thông báo đến cho FriendRequestActivity,
         nếu list trống thì hiện dòng text lên để thông báo
          */
-        Intent intent = new Intent("sent_adapter_empty");
-        intent.putExtra("empty", list.isEmpty());
+        Intent intent = new Intent("friendRequest/sent/empty");
+        intent.putExtra("dto", list.isEmpty());
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
         /*

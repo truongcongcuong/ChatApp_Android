@@ -2,8 +2,11 @@ package com.example.chatapp.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -15,9 +18,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,7 +41,10 @@ import com.example.chatapp.adapter.SyncContactAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.PhoneBookFriendDTO;
+import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.entity.Contact;
+import com.example.chatapp.entity.FriendRequest;
+import com.example.chatapp.enumvalue.FriendStatus;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.r0adkll.slidr.Slidr;
@@ -54,11 +62,108 @@ import java.util.Map;
 
 public class SyncContactActivity extends AppCompatActivity {
     private RecyclerView rcv_sync_contact;
-    private List<Contact> listContact = new ArrayList<>();
+    private List<Contact> listContact;
     private static final int MY_PERMISSION_REQUEST_CODE = 123;
     private Gson gson;
     private String token;
-    private List<PhoneBookFriendDTO> listPhoneBookFriend = new ArrayList<>();
+    private List<PhoneBookFriendDTO> listPhoneBookFriend;
+    private SyncContactAdapter adapter;
+
+    private final BroadcastReceiver friendRequestReceived = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto from = dto.getFrom();
+                    if (from != null) {
+                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                            UserProfileDto user = phoneBook.getUser();
+                            if (user != null && user.getId().equals(from.getId())) {
+                                user.setFriendStatus(FriendStatus.RECEIVED);
+                                phoneBook.setUser(user);
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestAccept = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto to = dto.getTo();
+                    if (to != null) {
+                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                            UserProfileDto user = phoneBook.getUser();
+                            if (user.getId().equals(to.getId())) {
+                                user.setFriendStatus(FriendStatus.FRIEND);
+                                phoneBook.setUser(user);
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestRecall = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto from = dto.getFrom();
+                    if (from != null) {
+                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                            UserProfileDto user = phoneBook.getUser();
+                            if (user.getId().equals(from.getId())) {
+                                user.setFriendStatus(FriendStatus.NONE);
+                                phoneBook.setUser(user);
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestDelete = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto to = dto.getTo();
+                    if (to != null) {
+                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                            UserProfileDto user = phoneBook.getUser();
+                            if (user.getId().equals(to.getId())) {
+                                user.setFriendStatus(FriendStatus.NONE);
+                                phoneBook.setUser(user);
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
 
 
     @Override
@@ -66,6 +171,11 @@ public class SyncContactActivity extends AppCompatActivity {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sync_contact);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestReceived, new IntentFilter("friendRequest/received"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestAccept, new IntentFilter("friendRequest/accept"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestRecall, new IntentFilter("friendRequest/recall"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestDelete, new IntentFilter("friendRequest/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -87,6 +197,19 @@ public class SyncContactActivity extends AppCompatActivity {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcv_sync_contact.getContext(), DividerItemDecoration.VERTICAL);
         rcv_sync_contact.addItemDecoration(dividerItemDecoration);
 
+        gson = new Gson();
+        GetNewAccessToken getNewAccessToken = new GetNewAccessToken(this);
+        getNewAccessToken.sendGetNewTokenRequest();
+
+        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
+        token = sharedPreferencesToken.getString("access-token", null);
+
+        listContact = new ArrayList<>();
+        listPhoneBookFriend = new ArrayList<>();
+        adapter = new SyncContactAdapter(listPhoneBookFriend, this, token);
+        rcv_sync_contact.setAdapter(adapter);
+        rcv_sync_contact.setLayoutManager(new LinearLayoutManager(this));
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
         } else {
@@ -98,13 +221,6 @@ public class SyncContactActivity extends AppCompatActivity {
         */
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        gson = new Gson();
-        GetNewAccessToken getNewAccessToken = new GetNewAccessToken(this);
-        getNewAccessToken.sendGetNewTokenRequest();
-
-        SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
-        token = sharedPreferencesToken.getString("access-token", null);
 
         getContactUser();
     }
@@ -134,7 +250,7 @@ public class SyncContactActivity extends AppCompatActivity {
                         Type listType = new TypeToken<List<PhoneBookFriendDTO>>() {
                         }.getType();
                         listPhoneBookFriend = gson.fromJson(array.toString(), listType);
-                        setDataToRCV();
+                        adapter.setList(listPhoneBookFriend);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -166,11 +282,11 @@ public class SyncContactActivity extends AppCompatActivity {
         queue.add(request);
     }
 
-    private void setDataToRCV() {
+    /*private void setDataToRCV() {
         SyncContactAdapter adapter = new SyncContactAdapter(listPhoneBookFriend, this, token);
         rcv_sync_contact.setAdapter(adapter);
         rcv_sync_contact.setLayoutManager(new LinearLayoutManager(this));
-    }
+    }*/
 
     protected void getContacts() {
 

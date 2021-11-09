@@ -25,6 +25,7 @@ import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.cons.ZoomOutPageTransformer;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.main.frag.ContactFragment;
 import com.example.chatapp.ui.main.frag.GroupFragment;
 import com.example.chatapp.ui.main.frag.InfoFragment;
@@ -77,19 +78,80 @@ public class MainActivity extends AppCompatActivity {
                 .topic("/users/queue/messages")
                 .subscribe(x -> {
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            messageFragment.setNewMessage(messageDto);
-                            Intent intent = new Intent("new_message");
-                            Bundle bundle = new Bundle();
-                            bundle.putSerializable("newMessage", messageDto);
-                            intent.putExtras(bundle);
-                            LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
-                        }
+                    MainActivity.this.runOnUiThread(() -> {
+                        messageFragment.setNewMessage(messageDto);
+                        Intent intent = new Intent("messages/new");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", messageDto);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
                     });
                 }, throwable -> {
                     Log.i("main acti subc mess err", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/friendRequest/received")
+                .subscribe(x -> {
+                    FriendRequest dto = gson.fromJson(x.getPayload(), FriendRequest.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("friendRequest/received");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", dto);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/friendRequest/accept")
+                .subscribe(x -> {
+                    FriendRequest dto = gson.fromJson(x.getPayload(), FriendRequest.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("friendRequest/accept");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", dto);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+
+                        /*
+                        khi đồng ý thêm bạn bè thì sẽ thông báo đến contact fragment để update lại list friend
+                         */
+                        Intent acceptFriendIntent = new Intent("accept_friend");
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(acceptFriendIntent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/friendRequest/recall")
+                .subscribe(x -> {
+                    FriendRequest dto = gson.fromJson(x.getPayload(), FriendRequest.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("friendRequest/recall");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", dto);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/friendRequest/delete")
+                .subscribe(x -> {
+                    FriendRequest dto = gson.fromJson(x.getPayload(), FriendRequest.class);
+                    Intent intent = new Intent("friendRequest/delete");
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("dto", dto);
+                    intent.putExtras(bundle);
+                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
                 });
         bnv_menu.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 

@@ -1,6 +1,9 @@
 package com.example.chatapp.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -17,6 +20,7 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +34,8 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.SearchPhoneAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserProfileDto;
+import com.example.chatapp.entity.FriendRequest;
+import com.example.chatapp.enumvalue.FriendStatus;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.r0adkll.slidr.Slidr;
@@ -58,11 +64,104 @@ public class AddFriendActivity extends AppCompatActivity {
     private final int DELAY_SEARCH = 250;
     private static String message;
 
+    private final BroadcastReceiver friendRequestReceived = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto from = dto.getFrom();
+                    if (from != null) {
+                        for (UserProfileDto user : searchUserResult) {
+                            if (user.getId().equals(from.getId())) {
+                                user.setFriendStatus(FriendStatus.RECEIVED);
+                            }
+                        }
+                        searchPhoneAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestAccept = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto to = dto.getTo();
+                    if (to != null) {
+                        for (UserProfileDto user : searchUserResult) {
+                            if (user.getId().equals(to.getId())) {
+                                user.setFriendStatus(FriendStatus.FRIEND);
+                            }
+                        }
+                        searchPhoneAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestRecall = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto from = dto.getFrom();
+                    if (from != null) {
+                        for (UserProfileDto user : searchUserResult) {
+                            if (user.getId().equals(from.getId())) {
+                                user.setFriendStatus(FriendStatus.NONE);
+                            }
+                        }
+                        searchPhoneAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendRequestDelete = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (dto != null) {
+                    UserProfileDto to = dto.getTo();
+                    if (to != null) {
+                        for (UserProfileDto user : searchUserResult) {
+                            if (user.getId().equals(to.getId())) {
+                                user.setFriendStatus(FriendStatus.NONE);
+                            }
+                        }
+                        searchPhoneAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friend);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestReceived, new IntentFilter("friendRequest/received"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestAccept, new IntentFilter("friendRequest/accept"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestRecall, new IntentFilter("friendRequest/recall"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestDelete, new IntentFilter("friendRequest/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()

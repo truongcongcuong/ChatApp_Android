@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
@@ -53,7 +54,8 @@ public class MessageFragmentContent extends Fragment {
     private Gson gson;
     private String token;
     private int page = 0;
-    private final int size = 20;
+    private final int size = 5;
+    private Button btnLoadMore;
 
     /*
     kéo để làm mới
@@ -168,6 +170,8 @@ public class MessageFragmentContent extends Fragment {
         View view = inflater.inflate(R.layout.fragment_message_content, container, false);
 
         rcv_list_message = view.findViewById(R.id.rcv_list_message);
+        btnLoadMore = view.findViewById(R.id.message_fragment_content_btn_load_more);
+        btnLoadMore.setVisibility(View.GONE);
         rcv_list_message.setLayoutManager(new LinearLayoutManager(context));
 
         this.adapter = new ListMessageAdapter(context, new ArrayList<>());
@@ -183,43 +187,8 @@ public class MessageFragmentContent extends Fragment {
             page = 0;
             refreshListInbox();
         });
-
-        rcv_list_message.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                /*LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if (linearLayoutManager != null) {
-                    *//*
-                    chỉ enable khi ở đầu của recyclerview
-                     *//*
-                    refreshLayout.setEnabled(linearLayoutManager.findFirstCompletelyVisibleItemPosition() > 0);
-                }*/
-                /*
-                nếu cuộn xuống cuối recyclerview thì load thêm data
-                 */
-//                if (!recyclerView.canScrollVertically(1)) {
-//                    loadMoreData();
-//                }
-            }
-
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-
-//                if (!recyclerView.canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                     scroll to top
-//                }
-                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    // scroll to bottom
-                    Log.d("--", "on recyclerview scroll event ");
-                    loadMoreData();
-                }
-//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-//                    // scrolling
-//                }
-            }
+        btnLoadMore.setOnClickListener(v -> {
+            loadMoreData();
         });
         return view;
     }
@@ -233,7 +202,11 @@ public class MessageFragmentContent extends Fragment {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-
+                        boolean last = (boolean) object.get("last");
+                        if (last)
+                            btnLoadMore.setVisibility(View.GONE);
+                        else
+                            btnLoadMore.setVisibility(View.VISIBLE);
                         Type listType = new TypeToken<List<InboxDto>>() {
                         }.getType();
                         List<InboxDto> list = gson.fromJson(array.toString(), listType);
@@ -275,7 +248,11 @@ public class MessageFragmentContent extends Fragment {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-
+                        boolean last = (boolean) object.get("last");
+                        if (last)
+                            btnLoadMore.setVisibility(View.GONE);
+                        else
+                            btnLoadMore.setVisibility(View.VISIBLE);
                         Type listType = new TypeToken<List<InboxDto>>() {
                         }.getType();
                         List<InboxDto> list = gson.fromJson(array.toString(), listType);

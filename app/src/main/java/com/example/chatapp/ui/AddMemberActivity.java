@@ -1,8 +1,10 @@
 package com.example.chatapp.ui;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -21,14 +23,15 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.SearchUserCreateGroupAdapter;
@@ -37,8 +40,8 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.SendDataCreateRoomActivity;
 import com.example.chatapp.dto.FriendDTO;
 import com.example.chatapp.dto.InboxDto;
-import com.example.chatapp.dto.Member;
 import com.example.chatapp.dto.MemberCreateDto;
+import com.example.chatapp.dto.MemberDto;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -64,6 +67,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 public class AddMemberActivity extends AppCompatActivity implements SendDataCreateRoomActivity {
@@ -85,6 +90,7 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
     danh sách bạn bè
      */
     private List<UserProfileDto> userFriends;
+    private List<UserProfileDto> searchResult;
 
     /*
     adpater những người đã được chọn để tạo nhóm
@@ -98,6 +104,38 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
     dùng để set màu trở lại như cũ cho button tạo nhóm khi enable hoặc disable
      */
     private ColorStateList backgroundTintList;
+    private Timer timer;
+    private final long DELAY_SEARCH = 250;
+    private int page = 0;
+    private int pageSearch = 0;
+    private final int size = 1;
+    private Button btnLoadMore;
+
+    private final BroadcastReceiver addMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                loadFriendList();
+            }
+        }
+    };
+
+    private final BroadcastReceiver deleteMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                loadFriendList();
+            }
+        }
+    };
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -105,6 +143,9 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_member);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(addMember, new IntentFilter("room/members/add"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -115,8 +156,11 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
                 .build();
 
         Slidr.attach(this, config);
-
+        timer = new Timer();
+        searchResult = new ArrayList<>(0);
         txt_add_member_find_user = findViewById(R.id.txt_add_member_find_user);
+        btnLoadMore = findViewById(R.id.add_member_btn_load_more);
+        btnLoadMore.setVisibility(View.GONE);
         RecyclerView rcv_user_add_member_activity = findViewById(R.id.rcv_user_add_member_activity);
 
         rcv_add_member_selected = findViewById(R.id.rcv_add_member_selected);
@@ -175,8 +219,10 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         ImageView closeIcon = txt_add_member_find_user.findViewById(closeIconId);
         closeIcon.setImageResource(R.drawable.ic_baseline_close_circle_24);
         closeIcon.setOnClickListener(v -> {
+            page = 0;
+            pageSearch = 0;
             editText.setText("");
-            adapter.notifyDataSetChanged();
+            loadFriendList();
         });
 
         /*
@@ -214,15 +260,24 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
                 /*
                 nếu text không rỗng thì tìm, ngược lại xóa recyclerview
                  */
-                if (!newText.isEmpty()) {
-//                    search(newText);
-                    List<UserProfileDto> find = userFriends.stream()
-                            .filter(x -> x.getDisplayName().toLowerCase()
-                                    .contains(txt_add_member_find_user.getQuery().toString().trim().toLowerCase()))
-                            .collect(Collectors.toList());
-                    adapter.setList(find);
+                if (!newText.trim().isEmpty()) {
+                    timer.cancel();
+                    timer = new Timer();
+                    timer.schedule(
+                            new TimerTask() {
+                                @Override
+                                public void run() {
+                                    pageSearch = 0;
+                                    search(newText);
+                                }
+                            },
+                            DELAY_SEARCH
+                    );
                 } else {
-                    adapter.setList(userFriends);
+                    page = 0;
+                    pageSearch = 0;
+                    timer.cancel();
+                    loadFriendList();
                 }
                 return false;
             }
@@ -273,9 +328,9 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, Constant.API_ROOM + "members/" + inboxDto.getRoom().getId(), array,
                 response -> {
                     String res = response.toString();
-                    Type listType = new TypeToken<Set<Member>>() {
+                    Type listType = new TypeToken<Set<MemberDto>>() {
                     }.getType();
-                    Set<Member> memberCreate = gson.fromJson(res, listType);
+                    Set<MemberDto> memberCreate = gson.fromJson(res, listType);
                     if (!memberCreate.isEmpty()) {
                         RoomDTO room = inboxDto.getRoom();
                         room.setMembers(memberCreate);
@@ -319,73 +374,49 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
     /*
     tìm kiếm user theo tên hoặc số điện thoại
      */
-    /*private void search(String newText) {
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_USER + "search",
-                response -> {
-                    try {
-                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        Type listType = new TypeToken<List<UserProfileDto>>() {
-                        }.getType();
-                        List<UserProfileDto> searchUserResult = new Gson().fromJson(res, listType);
-                        Log.d("", searchUserResult.toString());
-
-                        adapter.setList(searchUserResult);
-
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                },
-                error -> Log.i("search friend error", error.toString())) {
-            @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
-                return map;
-            }
-
-            @Override
-            protected Map<String, String> getParams() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("textToSearch", newText);
-                return map;
-            }
-        };
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        requestQueue.getCache().clear();
-        requestQueue.add(request);
-    }*/
-
-    /*
-    load tất cả bạn bè để chọn thành viên
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void loadFriendList() {
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST,
+    private void search(String newText) {
+        btnLoadMore.setOnClickListener(v -> {
+            pageSearch++;
+            search(newText);
+        });
+        List<String> exclude = inboxDto.getRoom().getMembers().stream().map(x -> x.getUser().getId())
+                .collect(Collectors.toList());
+        JSONArray jsonArray = new JSONArray(exclude);
+        JsonArrayRequest arrayRequest = new JsonArrayRequest(Request.Method.POST,
+                Constant.API_FRIEND_LIST + "/notIn" + "?query=" + newText
+                        + "&page=" + pageSearch + "&size=" + size,
+                jsonArray,
                 response -> {
                     try {
-                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        Type listType = new TypeToken<List<FriendDTO>>() {
-                        }.getType();
-                        JSONObject jsonObject = new JSONObject(res);
-                        List<FriendDTO> friendList = new Gson().fromJson(jsonObject.get("content").toString(), listType);
-                        Log.d("", friendList.toString());
-
-                        userFriends = friendList.stream()
-                                .filter(x -> {
-                                    UserProfileDto friend = x.getFriend();
-                                    Member member = Member.builder().userId(friend.getId()).build();
-                                    return !inboxDto.getRoom().getMembers().contains(member);
-                                })
-                                .map(FriendDTO::getFriend).collect(Collectors.toList());
-                        adapter.setList(userFriends);
-
-                    } catch (UnsupportedEncodingException | JSONException e) {
+                        if (response != null && response.length() > 0) {
+                            JSONObject object = response.getJSONObject(0);
+                            JSONArray content = (JSONArray) object.get("content");
+                            boolean last = (boolean) object.get("last");
+                            if (last)
+                                btnLoadMore.setVisibility(View.GONE);
+                            else
+                                btnLoadMore.setVisibility(View.VISIBLE);
+                            Type type = new TypeToken<List<FriendDTO>>() {
+                            }.getType();
+                            List<FriendDTO> list = gson.fromJson(content.toString(), type);
+                            List<UserProfileDto> users = list.stream().map(FriendDTO::getFriend).collect(Collectors.toList());
+                            if (pageSearch == 0) {
+                                searchResult = users;
+                            } else {
+                                searchResult.addAll(users);
+                            }
+                            adapter.setList(searchResult);
+                        }
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 },
-                error -> Log.i("search friend error", error.toString())) {
+                error -> {
+                }
+        ) {
             @Override
-            public Map<String, String> getHeaders() {
+            public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> map = new HashMap<>();
                 map.put("Authorization", "Bearer " + token);
                 return map;
@@ -393,9 +424,65 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         };
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        request.setRetryPolicy(retryPolicy);
-        requestQueue.getCache().clear();
-        requestQueue.add(request);
+        arrayRequest.setRetryPolicy(retryPolicy);
+        requestQueue.add(arrayRequest);
+    }
+
+    /*
+    load tất cả bạn bè để chọn thành viên
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void loadFriendList() {
+        btnLoadMore.setOnClickListener(v -> {
+            page++;
+            loadFriendList();
+        });
+        List<String> exclude = inboxDto.getRoom().getMembers().stream().map(x -> x.getUser().getId())
+                .collect(Collectors.toList());
+        JSONArray jsonArray = new JSONArray(exclude);
+        JsonArrayRequest arrayRequest = new JsonArrayRequest(Request.Method.POST,
+                Constant.API_FRIEND_LIST + "/notIn"
+                        + "?size=" + size + "&page=" + page,
+                jsonArray,
+                response -> {
+                    try {
+                        if (response != null && response.length() > 0) {
+                            JSONObject object = response.getJSONObject(0);
+                            JSONArray content = (JSONArray) object.get("content");
+                            boolean last = (boolean) object.get("last");
+                            if (last)
+                                btnLoadMore.setVisibility(View.GONE);
+                            else
+                                btnLoadMore.setVisibility(View.VISIBLE);
+                            Type type = new TypeToken<List<FriendDTO>>() {
+                            }.getType();
+                            List<FriendDTO> list = gson.fromJson(content.toString(), type);
+                            List<UserProfileDto> userList = list.stream().map(FriendDTO::getFriend).collect(Collectors.toList());
+                            if (page == 0) {
+                                userFriends = userList;
+                            } else {
+                                userFriends.addAll(userList);
+                            }
+                            adapter.setList(userFriends);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        arrayRequest.setRetryPolicy(retryPolicy);
+        requestQueue.add(arrayRequest);
     }
 
     /*

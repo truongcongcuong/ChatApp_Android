@@ -19,6 +19,6 @@ public class RoomDTO implements Serializable {
     private RoomType type;
     private UserProfileDto to;
     private String createAt;
-    private Set<Member> members;
+    private Set<MemberDto> members;
     private String createByUserId;
 }

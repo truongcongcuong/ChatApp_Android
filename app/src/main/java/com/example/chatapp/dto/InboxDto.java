@@ -10,4 +10,5 @@ public class InboxDto implements Serializable {
     private RoomDTO room;
     private MessageDto lastMessage;
     private long countNewMessage;
+    private String lastTime;
 }

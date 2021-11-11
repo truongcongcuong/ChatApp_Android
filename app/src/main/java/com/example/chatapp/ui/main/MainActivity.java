@@ -24,6 +24,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.cons.ZoomOutPageTransformer;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.main.frag.ContactFragment;
@@ -145,11 +146,43 @@ public class MainActivity extends AppCompatActivity {
                 .topic("/users/queue/friendRequest/delete")
                 .subscribe(x -> {
                     FriendRequest dto = gson.fromJson(x.getPayload(), FriendRequest.class);
-                    Intent intent = new Intent("friendRequest/delete");
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("dto", dto);
-                    intent.putExtras(bundle);
-                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("friendRequest/delete");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", dto);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/room/members/add")
+                .subscribe(x -> {
+                    RoomDTO newRoom = gson.fromJson(x.getPayload(), RoomDTO.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("room/members/add");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", newRoom);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/room/members/delete")
+                .subscribe(x -> {
+                    RoomDTO newRoom = gson.fromJson(x.getPayload(), RoomDTO.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("room/members/delete");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", newRoom);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
                 }, throwable -> {
                     Log.i("erro--", throwable.getMessage());
                 });

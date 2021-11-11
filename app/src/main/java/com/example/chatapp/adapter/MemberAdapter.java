@@ -25,13 +25,20 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MemberDto;
+import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MemberAdapter extends ArrayAdapter<MemberDto> {
     private final Context context;
@@ -40,6 +47,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
     private boolean currentUserIsAdmin;
     private final String access_token;
     private InboxDto inboxDto;
+    private final Gson gson;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public MemberAdapter(Context context, int resource, List<MemberDto> members, InboxDto inboxDto) {
@@ -51,7 +59,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
         this.context = context;
         this.inboxDto = inboxDto;
 
-        Gson gson = new Gson();
+        gson = new Gson();
         SharedPreferences sharedPreferencesUser = context.getSharedPreferences("user", Context.MODE_PRIVATE);
         user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
@@ -182,14 +190,21 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
         builder.setMessage(message)
                 .setPositiveButton(R.string.cancel_button, (dialog, id) -> dialog.cancel())
                 .setNegativeButton(R.string.delete, (dialog, id) -> {
-                    StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_ROOM + inboxDto.getRoom().getId() + "/" + member.getUser().getId(),
+                    RoomDTO room = inboxDto.getRoom();
+                    StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_ROOM + room.getId() + "/" + member.getUser().getId(),
                             response -> {
-                                Log.d("delete ok", "--------");
-                                Log.d("before delete ", inboxDto.getRoom().getMembers().toString());
-                                members.removeIf(x -> x.getUser().getId().equals(member.getUser().getId()));
-                                inboxDto.getRoom().getMembers().removeIf(x -> x.getUserId().equals(member.getUser().getId()));
-                                Log.d("after delete ", inboxDto.getRoom().getMembers().toString());
-                                notifyDataSetChanged();
+                                try {
+                                    String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                                    Type type = new TypeToken<Set<MemberDto>>() {
+                                    }.getType();
+                                    Set<MemberDto> newMembers = gson.fromJson(res, type);
+                                    members.removeIf(x -> x.getUser().getId().equals(member.getUser().getId()));
+                                    room.setMembers(newMembers);
+                                    inboxDto.setRoom(room);
+                                    notifyDataSetChanged();
+                                } catch (UnsupportedEncodingException e) {
+
+                                }
                             },
                             error -> Log.i("delete error", error.toString())) {
                         @Override

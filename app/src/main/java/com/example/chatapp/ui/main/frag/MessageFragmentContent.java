@@ -1,6 +1,9 @@
 package com.example.chatapp.ui.main.frag;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -12,6 +15,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -26,6 +30,7 @@ import com.example.chatapp.adapter.ListMessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.RoomDTO;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -62,6 +67,30 @@ public class MessageFragmentContent extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private final BroadcastReceiver addMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                adapter.updateChangeAfterAddOrDeleteMember(newRoom);
+            }
+        }
+    };
+
+    private final BroadcastReceiver deleteMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                adapter.updateChangeAfterAddOrDeleteMember(newRoom);
+            }
+        }
+    };
+
     public MessageFragmentContent(Context context) {
         this.context = context;
     }
@@ -78,6 +107,8 @@ public class MessageFragmentContent extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(addMember, new IntentFilter("room/members/add"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
         /*
         enable menu trên action bar
          */

@@ -1,8 +1,10 @@
 package com.example.chatapp.ui;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -16,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -27,6 +30,7 @@ import com.example.chatapp.adapter.MemberAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MemberDto;
+import com.example.chatapp.dto.RoomDTO;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.r0adkll.slidr.Slidr;
@@ -52,12 +56,40 @@ public class MemberActivity extends AppCompatActivity {
     private MemberAdapter adapter;
     private List<MemberDto> members;
 
+    private final BroadcastReceiver addMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                loadMemberList();
+            }
+        }
+    };
+
+    private final BroadcastReceiver deleteMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                loadMemberList();
+            }
+        }
+    };
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member);
+        LocalBroadcastManager.getInstance(this).registerReceiver(addMember, new IntentFilter("room/members/add"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
 
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)
@@ -107,9 +139,9 @@ public class MemberActivity extends AppCompatActivity {
                         members = gson.fromJson(res, listType);
                         adapter = new MemberAdapter(MemberActivity.this, R.layout.line_item_member, members, inboxDto);
                         lv_members.setAdapter(adapter);
-                        lv_members.setOnItemClickListener((parent, view, pos, itemId) -> {
-
-                        });
+//                        lv_members.setOnItemClickListener((parent, view, pos, itemId) -> {
+//
+//                        });
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }

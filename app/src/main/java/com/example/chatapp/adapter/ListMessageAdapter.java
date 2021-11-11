@@ -28,6 +28,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.RoomType;
@@ -54,6 +55,20 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     private final UserSummaryDTO user;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private final String access_token;
+
+    /*
+    cập nhật room cho inbox khi có sự kiện thêm hoặc xóa thành viên trên socket
+     */
+    public void updateChangeAfterAddOrDeleteMember(RoomDTO newRoom) {
+        if (list == null)
+            return;
+        for (InboxDto inboxDto : list) {
+            if (inboxDto.getRoom() != null && newRoom.getId().equals(inboxDto.getRoom().getId())) {
+                inboxDto.setRoom(newRoom);
+            }
+        }
+        notifyDataSetChanged();
+    }
 
     public ListMessageAdapter(Context context, List<InboxDto> list) {
         this.context = context;

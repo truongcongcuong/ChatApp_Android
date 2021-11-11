@@ -88,7 +88,7 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
             holder.item_create_group_user_name.setText(user.getDisplayName());
             try {
                 holder.item_create_group_user_detail.setText(String.format("%s: %s", context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
-            } catch (ParseException e) {
+            } catch (ParseException | NullPointerException e) {
                 holder.item_create_group_user_detail.setText("");
             }
 

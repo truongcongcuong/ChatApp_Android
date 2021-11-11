@@ -56,6 +56,7 @@ import com.example.chatapp.dto.MessageSendToServer;
 import com.example.chatapp.dto.ReactionReceiver;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
+import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.OnlineStatus;
@@ -126,7 +127,34 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     private StompClient stompClient;
     private LinearLayout layout_reply_chat_activity;
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver addMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                showImageAndDisplayName(inboxDto);
+            }
+        }
+    };
+
+    private final BroadcastReceiver deleteMember = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                System.out.println("newRoom after delete = " + newRoom);
+                showImageAndDisplayName(inboxDto);
+            }
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -150,6 +178,8 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("messages/new"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(addMember, new IntentFilter("room/members/add"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -387,8 +417,23 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         }
         txt_chat_user_name.setText(displayName);
         txt_chat_detail.setText(detail);
-        Glide.with(this).load(url).placeholder(R.drawable.image_placeholer)
-                .centerCrop().circleCrop().into(img_chat_user_avt);
+        final Context context = getApplication().getApplicationContext();
+
+        if (isValidContextForGlide(context)) {
+            Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
+                    .centerCrop().circleCrop().into(img_chat_user_avt);
+        }
+    }
+
+    public boolean isValidContextForGlide(final Context context) {
+        if (context == null) {
+            return false;
+        }
+        if (context instanceof Activity) {
+            final Activity activity = (Activity) context;
+            return !activity.isDestroyed() && !activity.isFinishing();
+        }
+        return true;
     }
 
     // nếu cuộn quá size/3 item thì hiện nút bấm để xuống cuối
@@ -591,14 +636,14 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         } else {
             // chưa có hình ảnh nào được chọn
         }
-        if (requestCode == VIEW_ROOM_DETAIL && resultCode == Activity.RESULT_OK && data != null) {
-            Bundle bundle = data.getExtras();
-            if (bundle != null) {
-                InboxDto inboxDto = (InboxDto) bundle.getSerializable("dto");
-                this.inboxDto = inboxDto;
-                showImageAndDisplayName(inboxDto);
-            }
-        }
+//        if (requestCode == VIEW_ROOM_DETAIL && resultCode == Activity.RESULT_OK && data != null) {
+//            Bundle bundle = data.getExtras();
+//            if (bundle != null) {
+//                InboxDto inboxDto = (InboxDto) bundle.getSerializable("dto");
+//                this.inboxDto = inboxDto;
+//                showImageAndDisplayName(inboxDto);
+//            }
+//        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 

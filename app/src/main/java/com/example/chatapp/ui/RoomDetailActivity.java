@@ -111,6 +111,32 @@ public class RoomDetailActivity extends AppCompatActivity {
         }
     };
 
+    private final BroadcastReceiver renameRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                showImageAndNameOfRoom(context, inboxDto);
+            }
+        }
+    };
+
+    private final BroadcastReceiver changeImageRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                showImageAndNameOfRoom(context, inboxDto);
+            }
+        }
+    };
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +146,8 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(addMember, new IntentFilter("room/members/add"));
         LocalBroadcastManager.getInstance(this).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(renameRoom, new IntentFilter("room/rename"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(changeImageRoom, new IntentFilter("room/changeImage"));
 
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)
@@ -170,13 +198,9 @@ public class RoomDetailActivity extends AppCompatActivity {
                 .name(getString(R.string.stored_media))
                 .build());
 
+        final Context context = getApplication().getApplicationContext();
         if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.ONE)) {
-            Glide.with(RoomDetailActivity.this)
-                    .load(inboxDto.getRoom().getTo().getImageUrl())
-                    .centerCrop().circleCrop()
-                    .placeholder(R.drawable.image_placeholer)
-                    .into(imageOfRoom);
-            nameOfRoom.setText(inboxDto.getRoom().getTo().getDisplayName());
+            showImageAndNameOfRoom(context, inboxDto);
 
             menuItems.add(MenuItem.builder()
                     .key("viewCommonGroup")
@@ -199,12 +223,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .name(getString(R.string.block_messages))
                     .build());
         } else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
-            Glide.with(RoomDetailActivity.this)
-                    .load(inboxDto.getRoom().getImageUrl())
-                    .centerCrop().circleCrop()
-                    .placeholder(R.drawable.image_placeholer)
-                    .into(imageOfRoom);
-            nameOfRoom.setText(inboxDto.getRoom().getName());
+            showImageAndNameOfRoom(context, inboxDto);
             room_detail_create_at.setText(String.format("%s: %s", getString(R.string.created), inboxDto.getRoom().getCreateAt()));
             menuItems.add(MenuItem.builder()
                     .key("viewMembers")
@@ -229,11 +248,13 @@ public class RoomDetailActivity extends AppCompatActivity {
                         .build());
             }
             btn_change_image_of_room.setPadding(3, 0, 3, 3);
-            Glide.with(RoomDetailActivity.this)
-                    .load(R.drawable.ic_baseline_camera_24)
-                    .centerCrop()
-                    .placeholder(R.drawable.image_placeholer)
-                    .into(btn_change_image_of_room);
+            if (isValidContextForGlide(context)) {
+                Glide.with(context)
+                        .load(R.drawable.ic_baseline_camera_24)
+                        .centerCrop()
+                        .placeholder(R.drawable.image_placeholer)
+                        .into(btn_change_image_of_room);
+            }
 
             // thay doi hinh anh cua nhom
             btn_change_image_of_room.setOnClickListener(v -> {
@@ -256,11 +277,13 @@ public class RoomDetailActivity extends AppCompatActivity {
             });
 
             btn_change_name_of_room.setPadding(1, 1, 1, 1);
-            Glide.with(RoomDetailActivity.this)
-                    .load(R.drawable.ic_baseline_change_circle_24)
-                    .centerCrop().circleCrop()
-                    .placeholder(R.drawable.image_placeholer)
-                    .into(btn_change_name_of_room);
+            if (isValidContextForGlide(context)) {
+                Glide.with(context)
+                        .load(R.drawable.ic_baseline_change_circle_24)
+                        .centerCrop().circleCrop()
+                        .placeholder(R.drawable.image_placeholer)
+                        .into(btn_change_name_of_room);
+            }
 
             btn_change_name_of_room.setOnClickListener(v -> showRenameDialog());
         }
@@ -350,6 +373,39 @@ public class RoomDetailActivity extends AppCompatActivity {
         scrollView.post(() -> scrollView.scrollTo(0, 0));
     }
 
+    public boolean isValidContextForGlide(final Context context) {
+        if (context == null) {
+            return false;
+        }
+        if (context instanceof Activity) {
+            final Activity activity = (Activity) context;
+            return !activity.isDestroyed() && !activity.isFinishing();
+        }
+        return true;
+    }
+
+    private void showImageAndNameOfRoom(Context context, InboxDto inboxDto) {
+        if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+            if (isValidContextForGlide(context)) {
+                Glide.with(context)
+                        .load(inboxDto.getRoom().getImageUrl())
+                        .centerCrop().circleCrop()
+                        .placeholder(R.drawable.image_placeholer)
+                        .into(imageOfRoom);
+            }
+            nameOfRoom.setText(inboxDto.getRoom().getName());
+        } else if (inboxDto.getRoom().getType().equals(RoomType.ONE)) {
+            if (isValidContextForGlide(context)) {
+                Glide.with(context)
+                        .load(inboxDto.getRoom().getTo().getImageUrl())
+                        .centerCrop().circleCrop()
+                        .placeholder(R.drawable.image_placeholer)
+                        .into(imageOfRoom);
+            }
+            nameOfRoom.setText(inboxDto.getRoom().getTo().getDisplayName());
+        }
+    }
+
     private void openFileChoose() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -421,16 +477,14 @@ public class RoomDetailActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void afterTextChanged(Editable s) {
-                if (!newName.getText().toString().equals(inboxDto.getRoom().getName())) {
-                    btn_ok.setEnabled(true);
-                    btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
-                } else {
-                    btn_ok.setEnabled(false);
-                    btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark)));
-                }
                 if (!newName.getText().toString().isEmpty()) {
-                    btn_ok.setEnabled(true);
-                    btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+                    if (!newName.getText().toString().equals(inboxDto.getRoom().getName())) {
+                        btn_ok.setEnabled(true);
+                        btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+                    } else {
+                        btn_ok.setEnabled(false);
+                        btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark)));
+                    }
                 } else {
                     btn_ok.setEnabled(false);
                     btn_ok.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark)));

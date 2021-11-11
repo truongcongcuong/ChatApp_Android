@@ -154,6 +154,32 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         }
     };
 
+    private final BroadcastReceiver renameRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                showImageAndDisplayName(inboxDto);
+            }
+        }
+    };
+
+    private final BroadcastReceiver changeImageRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                showImageAndDisplayName(inboxDto);
+            }
+        }
+    };
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
@@ -180,6 +206,8 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("messages/new"));
         LocalBroadcastManager.getInstance(this).registerReceiver(addMember, new IntentFilter("room/members/add"));
         LocalBroadcastManager.getInstance(this).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(renameRoom, new IntentFilter("room/rename"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(changeImageRoom, new IntentFilter("room/changeImage"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()

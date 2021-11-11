@@ -1,7 +1,9 @@
 package com.example.chatapp.ui.main.frag;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -24,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -38,6 +41,7 @@ import com.example.chatapp.adapter.ListMessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.ui.CreateGroupActivity;
 import com.google.gson.Gson;
@@ -66,7 +70,7 @@ public class GroupFragment extends Fragment {
     private Gson gson;
     private String token;
     private int page = 100;
-    private int size = 1;
+    private final int size = 1;
     private final String type = RoomType.GROUP.toString();
 
     private Button btnLoadMore;
@@ -90,6 +94,30 @@ public class GroupFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private final BroadcastReceiver renameRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                adapter.updateRoomChange(newRoom);
+            }
+        }
+    };
+
+    private final BroadcastReceiver changeImageRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                adapter.updateRoomChange(newRoom);
+            }
+        }
+    };
+
     public GroupFragment() {
     }
 
@@ -105,6 +133,8 @@ public class GroupFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(renameRoom, new IntentFilter("room/rename"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(changeImageRoom, new IntentFilter("room/changeImage"));
         /*
         enable menu trên action bar
          */

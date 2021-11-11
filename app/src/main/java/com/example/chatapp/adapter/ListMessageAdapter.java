@@ -59,7 +59,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
     /*
     cập nhật room cho inbox khi có sự kiện thêm hoặc xóa thành viên trên socket
      */
-    public void updateChangeAfterAddOrDeleteMember(RoomDTO newRoom) {
+    public void updateRoomChange(RoomDTO newRoom) {
         if (list == null)
             return;
         for (InboxDto inboxDto : list) {

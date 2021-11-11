@@ -74,7 +74,7 @@ public class MessageFragmentContent extends Fragment {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
-                adapter.updateChangeAfterAddOrDeleteMember(newRoom);
+                adapter.updateRoomChange(newRoom);
             }
         }
     };
@@ -86,7 +86,31 @@ public class MessageFragmentContent extends Fragment {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
-                adapter.updateChangeAfterAddOrDeleteMember(newRoom);
+                adapter.updateRoomChange(newRoom);
+            }
+        }
+    };
+
+    private final BroadcastReceiver renameRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                adapter.updateRoomChange(newRoom);
+            }
+        }
+    };
+
+    private final BroadcastReceiver changeImageRoom = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                adapter.updateRoomChange(newRoom);
             }
         }
     };
@@ -109,6 +133,8 @@ public class MessageFragmentContent extends Fragment {
         super.onCreate(savedInstanceState);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(addMember, new IntentFilter("room/members/add"));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(renameRoom, new IntentFilter("room/rename"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(changeImageRoom, new IntentFilter("room/changeImage"));
         /*
         enable menu trên action bar
          */

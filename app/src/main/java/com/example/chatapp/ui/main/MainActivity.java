@@ -186,6 +186,38 @@ public class MainActivity extends AppCompatActivity {
                 }, throwable -> {
                     Log.i("erro--", throwable.getMessage());
                 });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/room/rename")
+                .subscribe(x -> {
+                    RoomDTO newRoom = gson.fromJson(x.getPayload(), RoomDTO.class);
+                    System.out.println("newRoom rename = " + newRoom);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("room/rename");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", newRoom);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/room/changeImage")
+                .subscribe(x -> {
+                    RoomDTO newRoom = gson.fromJson(x.getPayload(), RoomDTO.class);
+                    System.out.println("newRoom changeImage = " + newRoom);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("room/changeImage");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", newRoom);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
         bnv_menu.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         viewPager = findViewById(R.id.pager);

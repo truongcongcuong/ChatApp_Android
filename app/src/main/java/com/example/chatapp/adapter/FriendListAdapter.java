@@ -18,6 +18,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.FriendDTO;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,9 +39,6 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         else
             this.list = list;
         this.context = context;
-//        Gson gson = new Gson();
-//        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("token", Context.MODE_PRIVATE);
-//        String token = sharedPreferencesToken.getString("access-token", null);
     }
 
     @NonNull
@@ -64,8 +62,13 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
                     .centerCrop().circleCrop().into(holder.img_list_contact_avt);
 
             holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());
-            Date dateCreate = sdfFull.parse(friend.getCreateAt());
-            holder.txt_list_contact_create_at.setText(String.format("%s %s", context.getString(R.string.friend_from), sdfYMD.format(dateCreate)));
+            try {
+                Date dateCreate = sdfFull.parse(friend.getCreateAt());
+                holder.txt_list_contact_create_at.setText(String.format("%s %s", context.getString(R.string.friend_from), sdfYMD.format(dateCreate)));
+            } catch (ParseException | NullPointerException e) {
+                holder.txt_list_contact_create_at.setText("");
+
+            }
             holder.itemView.setOnClickListener(v -> {
                 ProfileDialog profileDialog = new ProfileDialog(context, friend.getFriend(), null);
                 profileDialog.show();
@@ -98,38 +101,4 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         }
     }
 
-    /**
-     * Click vào một bạn bè để mở activity chat
-     */
-    /*private void getInboxWith(String anotherUserId) {
-        StringRequest request = new StringRequest(Request.Method.GET, Constant.API_INBOX + "/with/" + anotherUserId,
-                response -> {
-                    try {
-                        String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                        InboxDto dto = gson.fromJson(res, InboxDto.class);
-
-                        Intent intent = new Intent(context, ChatActivity.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable("dto", dto);
-                        intent.putExtras(bundle);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                },
-                error -> Log.i("friend list error", error.toString())) {
-            @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
-                return map;
-            }
-        };
-
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
-        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        request.setRetryPolicy(retryPolicy);
-        requestQueue.add(request);
-    }*/
 }

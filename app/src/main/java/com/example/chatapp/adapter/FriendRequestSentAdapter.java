@@ -85,7 +85,7 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
 
             try {
                 holder.txt_line_friend_request_sent_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
-            } catch (ParseException e) {
+            } catch (ParseException | NullPointerException e) {
                 holder.txt_line_friend_request_sent_create_at.setText("");
             }
             holder.btn_line_friend_request_sent_cancel.setOnClickListener(v -> deleteSentRequest(position));

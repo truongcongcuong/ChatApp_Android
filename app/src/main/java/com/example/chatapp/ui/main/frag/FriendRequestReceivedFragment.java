@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -65,10 +66,10 @@ public class FriendRequestReceivedFragment extends Fragment {
     private SwipeRefreshLayout friend_request_received_refresh_layout;
     private TextView txt_friend_request_receiver_no_request;
     private int page = 0;
-    private final int size = 20;
-    private boolean scroll = false;
+    private final int size = 1;
     private final FriendRequestActivity parent;
     private final int POSITION_OF_RECEIVED = 0;
+    private Button btnLoadMore;
 
     public FriendRequestReceivedFragment(FriendRequestActivity parent) {
         this.parent = parent;
@@ -116,6 +117,8 @@ public class FriendRequestReceivedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friend_request_received, container, false);
 
         recyclerView = view.findViewById(R.id.lsv_friend_request_received);
+        btnLoadMore = view.findViewById(R.id.friend_request_received_btn_load_more);
+        btnLoadMore.setVisibility(View.GONE);
         txt_friend_request_receiver_no_request = view.findViewById(R.id.txt_friend_request_receiver_no_request);
         txt_friend_request_receiver_no_request.setVisibility(View.GONE);
         list = new ArrayList<>();
@@ -142,22 +145,8 @@ public class FriendRequestReceivedFragment extends Fragment {
                 activity.countFriendRequestReceived();
         });
 
-        // scroll event
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                scroll = !recyclerView.canScrollVertically(1) && dy > 0;
-            }
-
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE && scroll) {
-                    loadMoreData();
-                }
-            }
+        btnLoadMore.setOnClickListener(v -> {
+            loadMoreData();
         });
 
         return view;
@@ -171,6 +160,11 @@ public class FriendRequestReceivedFragment extends Fragment {
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
                         int totalElements = (int) object.get("totalElements");
+                        boolean last = (boolean) object.get("last");
+                        if (last)
+                            btnLoadMore.setVisibility(View.GONE);
+                        else
+                            btnLoadMore.setVisibility(View.VISIBLE);
                         parent.updateCountSearchResult(POSITION_OF_RECEIVED, totalElements);
                         Type listType = new TypeToken<List<FriendRequest>>() {
                         }.getType();
@@ -216,6 +210,11 @@ public class FriendRequestReceivedFragment extends Fragment {
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
                         int totalElements = (int) object.get("totalElements");
+                        boolean last = (boolean) object.get("last");
+                        if (last)
+                            btnLoadMore.setVisibility(View.GONE);
+                        else
+                            btnLoadMore.setVisibility(View.VISIBLE);
                         parent.updateCountSearchResult(POSITION_OF_RECEIVED, totalElements);
                         Type listType = new TypeToken<List<FriendRequest>>() {
                         }.getType();

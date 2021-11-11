@@ -83,7 +83,7 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
             holder.txt_line_friend_request_name.setText(friendDTO.getFrom().getDisplayName());
             try {
                 holder.txt_line_friend_request_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
-            } catch (ParseException e) {
+            } catch (ParseException | NullPointerException e) {
                 holder.txt_line_friend_request_create_at.setText("");
             }
             holder.btn_line_friend_request_cancel.setOnClickListener(v -> {
@@ -134,13 +134,6 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
         StringRequest request = new StringRequest(method, Constant.API_FRIEND_REQUEST + "/" + friendRequest.getFrom().getId(),
                 response -> {
                     Log.e("response: ", response);
-//                    if (method == Request.Method.PUT) {
-                        /*
-                        khi đồng ý thêm bạn bè thì sẽ thông báo đến contact fragment để update lại list friend
-                         */
-//                        Intent intent = new Intent("accept_friend");
-//                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-//                    }
                     notifyDataChange(position);
                 }, error -> Log.e("error: ", error.toString())) {
             @Override

@@ -28,11 +28,13 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.SendDataFriendRequest;
 import com.example.chatapp.cons.ZoomOutPageTransformer;
+import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.main.frag.FriendRequestReceivedFragment;
 import com.example.chatapp.ui.main.frag.FriendRequestSentFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.gson.Gson;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
@@ -53,6 +55,7 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
     private String token;
     private int[] counts = new int[NUM_PAGES];
     private String[] title = new String[NUM_PAGES];
+    private UserSummaryDTO currentUser;
 
     private final BroadcastReceiver friendRequestReceived = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -61,9 +64,15 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                friendRequestReceivedFragment.receivedFriendRequest(dto);
-                counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] + 1;
-                updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+                if (currentUser.getId().equals(dto.getTo().getId())) {
+                    friendRequestReceivedFragment.receivedFriendRequest(dto);
+                    counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] + 1;
+                    updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    friendRequestSentFragment.sentFriendRequest(dto);
+                    counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] + 1;
+                    updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+                }
             }
         }
     };
@@ -75,9 +84,17 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                friendRequestSentFragment.acceptFriendRequest(dto);
-                counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] - 1;
-                updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+                if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    friendRequestSentFragment.acceptFriendRequest(dto);
+                    if (counts[POSITION_OF_SENT] > 0)
+                        counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] - 1;
+                    updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+                } else if (currentUser.getId().equals(dto.getTo().getId())) {
+                    friendRequestReceivedFragment.removeAcceptedFriendRequest(dto);
+                    if (counts[POSITION_OF_RECEIVED] > 0)
+                        counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] - 1;
+                    updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+                }
             }
         }
     };
@@ -89,9 +106,17 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                friendRequestReceivedFragment.recallFriendRequest(dto);
-                counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] - 1;
-                updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+                if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    friendRequestSentFragment.deleteFriendRequest(dto);
+                    if (counts[POSITION_OF_SENT] > 0)
+                        counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] - 1;
+                    updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+                } else if (currentUser.getId().equals(dto.getTo().getId())) {
+                    friendRequestReceivedFragment.recallFriendRequest(dto);
+                    if (counts[POSITION_OF_RECEIVED] > 0)
+                        counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] - 1;
+                    updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+                }
             }
         }
     };
@@ -103,9 +128,17 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                friendRequestSentFragment.deleteFriendRequest(dto);
-                counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] - 1;
-                updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+                if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    friendRequestSentFragment.deleteFriendRequest(dto);
+                    if (counts[POSITION_OF_SENT] > 0)
+                        counts[POSITION_OF_SENT] = counts[POSITION_OF_SENT] - 1;
+                    updateCountSearchResult(POSITION_OF_SENT, counts[POSITION_OF_SENT]);
+                } else if (currentUser.getId().equals(dto.getTo().getId())) {
+                    friendRequestReceivedFragment.recallFriendRequest(dto);
+                    if (counts[POSITION_OF_RECEIVED] > 0)
+                        counts[POSITION_OF_RECEIVED] = counts[POSITION_OF_RECEIVED] - 1;
+                    updateCountSearchResult(POSITION_OF_RECEIVED, counts[POSITION_OF_RECEIVED]);
+                }
             }
         }
     };
@@ -153,8 +186,11 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         if (friendRequestSentFragment == null)
             friendRequestSentFragment = new FriendRequestSentFragment(this);
 
+        Gson gson = new Gson();
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
+        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", Context.MODE_PRIVATE);
+        currentUser = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
         Toolbar toolbar_friend_request = findViewById(R.id.toolbar_friend_request);
         toolbar_friend_request.setTitleTextColor(Color.WHITE);

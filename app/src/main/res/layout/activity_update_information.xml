@@ -23,7 +23,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/border_for_circle_image"
-            tools:srcCompat="@tools:sample/avatars">
+            android:padding="1dp">
 
         </ImageView>
 

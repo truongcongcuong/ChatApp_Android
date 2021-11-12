@@ -28,6 +28,9 @@ import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.ui.AddFriendActivity;
 import com.example.chatapp.ui.CreateGroupActivity;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class MessageFragment extends Fragment {
     private final Context context;
     private MessageFragmentContent messageFragmentContent;
@@ -156,7 +159,33 @@ public class MessageFragment extends Fragment {
                     View view = activity.findViewById(item.getItemId());
 
                     final PopupMenu popupMenu = new PopupMenu(activity.getApplicationContext(), view);
-                    popupMenu.getMenuInflater().inflate(R.menu.popup_menu_message_fragment, popupMenu.getMenu());
+                    Menu menuOpts = popupMenu.getMenu();
+                    popupMenu.getMenuInflater().inflate(R.menu.popup_menu_message_fragment, menuOpts);
+
+                    /*
+                    set title theo ngôn ngữ hiện tại
+                     */
+                    menuOpts.getItem(0).setTitle(getString(R.string.create_group));
+                    menuOpts.getItem(1).setTitle(getString(R.string.add_friend));
+
+                    /*
+                    hiển thị icon trên popup menu
+                     */
+                    try {
+                        Field[] fields = popupMenu.getClass().getDeclaredFields();
+                        for (Field field : fields) {
+                            if ("mPopup".equals(field.getName())) {
+                                field.setAccessible(true);
+                                Object menuPopupHelper = field.get(popupMenu);
+                                Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                                Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+                                setForceIcons.invoke(menuPopupHelper, true);
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                     popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override

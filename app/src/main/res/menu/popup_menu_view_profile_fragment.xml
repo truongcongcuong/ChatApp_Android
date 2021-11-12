@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/view_profile_item_view_information"
+        android:icon="@drawable/ic_round_info_24_blue"
+        android:title="@string/view_information"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/view_profile_item_remove_friend"
+        android:icon="@drawable/ic_remove_friend_24"
+        android:title="@string/remove_friend"
+        app:showAsAction="ifRoom|withText" />
+
+</menu>

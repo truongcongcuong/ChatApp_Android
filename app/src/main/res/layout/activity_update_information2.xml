@@ -32,8 +32,8 @@
             android:id="@+id/img_edit_profile_avt"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/defaultprofile">
+            android:background="@drawable/border_for_circle_image"
+            android:padding="1dp">
 
         </ImageView>
 

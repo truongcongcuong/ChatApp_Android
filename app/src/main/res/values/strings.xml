@@ -165,6 +165,12 @@
     <string name="load_more">Load more</string>
     <string name="avatar">Avatar</string>
     <string name="no_group">You don\'t have any groups.</string>
+    <string name="view_information">View Information</string>
+    <string name="remove_friend">Remove Friend</string>
+    <string name="friend_request_sent_to_user">Friend request sent to %1$s.</string>
+    <string name="friend_request_received_from_user">%1$s sent to you a friend request.</string>
+    <string name="relation_is_friend">The two of you are now friends. Let\'s talk together.</string>
+    <string name="relation_is_none">Make friends with %1$s to create memorable moments.</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

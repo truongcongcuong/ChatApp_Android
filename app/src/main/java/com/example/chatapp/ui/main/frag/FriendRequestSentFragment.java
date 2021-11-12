@@ -70,6 +70,7 @@ public class FriendRequestSentFragment extends Fragment {
     private final FriendRequestActivity parent;
     private final int POSITION_OF_SENT = 1;
     private Button btnLoadMore;
+    private int totalElements = 0;
 
     public FriendRequestSentFragment(FriendRequestActivity parent) {
         this.parent = parent;
@@ -92,9 +93,8 @@ public class FriendRequestSentFragment extends Fragment {
             public void onReceive(Context context, Intent intent) {
                 boolean empty = intent.getBooleanExtra("dto", true);
                 if (empty)
-                    txt_friend_request_sent_no_request.setVisibility(View.VISIBLE);
-                else
-                    txt_friend_request_sent_no_request.setVisibility(View.GONE);
+                    totalElements = 0;
+                shouldShowMessageEmpty();
             }
         }, new IntentFilter("friendRequest/sent/empty"));
 
@@ -134,7 +134,6 @@ public class FriendRequestSentFragment extends Fragment {
         friend_request_sent_refresh_layout = view.findViewById(R.id.friend_request_sent_refresh_layout);
         friend_request_sent_refresh_layout.setColorSchemeColors(Color.RED);
         friend_request_sent_refresh_layout.setOnRefreshListener(() -> {
-            page = 0;
             Log.d("--", "on refresh ");
             refreshListFriendRequest();
             FriendRequestActivity activity = (FriendRequestActivity) getActivity();
@@ -149,19 +148,28 @@ public class FriendRequestSentFragment extends Fragment {
         return view;
     }
 
+    private void shouldShowMessageEmpty() {
+        if (totalElements == 0) {
+            txt_friend_request_sent_no_request.setVisibility(View.VISIBLE);
+        } else {
+            txt_friend_request_sent_no_request.setVisibility(View.GONE);
+        }
+    }
+
     private void loadMoreData() {
         page++;
         getListFriendRequest();
     }
 
     private void refreshListFriendRequest() {
+        page = 0;
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_REQUEST + "/sent" + "?size=" + size + "&page=" + page,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        int totalElements = (int) object.get("totalElements");
+                        totalElements = (int) object.get("totalElements");
                         boolean last = (boolean) object.get("last");
                         if (last)
                             btnLoadMore.setVisibility(View.GONE);
@@ -173,11 +181,7 @@ public class FriendRequestSentFragment extends Fragment {
                         list = gson.fromJson(array.toString(), listType);
                         Log.d("--sent", list.toString());
                         adapter.setList(list);
-                        if (recyclerView.getAdapter().getItemCount() == 0) {
-                            txt_friend_request_sent_no_request.setVisibility(View.VISIBLE);
-                        } else {
-                            txt_friend_request_sent_no_request.setVisibility(View.GONE);
-                        }
+                        shouldShowMessageEmpty();
                         friend_request_sent_refresh_layout.setRefreshing(false);
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -206,7 +210,7 @@ public class FriendRequestSentFragment extends Fragment {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
-                        int totalElements = (int) object.get("totalElements");
+                        totalElements = (int) object.get("totalElements");
                         boolean last = (boolean) object.get("last");
                         if (last)
                             btnLoadMore.setVisibility(View.GONE);
@@ -226,11 +230,7 @@ public class FriendRequestSentFragment extends Fragment {
                         if (page != 0) {
                             recyclerView.scrollToPosition(recyclerView.getAdapter().getItemCount());
                         }
-                        if (recyclerView.getAdapter().getItemCount() == 0) {
-                            txt_friend_request_sent_no_request.setVisibility(View.VISIBLE);
-                        } else {
-                            txt_friend_request_sent_no_request.setVisibility(View.GONE);
-                        }
+                        shouldShowMessageEmpty();
                         friend_request_sent_refresh_layout.setRefreshing(false);
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -254,14 +254,29 @@ public class FriendRequestSentFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void deleteFriendRequest(FriendRequest friendRequest) {
-        list.removeIf(x -> x.getTo() != null && x.getTo().getId().equals(friendRequest.getTo().getId()));
+        boolean delete = list.removeIf(x -> x.getTo() != null && x.getTo().getId().equals(friendRequest.getTo().getId()));
+        if (delete)
+            totalElements--;
         adapter.setList(list);
+        shouldShowMessageEmpty();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void acceptFriendRequest(FriendRequest friendRequest) {
-        list.removeIf(x -> x.getTo() != null && x.getTo().getId().equals(friendRequest.getTo().getId()));
+        boolean remove = list.removeIf(x -> x.getTo() != null && x.getTo().getId().equals(friendRequest.getTo().getId()));
+        if (remove)
+            totalElements--;
         adapter.setList(list);
+        shouldShowMessageEmpty();
     }
 
+    public void sentFriendRequest(FriendRequest friendRequest) {
+        if (list == null)
+            list = new ArrayList<>();
+        boolean add = list.add(friendRequest);
+        if (add)
+            totalElements++;
+        adapter.setList(list);
+        shouldShowMessageEmpty();
+    }
 }

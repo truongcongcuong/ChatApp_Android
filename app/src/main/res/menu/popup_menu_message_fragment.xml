@@ -3,12 +3,14 @@
 
     <item
         android:id="@+id/action_create_group"
+        android:icon="@drawable/ic_baseline_group_create_24_orange"
         android:title="@string/create_group"
         android:visible="true"
         app:showAsAction="ifRoom|withText" />
 
     <item
         android:id="@+id/action_add_friend"
+        android:icon="@drawable/ic_baseline_person_add_alt_24_green"
         android:title="@string/add_friend"
         android:visible="true"
         app:showAsAction="ifRoom|withText" />

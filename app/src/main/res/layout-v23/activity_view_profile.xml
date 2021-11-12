@@ -6,9 +6,11 @@
     android:layout_height="match_parent"
     android:background="@color/background_material_light"
     android:orientation="vertical"
+    android:theme="@style/Theme.ChatApp"
     tools:context=".ui.ViewInformationActivity">
 
     <RelativeLayout
+        android:id="@+id/view_profile_top_layout"
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:layout_alignParentTop="true"
@@ -23,7 +25,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/border_for_circle_image"
-            tools:srcCompat="@tools:sample/avatars">
+            android:padding="1dp">
 
         </ImageView>
 
@@ -32,44 +34,74 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_below="@+id/view_profile_top_layout"
+        android:layout_marginTop="10dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_chat_view_profile_activity"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/view_profile_txt_message"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="1"
-            android:background="@drawable/background_btn_friend_phonebook"
-            android:gravity="center_vertical|center_horizontal"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:minWidth="120dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:text="@string/chat"
-            android:textAlignment="center"
-            app:backgroundTint="@null" />
+            android:ellipsize="end"
+            android:gravity="center_horizontal"
+            android:maxLines="2"
+            android:minHeight="80dp"
+            android:padding="10dp"
+            android:textSize="18sp" />
 
-        <Button
-            android:id="@+id/btn_friend_status_view_profile_activity"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/background_btn_friend_phonebook"
-            android:gravity="center_vertical|center_horizontal"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:minWidth="120dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:textAlignment="center"
-            app:backgroundTint="@null" />
+            android:paddingEnd="10dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_chat_view_profile_activity"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/purple_200"
+                android:gravity="center_vertical|center_horizontal"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:minWidth="120dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/chat"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_round_message_24_blue"
+                app:iconGravity="textStart" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_friend_status_view_profile_activity"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/purple_200"
+                android:gravity="center_vertical|center_horizontal"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:minWidth="120dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/add_friend"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_baseline_person_add_alt_24"
+                app:iconGravity="textStart" />
+        </LinearLayout>
+
+
     </LinearLayout>
 
     <androidx.appcompat.widget.Toolbar

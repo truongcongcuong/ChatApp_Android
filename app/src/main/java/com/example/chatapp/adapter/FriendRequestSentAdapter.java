@@ -128,7 +128,7 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
             StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_FRIEND_REQUEST + "/" + friendRequest.getTo().getId(),
                     response -> {
                         Log.e("response: ", response);
-                        notifyDataChange(position);
+                        notifyDataChange(friendRequest);
                     }, error -> {
                 Log.e("error: ", error.toString());
 
@@ -148,8 +148,7 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void notifyDataChange(int position) {
-        FriendRequest friendRequest = list.get(position);
+    private void notifyDataChange(FriendRequest friendRequest) {
         list.removeIf(x -> x.getTo().getId().equals(friendRequest.getTo().getId()));
         notifyDataSetChanged();
 

@@ -34,6 +34,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.SearchPhoneAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserProfileDto;
+import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.enumvalue.FriendStatus;
 import com.google.gson.Gson;
@@ -63,6 +64,7 @@ public class AddFriendActivity extends AppCompatActivity {
     private TextView add_friend_txt_notify;
     private final int DELAY_SEARCH = 250;
     private static String message;
+    private UserSummaryDTO currentUser;
 
     private final BroadcastReceiver friendRequestReceived = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -71,16 +73,22 @@ public class AddFriendActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
+                if (currentUser.getId().equals(dto.getTo().getId())) {
                     UserProfileDto from = dto.getFrom();
-                    if (from != null) {
-                        for (UserProfileDto user : searchUserResult) {
-                            if (user.getId().equals(from.getId())) {
-                                user.setFriendStatus(FriendStatus.RECEIVED);
-                            }
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.RECEIVED);
                         }
-                        searchPhoneAdapter.notifyDataSetChanged();
                     }
+                    searchPhoneAdapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.SENT);
+                        }
+                    }
+                    searchPhoneAdapter.notifyDataSetChanged();
                 }
             }
         }
@@ -93,16 +101,22 @@ public class AddFriendActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
-                    UserProfileDto to = dto.getTo();
-                    if (to != null) {
-                        for (UserProfileDto user : searchUserResult) {
-                            if (user.getId().equals(to.getId())) {
-                                user.setFriendStatus(FriendStatus.FRIEND);
-                            }
+                if (currentUser.getId().equals(dto.getTo().getId())) {
+                    UserProfileDto from = dto.getFrom();
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.FRIEND);
                         }
-                        searchPhoneAdapter.notifyDataSetChanged();
                     }
+                    searchPhoneAdapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.FRIEND);
+                        }
+                    }
+                    searchPhoneAdapter.notifyDataSetChanged();
                 }
             }
         }
@@ -115,16 +129,22 @@ public class AddFriendActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
+                if (currentUser.getId().equals(dto.getTo().getId())) {
                     UserProfileDto from = dto.getFrom();
-                    if (from != null) {
-                        for (UserProfileDto user : searchUserResult) {
-                            if (user.getId().equals(from.getId())) {
-                                user.setFriendStatus(FriendStatus.NONE);
-                            }
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
                         }
-                        searchPhoneAdapter.notifyDataSetChanged();
                     }
+                    searchPhoneAdapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                        }
+                    }
+                    searchPhoneAdapter.notifyDataSetChanged();
                 }
             }
         }
@@ -137,16 +157,22 @@ public class AddFriendActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
-                    UserProfileDto to = dto.getTo();
-                    if (to != null) {
-                        for (UserProfileDto user : searchUserResult) {
-                            if (user.getId().equals(to.getId())) {
-                                user.setFriendStatus(FriendStatus.NONE);
-                            }
+                if (currentUser.getId().equals(dto.getTo().getId())) {
+                    UserProfileDto from = dto.getFrom();
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
                         }
-                        searchPhoneAdapter.notifyDataSetChanged();
                     }
+                    searchPhoneAdapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                        }
+                    }
+                    searchPhoneAdapter.notifyDataSetChanged();
                 }
             }
         }
@@ -177,8 +203,11 @@ public class AddFriendActivity extends AppCompatActivity {
         searchUserResult = new ArrayList<>();
         searchPhoneAdapter = new SearchPhoneAdapter(searchUserResult, this);
 
+        Gson gson = new Gson();
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
+        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", Context.MODE_PRIVATE);
+        currentUser = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
         message = getString(R.string.find_friend_via_phone_number);
         SearchView searchView = findViewById(R.id.add_friend_search_view);

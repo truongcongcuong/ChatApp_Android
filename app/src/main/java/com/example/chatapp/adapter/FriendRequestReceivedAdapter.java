@@ -134,7 +134,7 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
         StringRequest request = new StringRequest(method, Constant.API_FRIEND_REQUEST + "/" + friendRequest.getFrom().getId(),
                 response -> {
                     Log.e("response: ", response);
-                    notifyDataChange(position);
+                    notifyDataChange(friendRequest);
                 }, error -> Log.e("error: ", error.toString())) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -150,8 +150,7 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void notifyDataChange(int position) {
-        FriendRequest friendRequest = list.get(position);
+    private void notifyDataChange(FriendRequest friendRequest) {
         list.removeIf(x -> x.getFrom().getId().equals(friendRequest.getFrom().getId()));
         notifyDataSetChanged();
 

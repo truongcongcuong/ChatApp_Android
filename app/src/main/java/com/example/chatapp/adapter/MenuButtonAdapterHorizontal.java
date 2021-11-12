@@ -12,17 +12,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatapp.R;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 
 import java.util.List;
 
 public class MenuButtonAdapterHorizontal extends RecyclerView.Adapter<MenuButtonAdapterHorizontal.ViewHolder> {
 
     private final Context context;
-    private final List<MenuItem> items;
+    private final List<MyMenuItem> items;
     private final View.OnClickListener onClickListener;
 
-    public MenuButtonAdapterHorizontal(Context context, List<MenuItem> items, View.OnClickListener onClickListener) {
+    public MenuButtonAdapterHorizontal(Context context, List<MyMenuItem> items, View.OnClickListener onClickListener) {
         this.context = context;
         this.items = items;
         this.onClickListener = onClickListener;
@@ -42,9 +42,9 @@ public class MenuButtonAdapterHorizontal extends RecyclerView.Adapter<MenuButton
         StrictMode.setThreadPolicy(policy);
 
         if (items != null && position < items.size()) {
-            MenuItem menuItem = items.get(position);
-            holder.imv_item_menu_button_horizontal.setImageResource(menuItem.getImageResource());
-            holder.txt_item_menu_button_name_horizontal.setText(menuItem.getName());
+            MyMenuItem myMenuItem = items.get(position);
+            holder.imv_item_menu_button_horizontal.setImageResource(myMenuItem.getImageResource());
+            holder.txt_item_menu_button_name_horizontal.setText(myMenuItem.getName());
         }
 
     }

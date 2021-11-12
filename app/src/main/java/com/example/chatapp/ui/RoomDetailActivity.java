@@ -49,7 +49,7 @@ import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dialog.ViewCommonGroupDialog;
 import com.example.chatapp.dto.InboxDto;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.RoomType;
@@ -80,7 +80,7 @@ public class RoomDetailActivity extends AppCompatActivity {
     private static final int ADD_MEMBER = 2;
     private static final int VIEW_MEMBER = 3;
     private static final int REQUEST_PERMISSION = 123;
-    private List<MenuItem> menuItems;
+    private List<MyMenuItem> myMenuItems;
     private InboxDto inboxDto;
     private ImageButton imageOfRoom;
     private TextView nameOfRoom;
@@ -191,8 +191,8 @@ public class RoomDetailActivity extends AppCompatActivity {
         String userJson = sharedPreferencesUser.getString("user-info", null);
         UserSummaryDTO user = gson.fromJson(userJson, UserSummaryDTO.class);
 
-        menuItems = new ArrayList<>();
-        menuItems.add(MenuItem.builder()
+        myMenuItems = new ArrayList<>();
+        myMenuItems.add(MyMenuItem.builder()
                 .key("viewStoredMedia")
                 .imageResource(R.drawable.ic_baseline_folder_open_24)
                 .name(getString(R.string.stored_media))
@@ -202,22 +202,22 @@ public class RoomDetailActivity extends AppCompatActivity {
         if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.ONE)) {
             showImageAndNameOfRoom(context, inboxDto);
 
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("viewCommonGroup")
                     .imageResource(R.drawable.ic_baseline_groups_24)
                     .name(getString(R.string.view_groups_in_common))
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("createRoomWithThisUser")
                     .imageResource(R.drawable.ic_baseline_group_create_24_black)
                     .name(getString(R.string.create_group_with_this_user))
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("viewProfile")
                     .imageResource(R.drawable.ic_baseline_profile_circle_24)
                     .name(getString(R.string.view_profile))
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("block")
                     .imageResource(R.drawable.ic_baseline_block_24)
                     .name(getString(R.string.block_messages))
@@ -225,23 +225,23 @@ public class RoomDetailActivity extends AppCompatActivity {
         } else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             showImageAndNameOfRoom(context, inboxDto);
             room_detail_create_at.setText(String.format("%s: %s", getString(R.string.created), inboxDto.getRoom().getCreateAt()));
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("viewMembers")
                     .imageResource(R.drawable.ic_baseline_groups_24)
                     .name(getString(R.string.view_members))
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("addMember")
                     .imageResource(R.drawable.ic_baseline_group_create_24_black)
                     .name(getString(R.string.title_add_member))
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("leaveRoom")
                     .imageResource(R.drawable.ic_baseline_leave_24)
                     .name(getString(R.string.leave_group))
                     .build());
             if (user.getId().equals(inboxDto.getRoom().getCreateByUserId())) {
-                menuItems.add(MenuItem.builder()
+                myMenuItems.add(MyMenuItem.builder()
                         .key("deleteGroup")
                         .imageResource(R.drawable.ic_baseline_delete_forever_24)
                         .name(getString(R.string.delete_group))
@@ -288,28 +288,28 @@ public class RoomDetailActivity extends AppCompatActivity {
             btn_change_name_of_room.setOnClickListener(v -> showRenameDialog());
         }
 
-        menuItems.add(MenuItem.builder()
+        myMenuItems.add(MyMenuItem.builder()
                 .key("deleteInbox")
                 .imageResource(R.drawable.ic_baseline_delete_forever_24)
                 .name(getString(R.string.delete_chat_history))
                 .build());
 
-        menuItems.add(MenuItem.builder()
+        myMenuItems.add(MyMenuItem.builder()
                 .key("report")
                 .imageResource(R.drawable.ic_baseline_report_24)
                 .name(getString(R.string.report))
                 .build());
         for (int i = 0; i < 10; i++) {
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("----------------")
                     .name("----------------")
                     .build());
         }
 
-        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(RoomDetailActivity.this, R.layout.line_item_menu_button_vertical, menuItems);
+        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(RoomDetailActivity.this, R.layout.line_item_menu_button_vertical, myMenuItems);
         lv_menu_items.setAdapter(menuAdapter);
         lv_menu_items.setOnItemClickListener((parent, view, position, itemId) -> {
-            MenuItem item = menuItems.get(position);
+            MyMenuItem item = myMenuItems.get(position);
             switch (item.getKey()) {
                 case "viewMembers": {
                     Intent intent = new Intent(this, MemberActivity.class);

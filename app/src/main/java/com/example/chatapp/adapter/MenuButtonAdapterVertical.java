@@ -12,26 +12,33 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.example.chatapp.R;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 
 import java.util.List;
 
-public class MenuButtonAdapterVertical extends ArrayAdapter<MenuItem> {
+public class MenuButtonAdapterVertical extends ArrayAdapter<MyMenuItem> {
     private final Context context;
-    private final List<MenuItem> items;
+    private List<MyMenuItem> items;
+    private final int resource;
 
-    public MenuButtonAdapterVertical(Context context, int resource, List<MenuItem> items) {
+    public void setItems(List<MyMenuItem> items) {
+        this.items = items;
+        notifyDataSetChanged();
+    }
+
+    public MenuButtonAdapterVertical(Context context, int resource, List<MyMenuItem> items) {
         super(context, resource, items);
         this.items = items;
         this.context = context;
+        this.resource = resource;
     }
 
     @Override
     @SuppressLint("ViewHolder")
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = LayoutInflater.from(context).inflate(R.layout.line_item_menu_button_vertical, parent, false);
+        View view = LayoutInflater.from(context).inflate(resource, parent, false);
 
-        MenuItem item = items.get(position);
+        MyMenuItem item = items.get(position);
 
         ImageView image = view.findViewById(R.id.imv_item_menu_button);
         TextView name = view.findViewById(R.id.txt_item_menu_button_name);
@@ -44,7 +51,7 @@ public class MenuButtonAdapterVertical extends ArrayAdapter<MenuItem> {
 
     @Nullable
     @Override
-    public MenuItem getItem(int position) {
+    public MyMenuItem getItem(int position) {
         return items.get(position);
     }
 

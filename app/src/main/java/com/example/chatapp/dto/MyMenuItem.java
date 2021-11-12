@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class MenuItem {
+public class MyMenuItem {
     private String key;
     private String name;
     private int imageResource;

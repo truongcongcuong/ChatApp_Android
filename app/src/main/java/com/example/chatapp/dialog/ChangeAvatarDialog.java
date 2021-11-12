@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.ui.ViewImageActivity;
 
@@ -24,43 +24,43 @@ import java.util.List;
 
 public class ChangeAvatarDialog extends Dialog {
 
-    private List<MenuItem> menuItems;
+    private List<MyMenuItem> myMenuItems;
 
     public ChangeAvatarDialog(@NonNull Context context, final int REQUEST_GALLERY,
                               final int REQUEST_IMAGE_CAPTURE,
-                              List<MenuItem> listMenu,
+                              List<MyMenuItem> listMenu,
                               UserDetailDTO userDetailDTO) {
         super(context);
 
         if (listMenu == null || listMenu.isEmpty()) {
-            menuItems = new ArrayList<>();
-            menuItems.add(MenuItem.builder()
+            myMenuItems = new ArrayList<>();
+            myMenuItems.add(MyMenuItem.builder()
                     .key("view")
                     .name(context.getString(R.string.view_avatar))
                     .imageResource(R.drawable.ic_outline_remove_red_eye_24)
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("takeNew")
                     .name(context.getString(R.string.take_photo))
                     .imageResource(R.drawable.ic_outline_camera_alt_24)
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("takeFromGallery")
                     .name(context.getString(R.string.choose_from_gallery))
                     .imageResource(R.drawable.ic_outline_image_24)
                     .build());
         } else {
-            menuItems = listMenu;
+            myMenuItems = listMenu;
         }
 
         setContentView(R.layout.dialog_change_avatar);
 
-        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(context, R.layout.line_item_menu_button_vertical, menuItems);
+        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(context, R.layout.line_item_menu_button_vertical, myMenuItems);
         ListView listView = findViewById(R.id.change_avt_dialog_list_view);
         listView.setAdapter(menuAdapter);
 
         listView.setOnItemClickListener((parent, view, position, itemId) -> {
-            MenuItem item = menuItems.get(position);
+            MyMenuItem item = myMenuItems.get(position);
             switch (item.getKey()) {
                 case "view":
                     Intent intent = new Intent(context, ViewImageActivity.class);

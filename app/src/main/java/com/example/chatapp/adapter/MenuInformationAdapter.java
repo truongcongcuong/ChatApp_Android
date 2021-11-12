@@ -10,15 +10,15 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.example.chatapp.R;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 
 import java.util.List;
 
-public class MenuInformationAdapter extends ArrayAdapter<MenuItem> {
+public class MenuInformationAdapter extends ArrayAdapter<MyMenuItem> {
     private final Context context;
-    private final List<MenuItem> items;
+    private final List<MyMenuItem> items;
 
-    public MenuInformationAdapter(Context context, List<MenuItem> items, int resource) {
+    public MenuInformationAdapter(Context context, List<MyMenuItem> items, int resource) {
         super(context, resource, items);
         this.context = context;
         this.items = items;
@@ -31,7 +31,7 @@ public class MenuInformationAdapter extends ArrayAdapter<MenuItem> {
             view = LayoutInflater.from(context).inflate(R.layout.line_item_information, parent, false);
         }
 
-        MenuItem item = items.get(position);
+        MyMenuItem item = items.get(position);
 
         TextView txt_lii_title = view.findViewById(R.id.txt_lii_title);
         TextView txt_lii_infor = view.findViewById(R.id.txt_lii_infor);
@@ -44,7 +44,7 @@ public class MenuInformationAdapter extends ArrayAdapter<MenuItem> {
 
     @Nullable
     @Override
-    public MenuItem getItem(int position) {
+    public MyMenuItem getItem(int position) {
         return items.get(position);
     }
 

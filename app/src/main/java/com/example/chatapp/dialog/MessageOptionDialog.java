@@ -27,7 +27,7 @@ import com.example.chatapp.adapter.MenuButtonAdapterHorizontal;
 import com.example.chatapp.adapter.ReactionDialogCreateAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.SendDataReplyMessage;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -42,7 +42,7 @@ public class MessageOptionDialog extends BottomSheetDialogFragment implements Vi
 
     private MessageDto messageDto;
     private RecyclerView rcvMenuOption;
-    private List<MenuItem> menuItems;
+    private List<MyMenuItem> myMenuItems;
     private String token;
     private final Context context;
 
@@ -73,15 +73,15 @@ public class MessageOptionDialog extends BottomSheetDialogFragment implements Vi
         if (messageDto.isDeleted()) {
             layout_menu_in_message_option_dialog.setVisibility(View.GONE);
         }
-        menuItems = new ArrayList<>();
-        menuItems.add(MenuItem.builder()
+        myMenuItems = new ArrayList<>();
+        myMenuItems.add(MyMenuItem.builder()
                 .key("reply")
                 .imageResource(R.drawable.ic_round_reply_36)
                 .name(context.getString(R.string.reply))
                 .build());
 
         if (messageDto.getSender() != null && user.getId().equals(messageDto.getSender().getId())) {
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("deleteMessage")
                     .imageResource(R.drawable.ic_baseline_delete_forever_24)
                     .name(context.getString(R.string.remove))
@@ -94,7 +94,7 @@ public class MessageOptionDialog extends BottomSheetDialogFragment implements Vi
         rcvReaction.setAdapter(arrayAdapter);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(context, 4, LinearLayoutManager.VERTICAL, false);
-        MenuButtonAdapterHorizontal menuButtonAdapterHorizontal = new MenuButtonAdapterHorizontal(context, menuItems, this);
+        MenuButtonAdapterHorizontal menuButtonAdapterHorizontal = new MenuButtonAdapterHorizontal(context, myMenuItems, this);
         rcvMenuOption.setLayoutManager(gridLayoutManager);
         rcvMenuOption.setAdapter(menuButtonAdapterHorizontal);
 
@@ -110,11 +110,11 @@ public class MessageOptionDialog extends BottomSheetDialogFragment implements Vi
     @Override
     public void onClick(View v) {
         int position = rcvMenuOption.indexOfChild(v);
-        MenuItem menuItem = menuItems.get(position);
-        if (menuItem.getKey().equals("deleteMessage")) {
+        MyMenuItem myMenuItem = myMenuItems.get(position);
+        if (myMenuItem.getKey().equals("deleteMessage")) {
             deleteMessage();
             dismiss();
-        } else if (menuItem.getKey().equals("reply")) {
+        } else if (myMenuItem.getKey().equals("reply")) {
             SendDataReplyMessage sendDataReplyMessage = (SendDataReplyMessage) context;
             sendDataReplyMessage.reply(messageDto);
             dismiss();

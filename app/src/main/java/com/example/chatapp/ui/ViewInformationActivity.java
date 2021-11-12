@@ -31,7 +31,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuInformationAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dialog.ChangeAvatarDialog;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
@@ -159,27 +159,27 @@ public class ViewInformationActivity extends AppCompatActivity {
     @SneakyThrows
     private void updateItems() {
         setTitle(userDetailDTO.getDisplayName());
-        List<MenuItem> items = new ArrayList<>();
-        items.add(MenuItem.builder()
+        List<MyMenuItem> items = new ArrayList<>();
+        items.add(MyMenuItem.builder()
                 .key(getResources().getString(R.string.name))
                 .name(userDetailDTO.getDisplayName())
                 .build());
-        items.add(MenuItem.builder()
+        items.add(MyMenuItem.builder()
                 .key(getResources().getString(R.string.username))
                 .name(userDetailDTO.getUsername())
                 .build());
-        items.add(MenuItem.builder()
+        items.add(MyMenuItem.builder()
                 .key(getResources().getString(R.string.gender))
                 .name(userDetailDTO.getGender())
                 .build());
         if (userDetailDTO.getDateOfBirth() != null) {
-            items.add(MenuItem.builder()
+            items.add(MyMenuItem.builder()
                     .key(getResources().getString(R.string.birthday))
                     .name(sdf.format(sdfFull.parse(userDetailDTO.getDateOfBirth())))
                     .build());
         }
 
-        items.add(MenuItem.builder()
+        items.add(MyMenuItem.builder()
                 .key(getResources().getString(R.string.mobile))
                 .name(userDetailDTO.getPhoneNumber())
                 .build());

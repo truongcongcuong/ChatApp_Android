@@ -27,7 +27,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.ui.ChatActivity;
 import com.example.chatapp.ui.ViewProfileActivity;
@@ -46,14 +46,14 @@ public class ProfileDialog extends Dialog {
     private Gson gson;
     private String token;
     private Context context;
-    private List<MenuItem> menuItems;
+    private List<MyMenuItem> myMenuItems;
 
     private ProfileDialog(@NonNull Context context) {
         super(context);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public ProfileDialog(@NonNull Context context, UserProfileDto userProfileDto, List<MenuItem> listMenu) {
+    public ProfileDialog(@NonNull Context context, UserProfileDto userProfileDto, List<MyMenuItem> listMenu) {
         super(context);
         this.context = context;
 
@@ -63,19 +63,19 @@ public class ProfileDialog extends Dialog {
         token = sharedPreferencesToken.getString("access-token", null);
 
         if (listMenu == null || listMenu.isEmpty()) {
-            menuItems = new ArrayList<>();
-            menuItems.add(MenuItem.builder()
+            myMenuItems = new ArrayList<>();
+            myMenuItems.add(MyMenuItem.builder()
                     .key("chat")
                     .name(context.getString(R.string.chat))
                     .imageResource(R.drawable.ic_round_message_24_blue)
                     .build());
-            menuItems.add(MenuItem.builder()
+            myMenuItems.add(MyMenuItem.builder()
                     .key("viewProfile")
                     .name(context.getString(R.string.view_profile))
                     .imageResource(R.drawable.ic_baseline_profile_circle_24_orange)
                     .build());
         } else {
-            menuItems = listMenu;
+            myMenuItems = listMenu;
         }
 
         setContentView(R.layout.layout_profile_dialog);
@@ -85,7 +85,7 @@ public class ProfileDialog extends Dialog {
         ImageView imv_close = findViewById(R.id.profile_imv_close);
         imv_close.setOnClickListener(v -> cancel());
 
-        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(context, R.layout.line_item_menu_button_vertical, menuItems);
+        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(context, R.layout.line_item_menu_button_vertical, myMenuItems);
         listView.setAdapter(menuAdapter);
         if (userProfileDto != null) {
             Glide.with(context).load(userProfileDto.getImageUrl())
@@ -95,7 +95,7 @@ public class ProfileDialog extends Dialog {
             profile_name_dialog.setText(userProfileDto.getDisplayName());
 
             listView.setOnItemClickListener((parent, view, position, itemId) -> {
-                MenuItem item = menuItems.get(position);
+                MyMenuItem item = myMenuItems.get(position);
                 if (item.getKey().equals("chat") && userProfileDto != null)
                     getInboxWith(userProfileDto.getId());
                 else if (item.getKey().equals("viewProfile")) {

@@ -21,150 +21,63 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
-                <RelativeLayout
+                <ListView
+                    android:id="@+id/contact_frg_lv_menu"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content" />
 
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cav_contact_friend_request"
-                        android:layout_width="match_parent"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/contact_frg_count"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginTop="0dp">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:id="@+id/ctl_contact_friend_request"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <ImageView
-                                android:id="@+id/img_contact_friend_request"
-                                android:layout_width="45dp"
-                                android:layout_height="45dp"
-                                android:layout_margin="10dp"
-                                android:background="@android:color/transparent"
-                                android:src="@drawable/ic_baseline_profile_circle_24_orange"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent">
-
-                            </ImageView>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="20dp"
-                                android:gravity="center_vertical"
-                                android:text="@string/friend_request"
-                                android:textColor="#666666"
-                                android:textSize="18sp"
-                                app:layout_constraintBottom_toBottomOf="@+id/img_contact_friend_request"
-                                app:layout_constraintStart_toEndOf="@+id/img_contact_friend_request"
-                                app:layout_constraintTop_toTopOf="@+id/img_contact_friend_request" />
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cav_contact_phonebook_friend"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/cav_contact_friend_request"
-                        android:layout_marginTop="0dp">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:id="@+id/ctl_contact_phone_book_friend"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <ImageView
-                                android:id="@+id/img_contact_phonebook_friend"
-                                android:layout_width="45dp"
-                                android:layout_height="45dp"
-                                android:layout_margin="10dp"
-                                android:background="@android:color/transparent"
-                                android:src="@drawable/ic_baseline_contact_phone_24"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent">
-
-                            </ImageView>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="20dp"
-                                android:gravity="center_vertical"
-                                android:text="@string/phone_book_friend"
-                                android:textColor="#666666"
-                                android:textSize="18sp"
-                                app:layout_constraintBottom_toBottomOf="@+id/img_contact_phonebook_friend"
-                                app:layout_constraintStart_toEndOf="@+id/img_contact_phonebook_friend"
-                                app:layout_constraintTop_toTopOf="@+id/img_contact_phonebook_friend" />
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cav_contact_all"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/cav_contact_phonebook_friend">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_vertical">
-
-                            <TextView
-                                android:id="@+id/contact_frg_count"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="10dp"
-                                android:gravity="center_vertical"
-                                android:text="@string/all_contact"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                app:layout_constraintBottom_toBottomOf="@id/btn_contact_refresh"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="@+id/btn_contact_refresh" />
-
-                            <Button
-                                android:id="@+id/btn_contact_refresh"
-                                style="@style/Widget.MaterialComponents.Button.TextButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="10dp"
-                                android:text="@string/refresh"
-                                android:textColor="@color/color_send"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintTop_toTopOf="parent" />
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rcv_contact_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/cav_contact_all"
-                        android:background="@color/background_material_light"
-                        android:scrollbarSize="3dp"
-                        android:scrollbarThumbVertical="@color/gray"
-                        android:scrollbars="vertical" />
+                        android:layout_marginStart="10dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/all_contact"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn_contact_refresh"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/btn_contact_refresh" />
 
                     <Button
-                        android:id="@+id/contact_frg_btn_load_more"
+                        android:id="@+id/btn_contact_refresh"
                         style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/rcv_contact_list"
-                        android:layout_centerHorizontal="true"
-                        android:drawableEnd="@drawable/ic_baseline_expand_more_24"
-                        android:text="@string/load_more"
-                        android:textColor="@color/color_send" />
-                </RelativeLayout>
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/refresh"
+                        android:textColor="@color/color_send"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rcv_contact_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/background_material_light"
+                    android:scrollbarSize="3dp"
+                    android:scrollbarThumbVertical="@color/gray"
+                    android:scrollbars="vertical" />
+
+                <Button
+                    android:id="@+id/contact_frg_btn_load_more"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/ic_baseline_expand_more_24"
+                    android:text="@string/load_more"
+                    android:textColor="@color/color_send" />
             </LinearLayout>
 
         </androidx.core.widget.NestedScrollView>

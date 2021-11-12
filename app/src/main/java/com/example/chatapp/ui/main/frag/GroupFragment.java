@@ -118,6 +118,24 @@ public class GroupFragment extends Fragment {
         }
     };
 
+    /*
+    lắng nghe sự kiện thay đổi ngôn ngữ
+    */
+    private final BroadcastReceiver changeLanguage = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                boolean change = bundle.getBoolean("change");
+                if (change) {
+                    adapter.notifyDataSetChanged();
+                    btnLoadMore.setText(getString(R.string.load_more));
+                }
+            }
+        }
+    };
+
     public GroupFragment() {
     }
 
@@ -135,6 +153,7 @@ public class GroupFragment extends Fragment {
         super.onCreate(savedInstanceState);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(renameRoom, new IntentFilter("room/rename"));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(changeImageRoom, new IntentFilter("room/changeImage"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(changeLanguage, new IntentFilter("language/change"));
         /*
         enable menu trên action bar
          */

@@ -4,14 +4,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
@@ -35,8 +36,7 @@ import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
-import com.example.chatapp.cons.SendingData;
-import com.example.chatapp.dto.MenuItem;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.Language;
 import com.example.chatapp.ui.ChangePasswordActivity;
@@ -56,9 +56,10 @@ import java.util.Map;
 public class InfoFragment extends Fragment {
     private TextView txt_info_name;
     private ImageView image_info_image;
-    private List<MenuItem> menuItems;
+    private List<MyMenuItem> myMenuItems;
     private NestedScrollView nestedScrollView;
     private Gson gson;
+    private MenuButtonAdapterVertical menuAdapter;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -105,49 +106,12 @@ public class InfoFragment extends Fragment {
 //        SharedPreferences sharedPreferencesToken = getActivity().getSharedPreferences("token", Context.MODE_PRIVATE);
 //        String token = sharedPreferencesToken.getString("access-token", null);
 
-        menuItems = new ArrayList<>();
-        menuItems.add(MenuItem.builder()
-                .key("viewProfile")
-                .imageResource(R.drawable.ic_baseline_profile_circle_24)
-                .name(getString(R.string.view_profile))
-                .build());
+        initListMenuItems();
 
-        menuItems.add(MenuItem.builder()
-                .key("changePassword")
-                .imageResource(R.drawable.ic_baseline_key_24)
-                .name(getString(R.string.change_password))
-                .build());
-
-        menuItems.add(MenuItem.builder()
-                .key("changeLanguage")
-                .imageResource(R.drawable.language)
-                .name(getString(R.string.language))
-                .build());
-
-        menuItems.add(MenuItem.builder()
-                .key("signout")
-                .imageResource(R.drawable.ic_baseline_leave_24)
-                .name(getString(R.string.logout))
-                .build());
-
-        menuItems.add(MenuItem.builder()
-                .key("infoApp")
-                .imageResource(R.drawable.ic_round_info_24_dark)
-                .name(getString(R.string.app_info))
-                .build());
-
-        for (int i = 0; i < 10; i++) {
-            menuItems.add(MenuItem.builder()
-                    .key("---")
-                    .name("---------------------")
-                    .build());
-        }
-
-
-        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(getActivity(), R.layout.line_item_menu_button_vertical, menuItems);
+        menuAdapter = new MenuButtonAdapterVertical(getActivity(), R.layout.line_item_menu_button_vertical, myMenuItems);
         lv_info_fragment_menu.setAdapter(menuAdapter);
         lv_info_fragment_menu.setOnItemClickListener((parent, view1, position, itemId) -> {
-            MenuItem item = menuItems.get(position);
+            MyMenuItem item = myMenuItems.get(position);
             if (item.getKey().equals("viewProfile")) {
                 viewInformation();
             } else if (item.getKey().equals("changePassword")) {
@@ -167,11 +131,55 @@ public class InfoFragment extends Fragment {
         return view;
     }
 
+    private void initListMenuItems() {
+        try {
+            myMenuItems.clear();
+        } catch (Exception e) {
+            myMenuItems = new ArrayList<>();
+        }
+        myMenuItems.add(MyMenuItem.builder()
+                .key("viewProfile")
+                .imageResource(R.drawable.ic_baseline_profile_circle_24)
+                .name(getString(R.string.view_profile))
+                .build());
+
+        myMenuItems.add(MyMenuItem.builder()
+                .key("changePassword")
+                .imageResource(R.drawable.ic_baseline_key_24)
+                .name(getString(R.string.change_password))
+                .build());
+
+        myMenuItems.add(MyMenuItem.builder()
+                .key("changeLanguage")
+                .imageResource(R.drawable.language)
+                .name(getString(R.string.language))
+                .build());
+
+        myMenuItems.add(MyMenuItem.builder()
+                .key("signout")
+                .imageResource(R.drawable.ic_baseline_leave_24)
+                .name(getString(R.string.logout))
+                .build());
+
+        myMenuItems.add(MyMenuItem.builder()
+                .key("infoApp")
+                .imageResource(R.drawable.ic_round_info_24_dark)
+                .name(getString(R.string.app_info))
+                .build());
+
+        for (int i = 0; i < 10; i++) {
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("---")
+                    .name("---------------------")
+                    .build());
+        }
+    }
+
     private void showDialogChangeLanguage() {
         TextView txt_change_language_english, txt_change_language_vietnamese;
         Dialog dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.dialog_change_language);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         txt_change_language_english = dialog.findViewById(R.id.txt_change_language_english);
         txt_change_language_vietnamese = dialog.findViewById(R.id.txt_change_language_vietnamese);
         LanguageUtils languageUtils = new LanguageUtils(getContext());
@@ -202,12 +210,32 @@ public class InfoFragment extends Fragment {
             dialog.dismiss();
         });
 
+        WindowManager.LayoutParams layoutParams = dialog.getWindow().getAttributes();
+        layoutParams.dimAmount = .5f;
+        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+//        layoutParams.gravity = Gravity.BOTTOM;
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayHeight = displayMetrics.heightPixels;
+        layoutParams.height = (int) (displayHeight * 0.3f);
+        dialog.getWindow().setAttributes(layoutParams);
+
         dialog.show();
     }
 
     private void reloadActivity() {
-        SendingData sendData = (SendingData) getContext();
-        sendData.sendString("true");
+//        SendingData sendData = (SendingData) getContext();
+//        sendData.sendString("true");
+        initListMenuItems();
+        menuAdapter.setItems(myMenuItems);
+        Intent intent = new Intent("language/change");
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("change", true);
+        intent.putExtras(bundle);
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
     }
 
     // set dynamic height for list view

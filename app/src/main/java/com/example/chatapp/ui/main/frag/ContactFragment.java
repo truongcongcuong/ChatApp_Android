@@ -18,12 +18,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.MenuItemCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
@@ -40,9 +40,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.FriendListAdapter;
+import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.FriendDTO;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.ui.AddFriendActivity;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.ui.SyncContactActivity;
@@ -79,6 +81,10 @@ public class ContactFragment extends Fragment {
     private TextView contact_frg_count;
     private Timer timer;
     private final int DELAY_SEARCH = 250;
+    private List<MyMenuItem> myMenuItems;
+    private MenuButtonAdapterVertical menuAdapter;
+    private Button btn_contact_refresh;
+    private int totalElements = 0;
 
     /*
     kéo để làm mới
@@ -90,6 +96,37 @@ public class ContactFragment extends Fragment {
 
     private String mParam1;
     private String mParam2;
+
+    /*
+    lắng nghe sự kiện thay đổi ngôn ngữ
+     */
+    private final BroadcastReceiver changeLanguage = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                boolean change = bundle.getBoolean("change");
+                if (change) {
+                    initListMenuItems();
+                    menuAdapter.setItems(myMenuItems);
+                    menuAdapter.notifyDataSetChanged();
+                    btn_contact_refresh.setText(getString(R.string.refresh));
+                    contact_frg_count.setText(String.format("%s (%d)", getString(R.string.all_contact), totalElements));
+                    btnLoadMore.setText(getString(R.string.load_more));
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver acceptFriend = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateListFriends();
+        }
+    };
 
     public ContactFragment() {
     }
@@ -106,15 +143,13 @@ public class ContactFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(changeLanguage, new IntentFilter("language/change"));
+
         /*
         khi đồng ý kết bạn ở activity friend request thì contact fragment load lại danh sách bạn bè
          */
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                updateListFriends();
-            }
-        }, new IntentFilter("accept_friend"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(acceptFriend, new IntentFilter("accept_friend"));
         /*
         enable menu trên action bar
          */
@@ -139,20 +174,29 @@ public class ContactFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_contact, container, false);
         RecyclerView rcv_contact_list = view.findViewById(R.id.rcv_contact_list);
-        ConstraintLayout ctl_contact_phone_book_friend = view.findViewById(R.id.ctl_contact_phone_book_friend);
-        ConstraintLayout ctl_contact_friend_request = view.findViewById(R.id.ctl_contact_friend_request);
+        ListView lv_info_fragment_menu = view.findViewById(R.id.contact_frg_lv_menu);
+
+        initListMenuItems();
+
+        menuAdapter = new MenuButtonAdapterVertical(getActivity(), R.layout.line_item_menu_contact_fragment, myMenuItems);
+        lv_info_fragment_menu.setAdapter(menuAdapter);
+        lv_info_fragment_menu.setOnItemClickListener((parent, view1, position, itemId) -> {
+            MyMenuItem item = myMenuItems.get(position);
+            if (item.getKey().equals("friendRequest")) {
+                Intent intent = new Intent(getActivity(), FriendRequestActivity.class);
+                startActivity(intent);
+            } else if (item.getKey().equals("syncContact")) {
+                Intent intent = new Intent(getActivity(), SyncContactActivity.class);
+                startActivity(intent);
+            }
+        });
+
         contact_frg_count = view.findViewById(R.id.contact_frg_count);
-        Button btn_contact_refresh = view.findViewById(R.id.btn_contact_refresh);
+        contact_frg_count.setText(String.format("%s (%d)", getString(R.string.all_contact), totalElements));
+        btn_contact_refresh = view.findViewById(R.id.btn_contact_refresh);
         btnLoadMore = view.findViewById(R.id.contact_frg_btn_load_more);
         btnLoadMore.setVisibility(View.GONE);
-        ctl_contact_phone_book_friend.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), SyncContactActivity.class);
-            startActivity(intent);
-        });
-        ctl_contact_friend_request.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), FriendRequestActivity.class);
-            startActivity(intent);
-        });
+
         rcv_contact_list.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         this.adapter = new FriendListAdapter(list, getActivity());
         rcv_contact_list.setAdapter(adapter);
@@ -195,6 +239,26 @@ public class ContactFragment extends Fragment {
         return view;
     }
 
+    private void initListMenuItems() {
+        try {
+            myMenuItems.clear();
+        } catch (Exception e) {
+            myMenuItems = new ArrayList<>();
+        }
+        myMenuItems.add(MyMenuItem.builder()
+                .key("friendRequest")
+                .imageResource(R.drawable.ic_baseline_profile_circle_24_orange)
+                .name(getString(R.string.friend_request))
+                .build());
+
+        myMenuItems.add(MyMenuItem.builder()
+                .key("syncContact")
+                .imageResource(R.drawable.ic_baseline_contact_phone_24)
+                .name(getString(R.string.phone_book_friend))
+                .build());
+
+    }
+
     private void loadMoreData() {
         StringRequest request = new StringRequest(Request.Method.GET, Constant.API_FRIEND_LIST + "?size=" + size + "&page=" + page,
                 response -> {
@@ -204,8 +268,8 @@ public class ContactFragment extends Fragment {
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
                         boolean last = (boolean) object.get("last");
-                        int totalElements = (int) object.get("totalElements");
-                        shouldShowButtonLoadMore(last, totalElements);
+                        totalElements = (int) object.get("totalElements");
+                        shouldShowButtonLoadMore(last);
                         Type listType = new TypeToken<List<FriendDTO>>() {
                         }.getType();
                         List<FriendDTO> listMore = gson.fromJson(array.toString(), listType);
@@ -231,7 +295,7 @@ public class ContactFragment extends Fragment {
         requestQueue.add(request);
     }
 
-    private void shouldShowButtonLoadMore(boolean last, int totalElements) {
+    private void shouldShowButtonLoadMore(boolean last) {
         contact_frg_count.setText(String.format("%s (%d)", getString(R.string.all_contact), totalElements));
         if (last)
             btnLoadMore.setVisibility(View.GONE);
@@ -253,8 +317,8 @@ public class ContactFragment extends Fragment {
                         JSONObject object = new JSONObject(res);
                         JSONArray array = (JSONArray) object.get("content");
                         boolean last = (boolean) object.get("last");
-                        int totalElements = (int) object.get("totalElements");
-                        shouldShowButtonLoadMore(last, totalElements);
+                        totalElements = (int) object.get("totalElements");
+                        shouldShowButtonLoadMore(last);
                         Type listType = new TypeToken<List<FriendDTO>>() {
                         }.getType();
                         list = gson.fromJson(array.toString(), listType);

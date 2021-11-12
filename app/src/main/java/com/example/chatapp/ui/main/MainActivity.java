@@ -1,7 +1,10 @@
 package com.example.chatapp.ui.main;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -51,12 +54,64 @@ public class MainActivity extends AppCompatActivity implements SendingData {
     private int mCurrentPosition;
     private int mScrollState;
 
+    /*
+    lắng nghe sự kiện thay đổi ngôn ngữ
+     */
+    private final BroadcastReceiver changeLanguage = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                boolean change = bundle.getBoolean("change");
+                if (change) {
+                    updateUIAfterChangeLanguage(mCurrentPosition);
+                }
+            }
+        }
+    };
+
+    /*
+    cập nhật lại ui khi thay đổi ngôn ngữ
+     */
+    private void updateUIAfterChangeLanguage(int position) {
+        if (position == 0) {
+            String title = getString(R.string.title_message);
+            MenuItem item = bnv_menu.getMenu().getItem(position);
+            setTitle(title);
+            item.setTitle(title);
+        } else if (position == 1) {
+            String title = getString(R.string.title_contact);
+            MenuItem item = bnv_menu.getMenu().getItem(position);
+            setTitle(title);
+            item.setTitle(title);
+        } else if (position == 2) {
+            String title = getString(R.string.title_group);
+            MenuItem item = bnv_menu.getMenu().getItem(position);
+            setTitle(title);
+            item.setTitle(title);
+        } else if (position == 3) {
+            String title = getString(R.string.title_recent);
+            MenuItem item = bnv_menu.getMenu().getItem(position);
+            setTitle(title);
+            item.setTitle(title);
+        } else {
+            String title = getString(R.string.title_more);
+            MenuItem item = bnv_menu.getMenu().getItem(position);
+            setTitle(title);
+            item.setTitle(title);
+        }
+    }
+
     @SuppressLint("CheckResult")
     @Override
     @RequiresApi(api = Build.VERSION_CODES.N)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // đăng ký lắng nghe sự kiện thay đổi ngôn ngữ
+        LocalBroadcastManager.getInstance(this).registerReceiver(changeLanguage, new IntentFilter("language/change"));
 
         Toolbar toolbar = findViewById(R.id.tlb_main_activity);
         toolbar.setTitleTextColor(Color.WHITE);
@@ -237,21 +292,17 @@ public class MainActivity extends AppCompatActivity implements SendingData {
              */
             @Override
             public void onPageSelected(final int position) {
+                updateUIAfterChangeLanguage(position);
                 mCurrentPosition = position;
                 if (position == 0) {
-                    setTitle(R.string.title_message);
                     bnv_menu.getMenu().findItem(R.id.navigation_message).setChecked(true);
                 } else if (position == 1) {
-                    setTitle(R.string.title_contact);
                     bnv_menu.getMenu().findItem(R.id.navigation_contact).setChecked(true);
                 } else if (position == 2) {
-                    setTitle(R.string.title_group);
                     bnv_menu.getMenu().findItem(R.id.navigation_group).setChecked(true);
                 } else if (position == 3) {
-                    setTitle(R.string.title_recent);
                     bnv_menu.getMenu().findItem(R.id.navigation_recent).setChecked(true);
                 } else {
-                    setTitle(R.string.title_more);
                     bnv_menu.getMenu().findItem(R.id.navigation_info).setChecked(true);
                 }
             }
@@ -295,31 +346,44 @@ public class MainActivity extends AppCompatActivity implements SendingData {
             }
         });
 
-        int page = getIntent().getIntExtra("page",0);
-        Log.e("page : ====== : ",page+"");
-        viewPager.setCurrentItem(page);
+//        int page = getIntent().getIntExtra("page", 0);
+//        Log.e("page : ====== : ", page + "");
+//        viewPager.setCurrentItem(page);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_message:
-                    viewPager.setCurrentItem(0);
-                    return true;
-                case R.id.navigation_contact:
-                    viewPager.setCurrentItem(1);
-                    return true;
-                case R.id.navigation_group:
-                    viewPager.setCurrentItem(2);
-                    return true;
-                case R.id.navigation_recent:
-                    viewPager.setCurrentItem(3);
-                    return true;
-                case R.id.navigation_info:
-                    viewPager.setCurrentItem(4);
-                    return true;
+            if (item.getItemId() == R.id.navigation_message) {
+                mCurrentPosition = 0;
+                viewPager.setCurrentItem(mCurrentPosition);
+                updateUIAfterChangeLanguage(mCurrentPosition);
+                return true;
+            }
+            if (item.getItemId() == R.id.navigation_contact) {
+                mCurrentPosition = 1;
+                viewPager.setCurrentItem(mCurrentPosition);
+                updateUIAfterChangeLanguage(mCurrentPosition);
+                return true;
+            }
+            if (item.getItemId() == R.id.navigation_group) {
+                mCurrentPosition = 2;
+                viewPager.setCurrentItem(mCurrentPosition);
+                updateUIAfterChangeLanguage(mCurrentPosition);
+                return true;
+            }
+            if (item.getItemId() == R.id.navigation_recent) {
+                mCurrentPosition = 3;
+                viewPager.setCurrentItem(mCurrentPosition);
+                updateUIAfterChangeLanguage(mCurrentPosition);
+                return true;
+            }
+            if (item.getItemId() == R.id.navigation_info) {
+                mCurrentPosition = 4;
+                viewPager.setCurrentItem(mCurrentPosition);
+                updateUIAfterChangeLanguage(mCurrentPosition);
+                return true;
             }
             return false;
         }
@@ -333,12 +397,12 @@ public class MainActivity extends AppCompatActivity implements SendingData {
 
     @Override
     public void sendString(String s) {
-        if(Boolean.parseBoolean(s)){
-            Intent intent = getIntent();
-            intent.putExtra("page",4);
-            finish();
-            startActivity(intent);
-        }
+//        if (Boolean.parseBoolean(s)) {
+//            Intent intent = getIntent();
+//            intent.putExtra("page", 4);
+//            finish();
+//            startActivity(intent);
+//        }
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStateAdapter {
@@ -348,9 +412,9 @@ public class MainActivity extends AppCompatActivity implements SendingData {
 
         @Override
         public Fragment createFragment(int position) {
-            if (position == 0)
+            if (position == 0) {
                 return messageFragment;
-            else if (position == 1) {
+            } else if (position == 1) {
                 if (contactFragment == null)
                     contactFragment = new ContactFragment();
                 return contactFragment;

@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_marginTop="0dp"
-        android:background="@color/purple_200"/>
+        android:background="@color/purple_200" />
 
 
     <!--<androidx.constraintlayout.widget.ConstraintLayout
@@ -72,14 +72,17 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bnv_bot"
+        style="@style/Widget.MaterialComponents.BottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
-        android:background="?android:attr/windowBackground"
+        android:background="@color/bg_app"
+        android:clickable="true"
+        android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
-        app:itemBackground="@color/bg_app"
         app:itemIconTint="@android:color/white"
+        app:itemRippleColor="@color/purple_200"
         app:itemTextColor="@android:color/white"
         app:menu="@menu/navigation" />
 

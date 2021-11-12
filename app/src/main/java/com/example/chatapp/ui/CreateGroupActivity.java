@@ -437,7 +437,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 .load(R.drawable.ic_baseline_camera_64)
                 .placeholder(R.drawable.image_placeholer)
                 .into(image_create_group);
-        image_create_group.setBackground(null);
+//        image_create_group.setBackground(null);
     }
 
     @Override
@@ -596,7 +596,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                         .circleCrop()
                         .placeholder(R.drawable.image_placeholer)
                         .into(image_create_group);
-                image_create_group.setBackgroundResource(R.drawable.border_for_circle_image);
+//                image_create_group.setBackgroundResource(R.drawable.border_for_circle_image);
                 image_create_group_delete.setVisibility(View.VISIBLE);
             } else {
                 initImageCreate();

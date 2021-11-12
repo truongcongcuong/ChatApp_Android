@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -71,8 +70,7 @@ public class ViewCommonGroupDialog extends Dialog {
 
         imv_close.setOnClickListener(v -> cancel());
 
-        itemGroupAdapter = new LineItemGroupAdapter(context, commonGroup,
-                AppCompatResources.getDrawable(context, R.drawable.dark_background_dialog_circle), Color.WHITE);
+        itemGroupAdapter = new LineItemGroupAdapter(context, commonGroup, Color.WHITE);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(itemGroupAdapter);
 

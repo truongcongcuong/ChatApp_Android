@@ -129,6 +129,9 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignBottom="@id/blank"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
             android:padding="1dp" />
 
 

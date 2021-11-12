@@ -28,6 +28,7 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.PhoneBookFriendDTO;
 import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.enumvalue.FriendStatus;
@@ -63,7 +64,7 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
         return new ViewHolder(view, this);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PhoneBookFriendDTO dto = list.get(position);
@@ -104,6 +105,11 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
                     .into(holder.img_li_sync_contact_avt);
             holder.txt_li_sync_contact_contact_name.setText(dto.getName());
             holder.txt_li_sync_contact_display_name.setText(user.getDisplayName());
+
+            holder.itemView.setOnClickListener(v -> {
+                ProfileDialog profileDialog = new ProfileDialog(context, user, null);
+                profileDialog.show();
+            });
         }
 
     }

@@ -59,6 +59,7 @@ public class ViewImageActivity extends AppCompatActivity {
             }
             Glide.with(this)
                     .load(imageUrl)
+                    .placeholder(R.drawable.image_placeholer)
                     .into(imageView);
         }
 

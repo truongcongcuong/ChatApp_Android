@@ -2,7 +2,6 @@ package com.example.chatapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -28,16 +27,14 @@ import java.util.List;
 public class LineItemGroupAdapter extends RecyclerView.Adapter<LineItemGroupAdapter.ViewHolder> {
     private final Context context;
     private List<InboxDto> list;
-    private final Drawable backGround;
     private final int foreGround;
 
-    public LineItemGroupAdapter(Context context, List<InboxDto> list, Drawable backGround, int foreGround) {
+    public LineItemGroupAdapter(Context context, List<InboxDto> list, int foreGround) {
         this.context = context;
         if (list == null)
             this.list = new ArrayList<>(0);
         else
             this.list = list;
-        this.backGround = backGround;
         this.foreGround = foreGround;
     }
 
@@ -45,7 +42,7 @@ public class LineItemGroupAdapter extends RecyclerView.Adapter<LineItemGroupAdap
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.line_item_group, parent, false);
-        return new ViewHolder(view, backGround, foreGround);
+        return new ViewHolder(view, foreGround);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -96,14 +93,13 @@ public class LineItemGroupAdapter extends RecyclerView.Adapter<LineItemGroupAdap
         TextView txt_search_group_detail;
         View line_item_group_background;
 
-        public ViewHolder(@NonNull View itemView, Drawable backGround, int foreGround) {
+        public ViewHolder(@NonNull View itemView, int foreGround) {
             super(itemView);
             line_item_group_image = itemView.findViewById(R.id.line_item_group_img);
             line_item_group_name = itemView.findViewById(R.id.line_item_group_name);
             txt_search_group_detail = itemView.findViewById(R.id.line_item_group_detail);
             line_item_group_background = itemView.findViewById(R.id.line_item_group_background);
 
-            line_item_group_background.setBackground(backGround);
             line_item_group_name.setTextColor(foreGround);
             txt_search_group_detail.setTextColor(foreGround);
         }

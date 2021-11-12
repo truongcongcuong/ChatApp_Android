@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -103,8 +102,7 @@ public class FragmentSearchGroup extends Fragment {
         btn_load_more.setVisibility(View.GONE);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        adapter = new LineItemGroupAdapter(context, null,
-                AppCompatResources.getDrawable(context, R.drawable.white_background_dialog_circle), Color.DKGRAY);
+        adapter = new LineItemGroupAdapter(context, null, Color.DKGRAY);
         recyclerView.setAdapter(adapter);
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);

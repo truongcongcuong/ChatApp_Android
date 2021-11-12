@@ -24,8 +24,11 @@
             android:layout_alignParentBottom="true"
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
-            android:background="@drawable/border_for_circle_image"
-            android:padding="1dp">
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="1dp"
+            tools:background="@drawable/border_for_circle_image">
 
         </ImageView>
 

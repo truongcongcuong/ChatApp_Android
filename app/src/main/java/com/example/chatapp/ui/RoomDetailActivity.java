@@ -393,6 +393,16 @@ public class RoomDetailActivity extends AppCompatActivity {
                         .placeholder(R.drawable.image_placeholer)
                         .into(imageOfRoom);
             }
+            imageOfRoom.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ViewImageActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("activityTitle", inboxDto.getRoom().getName());
+                bundle.putString("activitySubTitle", getString(R.string.avatar));
+                bundle.putString("imageUrl", inboxDto.getRoom().getImageUrl());
+                intent.putExtras(bundle);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            });
             nameOfRoom.setText(inboxDto.getRoom().getName());
         } else if (inboxDto.getRoom().getType().equals(RoomType.ONE)) {
             if (isValidContextForGlide(context)) {
@@ -402,6 +412,16 @@ public class RoomDetailActivity extends AppCompatActivity {
                         .placeholder(R.drawable.image_placeholer)
                         .into(imageOfRoom);
             }
+            imageOfRoom.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ViewImageActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("activityTitle", inboxDto.getRoom().getTo().getDisplayName());
+                bundle.putString("activitySubTitle", getString(R.string.avatar));
+                bundle.putString("imageUrl", inboxDto.getRoom().getTo().getImageUrl());
+                intent.putExtras(bundle);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            });
             nameOfRoom.setText(inboxDto.getRoom().getTo().getDisplayName());
         }
     }

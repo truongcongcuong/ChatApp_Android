@@ -300,6 +300,15 @@ public class ViewProfileActivity extends AppCompatActivity {
                                 .placeholder(R.drawable.image_placeholer)
                                 .centerCrop().circleCrop()
                                 .into(img_view_profile_activity);
+                        img_view_profile_activity.setOnClickListener(v -> {
+                            Intent intent = new Intent(this, ViewImageActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putString("activityTitle", viewProfileDto.getUser().getDisplayName());
+                            bundle.putString("activitySubTitle", getString(R.string.avatar));
+                            bundle.putString("imageUrl", viewProfileDto.getUser().getImageUrl());
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                        });
 
                     } catch (NumberFormatException | UnsupportedEncodingException e) {
                         e.printStackTrace();

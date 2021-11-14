@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.SendDataCreateRoomActivity;
 import com.example.chatapp.dto.UserProfileDto;
@@ -82,7 +83,8 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
             }
 
             Glide.with(context).load(user.getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
+                    .placeholder(R.drawable.img_avatar_placeholer)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .centerCrop().circleCrop()
                     .into(holder.item_create_group_user_img);
             holder.item_create_group_user_name.setText(user.getDisplayName());

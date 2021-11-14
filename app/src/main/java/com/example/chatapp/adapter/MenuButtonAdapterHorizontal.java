@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.MyMenuItem;
 
@@ -43,7 +45,10 @@ public class MenuButtonAdapterHorizontal extends RecyclerView.Adapter<MenuButton
 
         if (items != null && position < items.size()) {
             MyMenuItem myMenuItem = items.get(position);
-            holder.imv_item_menu_button_horizontal.setImageResource(myMenuItem.getImageResource());
+            Glide.with(context)
+                    .load(myMenuItem.getImageResource())
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(holder.imv_item_menu_button_horizontal);
             holder.txt_item_menu_button_name_horizontal.setText(myMenuItem.getName());
         }
 

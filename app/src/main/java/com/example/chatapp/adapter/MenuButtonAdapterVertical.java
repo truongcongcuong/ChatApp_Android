@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.MyMenuItem;
 
@@ -43,7 +45,10 @@ public class MenuButtonAdapterVertical extends ArrayAdapter<MyMenuItem> {
         ImageView image = view.findViewById(R.id.imv_item_menu_button);
         TextView name = view.findViewById(R.id.txt_item_menu_button_name);
 
-        image.setImageResource(item.getImageResource());
+        Glide.with(context)
+                .load(item.getImageResource())
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(image);
         name.setText(item.getName());
 
         return view;

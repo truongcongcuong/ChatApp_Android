@@ -24,6 +24,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
@@ -117,7 +118,8 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             }
 
             // load image
-            Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
+            Glide.with(context).load(url).placeholder(R.drawable.img_avatar_placeholer)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .centerCrop().circleCrop().into(holder.img_lim_avt);
 
             MessageDto lastMessage = inboxDto.getLastMessage();

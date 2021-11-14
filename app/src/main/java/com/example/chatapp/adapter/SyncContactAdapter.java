@@ -26,6 +26,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dialog.ProfileDialog;
@@ -100,7 +101,8 @@ public class SyncContactAdapter extends RecyclerView.Adapter<SyncContactAdapter.
             }
 
             Glide.with(context).load(user.getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
+                    .placeholder(R.drawable.img_avatar_placeholer)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .centerCrop().circleCrop()
                     .into(holder.img_li_sync_contact_avt);
             holder.txt_li_sync_contact_contact_name.setText(dto.getName());

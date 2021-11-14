@@ -21,6 +21,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
@@ -109,7 +110,8 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
             try {
                 nameOfMember.setText(member.getUser().getDisplayName());
                 Glide.with(context).load(member.getUser().getImageUrl())
-                        .placeholder(R.drawable.image_placeholer)
+                        .placeholder(R.drawable.img_avatar_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop()
                         .circleCrop()
                         .into(imageOfMember);

@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.ViewAllReadTrackingDialog;
 import com.example.chatapp.dto.MessageDto;
@@ -65,7 +66,8 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
             if (position < max - 1) {
                 holder.readby_image.setBackgroundResource(R.drawable.border_for_circle_image);
                 Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                        .placeholder(R.drawable.image_placeholer)
+                        .placeholder(R.drawable.img_avatar_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop().circleCrop().into(holder.readby_image);
             }
 
@@ -73,7 +75,8 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
                 int remain = list.size() - max;
                 holder.readby_image.setBackgroundResource(R.drawable.border_for_circle_image);
                 Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                        .placeholder(R.drawable.image_placeholer)
+                        .placeholder(R.drawable.img_avatar_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop().circleCrop().into(holder.readby_image);
                 if (remain > 0) {
                     holder.readby_image.setAlpha(0.3f);

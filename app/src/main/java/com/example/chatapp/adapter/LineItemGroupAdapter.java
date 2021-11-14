@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.enumvalue.RoomType;
@@ -55,7 +56,8 @@ public class LineItemGroupAdapter extends RecyclerView.Adapter<LineItemGroupAdap
             InboxDto inbox = list.get(position);
             if (inbox != null && inbox.getRoom().getType().equals(RoomType.GROUP)) {
                 Glide.with(context).load(inbox.getRoom().getImageUrl())
-                        .placeholder(R.drawable.image_placeholer)
+                        .placeholder(R.drawable.img_avatar_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop().circleCrop()
                         .into(holder.line_item_group_image);
                 holder.line_item_group_name.setText(inbox.getRoom().getName());

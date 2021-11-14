@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dto.ReactionDto;
 
@@ -36,7 +37,8 @@ public class ReactionDialogAdapter extends ArrayAdapter<ReactionDto> {
 
         ReactionDto reactionDto = reactions.get(position);
         Glide.with(context).load(reactionDto.getReactByUser().getImageUrl())
-                .placeholder(R.drawable.image_placeholer)
+                .placeholder(R.drawable.img_avatar_placeholer)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .centerCrop()
                 .circleCrop()
                 .into(imageOfUser);

@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.SendDataCreateRoomActivity;
 import com.example.chatapp.dto.UserProfileDto;
@@ -63,7 +64,8 @@ public class SelectedUserCreateGroupAdapter extends RecyclerView.Adapter<Selecte
                     .load(profileDto.getImageUrl())
                     .centerCrop()
                     .circleCrop()
-                    .placeholder(R.drawable.image_placeholer)
+                    .placeholder(R.drawable.img_avatar_placeholer)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .into(holder.item_create_group_selected_user_img);
             /*
             khi click icon xóa thì gửi thông điệp xóa đến createGroup activity

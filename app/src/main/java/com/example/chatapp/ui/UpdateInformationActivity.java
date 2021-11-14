@@ -27,6 +27,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
@@ -111,7 +112,8 @@ public class UpdateInformationActivity extends AppCompatActivity {
         Button btn_edit_profile_save = findViewById(R.id.btn_edit_profile_save);
 
         Glide.with(this).load(userDetailDTO.getImageUrl())
-                .placeholder(R.drawable.image_placeholer)
+                .placeholder(R.drawable.img_avatar_placeholer)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .centerCrop().circleCrop().into(img_edit_profile_avt);
 
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

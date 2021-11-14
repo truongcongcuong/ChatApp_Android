@@ -23,6 +23,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dialog.ProfileDialog;
@@ -78,7 +79,8 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
         if (friendDTO != null) {
             if (friendDTO.getTo() != null) {
                 Glide.with(context).load(friendDTO.getTo().getImageUrl())
-                        .placeholder(R.drawable.image_placeholer)
+                        .placeholder(R.drawable.img_avatar_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop().circleCrop().into(holder.img_line_friend_request_sent_avt);
                 holder.txt_line_friend_request_sent_name.setText(friendDTO.getTo().getDisplayName());
             }

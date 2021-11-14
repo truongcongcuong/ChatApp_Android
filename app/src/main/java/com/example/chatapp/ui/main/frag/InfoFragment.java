@@ -33,6 +33,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
@@ -288,7 +289,8 @@ public class InfoFragment extends Fragment {
         UserSummaryDTO user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
         txt_info_name.setText(user.getDisplayName());
         Glide.with(this).load(user.getImageUrl())
-                .placeholder(R.drawable.image_placeholer)
+                .placeholder(R.drawable.img_avatar_placeholer)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .centerCrop().circleCrop().into(image_info_image);
     }
 

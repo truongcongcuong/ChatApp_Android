@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.FriendDTO;
@@ -58,7 +59,8 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
         if (friend != null) {
             // load image
             Glide.with(context).load(friend.getFriend().getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
+                    .placeholder(R.drawable.img_avatar_placeholer)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .centerCrop().circleCrop().into(holder.img_list_contact_avt);
 
             holder.txt_list_contact_display_name.setText(friend.getFriend().getDisplayName());

@@ -27,6 +27,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuInformationAdapter;
 import com.example.chatapp.cons.Constant;
@@ -187,7 +188,8 @@ public class ViewInformationActivity extends AppCompatActivity {
         lsv_update_info.setAdapter(adapter);
         Glide.with(this)
                 .load(userDetailDTO.getImageUrl())
-                .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                .centerCrop().circleCrop().placeholder(R.drawable.img_avatar_placeholer)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(img_update_info_avt);
 
     }

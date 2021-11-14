@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.utils.TimeAgo;
 import com.r0adkll.slidr.Slidr;
@@ -59,7 +60,7 @@ public class ViewImageActivity extends AppCompatActivity {
             }
             Glide.with(this)
                     .load(imageUrl)
-                    .placeholder(R.drawable.image_placeholer)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .into(imageView);
         }
 

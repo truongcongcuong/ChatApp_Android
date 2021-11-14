@@ -44,6 +44,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
@@ -252,7 +253,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                 Glide.with(context)
                         .load(R.drawable.ic_baseline_camera_24)
                         .centerCrop()
-                        .placeholder(R.drawable.image_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .into(btn_change_image_of_room);
             }
 
@@ -281,7 +282,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                 Glide.with(context)
                         .load(R.drawable.ic_baseline_change_circle_24)
                         .centerCrop().circleCrop()
-                        .placeholder(R.drawable.image_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .into(btn_change_name_of_room);
             }
 
@@ -390,7 +391,8 @@ public class RoomDetailActivity extends AppCompatActivity {
                 Glide.with(context)
                         .load(inboxDto.getRoom().getImageUrl())
                         .centerCrop().circleCrop()
-                        .placeholder(R.drawable.image_placeholer)
+                        .placeholder(R.drawable.img_avatar_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .into(imageOfRoom);
             }
             imageOfRoom.setOnClickListener(v -> {
@@ -409,7 +411,8 @@ public class RoomDetailActivity extends AppCompatActivity {
                 Glide.with(context)
                         .load(inboxDto.getRoom().getTo().getImageUrl())
                         .centerCrop().circleCrop()
-                        .placeholder(R.drawable.image_placeholer)
+                        .placeholder(R.drawable.img_avatar_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .into(imageOfRoom);
             }
             imageOfRoom.setOnClickListener(v -> {
@@ -673,7 +676,8 @@ public class RoomDetailActivity extends AppCompatActivity {
                                     Glide.with(RoomDetailActivity.this)
                                             .load(inboxDto.getRoom().getImageUrl())
                                             .centerCrop().circleCrop()
-                                            .placeholder(R.drawable.image_placeholer)
+                                            .placeholder(R.drawable.img_avatar_placeholer)
+                                            .transition(DrawableTransitionOptions.withCrossFade())
                                             .into(imageOfRoom);
                                 }
                             } catch (UnsupportedEncodingException e) {

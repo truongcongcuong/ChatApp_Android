@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.UserProfileDto;
@@ -58,7 +59,8 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
         if (list != null && position < list.size()) {
             UserProfileDto user = list.get(position);
             Glide.with(context).load(user.getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
+                    .placeholder(R.drawable.img_avatar_placeholer)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .centerCrop().circleCrop()
                     .into(holder.img_search_user_avt);
             holder.txt_search_user_display_name.setText(user.getDisplayName());

@@ -41,6 +41,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.SearchUserCreateGroupAdapter;
 import com.example.chatapp.adapter.SelectedUserCreateGroupAdapter;
@@ -435,7 +436,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     private void initImageCreate() {
         Glide.with(this)
                 .load(R.drawable.ic_baseline_camera_64)
-                .placeholder(R.drawable.image_placeholer)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image_create_group);
 //        image_create_group.setBackground(null);
     }
@@ -594,7 +595,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                         .load(imageGroupFile.getPath())
                         .centerCrop()
                         .circleCrop()
-                        .placeholder(R.drawable.image_placeholer)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .into(image_create_group);
 //                image_create_group.setBackgroundResource(R.drawable.border_for_circle_image);
                 image_create_group_delete.setVisibility(View.VISIBLE);

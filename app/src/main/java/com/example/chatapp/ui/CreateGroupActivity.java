@@ -50,6 +50,7 @@ import com.example.chatapp.cons.SendDataCreateRoomActivity;
 import com.example.chatapp.dto.FriendDTO;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MemberCreateDto;
+import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.RoomCreateDto;
 import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -628,9 +629,9 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                                 String res = null;
                                 try {
                                     res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                                    Type listType = new TypeToken<List<String>>() {
+                                    Type listType = new TypeToken<List<MyMedia>>() {
                                     }.getType();
-                                    List<String> urls = gson.fromJson(res, listType);
+                                    List<MyMedia> urls = gson.fromJson(res, listType);
                                     createGroupAfterUploadImage(urls);
                                 } catch (UnsupportedEncodingException | JSONException e) {
                                     e.printStackTrace();
@@ -659,7 +660,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
     tạo nhóm sau khi đã có link ảnh đại diện
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void createGroupAfterUploadImage(List<String> urls) throws JSONException {
+    private void createGroupAfterUploadImage(List<MyMedia> mediaList) throws JSONException {
         Set<MemberCreateDto> members = usersSelected.stream().map(x -> MemberCreateDto.builder()
                 .userId(x.getId())
                 .addTime(sdfYMD.format(new Date()))
@@ -674,8 +675,8 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 .build();
         Log.d("----room create", room.toString());
 
-        if (urls != null && !urls.isEmpty()) {
-            room.setImageUrl(urls.get(0));
+        if (mediaList != null && !mediaList.isEmpty()) {
+            room.setImageUrl(mediaList.get(0).getUrl());
         }
         JSONObject object = new JSONObject(gson.toJson(room));
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Constant.API_ROOM, object,

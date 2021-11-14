@@ -24,6 +24,14 @@ public class TimeAgo {
 
     public static final List<String> timesString = Arrays.asList("năm", "tháng", "ngày", "giờ", "phút", "giây");
 
+    public static long getMiliSeconds(String date1) throws ParseException {
+        Date d1 = new Date();
+        Date d2 = new Date();
+
+        d2 = timeStampFormat.parse(date1);
+        return (d1.getTime() - d2.getTime());
+    }
+
     public static String getTime(String date1) throws ParseException {
 
 //        Date d1 = new Date(new Date().getTime() + 7 * 3600 * 1000);

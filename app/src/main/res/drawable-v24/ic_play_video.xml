@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <!-- drawable/circle_card_icon.xml -->
-        <shape android:shape="rectangle">
-            <solid android:color="@color/black" />
-            <size
-                android:width="200dp"
-                android:height="200dp" />
-            <corners android:radius="20dp" />
-        </shape>
-    </item>
     <item
         android:width="64dp"
         android:height="64dp"

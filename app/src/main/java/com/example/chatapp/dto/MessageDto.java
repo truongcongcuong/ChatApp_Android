@@ -24,4 +24,5 @@ public class MessageDto implements Serializable {
     private List<Reaction> reactions;
     private Set<ReadByDto> readbyes;
     private MessageDto reply;
+    private List<MyMedia> media;
 }

@@ -50,6 +50,7 @@ import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dialog.ViewCommonGroupDialog;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -664,22 +665,17 @@ public class RoomDetailActivity extends AppCompatActivity {
                         response -> {
                             try {
                                 String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                                Type listType = new TypeToken<List<String>>() {
+                                Type listType = new TypeToken<MyMedia>() {
                                 }.getType();
-                                List<String> urls = new Gson().fromJson(res, listType);
-                                for (String url : urls) {
-                                    Log.d("", url);
-                                }
-                                if (!urls.isEmpty()) {
-                                    room.setImageUrl(urls.get(0));
-                                    inboxDto.setRoom(room);
-                                    Glide.with(RoomDetailActivity.this)
-                                            .load(inboxDto.getRoom().getImageUrl())
-                                            .centerCrop().circleCrop()
-                                            .placeholder(R.drawable.img_avatar_placeholer)
-                                            .transition(DrawableTransitionOptions.withCrossFade())
-                                            .into(imageOfRoom);
-                                }
+                                MyMedia media = new Gson().fromJson(res, listType);
+                                room.setImageUrl(media.getUrl());
+                                inboxDto.setRoom(room);
+                                Glide.with(RoomDetailActivity.this)
+                                        .load(inboxDto.getRoom().getImageUrl())
+                                        .centerCrop().circleCrop()
+                                        .placeholder(R.drawable.img_avatar_placeholer)
+                                        .transition(DrawableTransitionOptions.withCrossFade())
+                                        .into(imageOfRoom);
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }

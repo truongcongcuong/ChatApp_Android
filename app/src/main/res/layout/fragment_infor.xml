@@ -27,12 +27,11 @@
 
                 <ImageButton
                     android:id="@+id/image_user_info_fragment"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
+                    android:layout_width="121dp"
+                    android:layout_height="121dp"
                     android:layout_centerHorizontal="true"
                     android:background="@drawable/border_for_circle_image"
-                    android:padding="1dp"
-                    tools:srcCompat="@tools:sample/avatars" />
+                    android:padding="1dp" />
 
                 <TextView
                     android:id="@+id/name_of_user_info_fragment"

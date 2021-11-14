@@ -18,16 +18,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.MessageOptionDialog;
 import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.ReactionReceiver;
 import com.example.chatapp.dto.ReadByDto;
 import com.example.chatapp.dto.ReadByReceiver;
@@ -35,7 +35,6 @@ import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.Reaction;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.ui.ViewImageActivity;
-import com.example.chatapp.ui.ViewVideoActivity;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -253,20 +252,20 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 senderViewHolder.senderMessage.setTextColor(Color.GRAY);
                             }
                             break;
-                        case IMAGE:
+                        /*case IMAGE:
                             senderViewHolder.contentImage.setVisibility(View.VISIBLE);
                             Glide.with(context).load(messageDto.getContent())
                                     .apply(RequestOptions.bitmapTransform(new RoundedCorners(48)))
                                     .into(senderViewHolder.contentImage);
 
                             senderViewHolder.contentImage.setOnClickListener(v -> {
-                                showImageViewActivity(messageDto);
+                                showImageViewActivity(messageDto.getSender().getDisplayName(), messageDto.getCreateAt(), messageDto.getContent());
                             });
                             senderViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                             break;
                         case VIDEO:
                             senderViewHolder.contentVideo.setVisibility(View.VISIBLE);
-                            senderViewHolder.contentVideo.setBackgroundResource(R.drawable.background_video);
+                            senderViewHolder.contentVideo.setBackgroundResource(R.drawable.ic_play_video);
                             senderViewHolder.contentVideo.setOnClickListener(v -> {
                                 Intent intent = new Intent(context, ViewVideoActivity.class);
                                 Bundle bundle = new Bundle();
@@ -275,6 +274,35 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 context.startActivity(intent);
                             });
                             senderViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
+                            break;*/
+                        case MEDIA:
+                            final int COLUMNS = 4;
+                            if (messageDto.getContent() != null && !messageDto.getContent().isEmpty()) {
+                                senderViewHolder.senderMessage.setVisibility(View.VISIBLE);
+                                senderViewHolder.senderMessage.setText(messageDto.getContent());
+                                if (messageDto.isDeleted()) {
+                                    senderViewHolder.senderMessage.setTextColor(Color.GRAY);
+                                }
+                            }
+                            List<MyMedia> media = messageDto.getMedia();
+                            if (media != null) {
+                                int numMedia = media.size();
+                                GridLayoutManager layoutManager;
+                                LineItemMediaAdapter mediaAdapter;
+                                if (numMedia > 0 && numMedia < COLUMNS) {
+                                    senderViewHolder.send_message_rcv_media.setVisibility(View.VISIBLE);
+                                    layoutManager = new GridLayoutManager(context, numMedia);
+                                    senderViewHolder.send_message_rcv_media.setLayoutManager(layoutManager);
+                                    mediaAdapter = new LineItemMediaAdapter(context, messageDto, numMedia);
+                                    senderViewHolder.send_message_rcv_media.setAdapter(mediaAdapter);
+                                } else {
+                                    senderViewHolder.send_message_rcv_media.setVisibility(View.VISIBLE);
+                                    layoutManager = new GridLayoutManager(context, COLUMNS);
+                                    senderViewHolder.send_message_rcv_media.setLayoutManager(layoutManager);
+                                    mediaAdapter = new LineItemMediaAdapter(context, messageDto, COLUMNS);
+                                    senderViewHolder.send_message_rcv_media.setAdapter(mediaAdapter);
+                                }
+                            }
                             break;
                     }
                     // hiện danh sách người đã xem tin nhắn
@@ -321,7 +349,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     if (messageDto.getSender() != null) {
                         if (position == list.size() - 1) {
                             Glide.with(context).load(messageDto.getSender().getImageUrl())
-                                    .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                    .centerCrop().circleCrop().placeholder(R.drawable.img_avatar_placeholer)
                                     .into(receiverViewHolder.receiverImage);
                             receiverViewHolder.receiverImage.setBackgroundResource(R.drawable.border_for_circle_image);
 
@@ -331,7 +359,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             if (messageDto.getSender() != null) {
                                 if (list.get(position + 1).getSender() == null) {
                                     Glide.with(context).load(messageDto.getSender().getImageUrl())
-                                            .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                            .centerCrop().circleCrop().placeholder(R.drawable.img_avatar_placeholer)
                                             .into(receiverViewHolder.receiverImage);
 
                                     receiverViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
@@ -339,7 +367,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                                 } else if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
                                     Glide.with(context).load(messageDto.getSender().getImageUrl())
-                                            .centerCrop().circleCrop().placeholder(R.drawable.image_placeholer)
+                                            .centerCrop().circleCrop().placeholder(R.drawable.img_avatar_placeholer)
                                             .into(receiverViewHolder.receiverImage);
                                     receiverViewHolder.receiverImage.setBackgroundResource(R.drawable.border_for_circle_image);
 
@@ -365,20 +393,20 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 receiverViewHolder.receiverMessage.setTextColor(Color.GRAY);
                             }
                             break;
-                        case IMAGE:
+                        /*case IMAGE:
                             receiverViewHolder.contentImage.setVisibility(View.VISIBLE);
                             Glide.with(context).load(messageDto.getContent())
                                     .apply(RequestOptions.bitmapTransform(new RoundedCorners(48)))
                                     .into(receiverViewHolder.contentImage);
 
                             receiverViewHolder.contentImage.setOnClickListener(v -> {
-                                showImageViewActivity(messageDto);
+                                showImageViewActivity(messageDto.getSender().getDisplayName(), messageDto.getCreateAt(), messageDto.getContent());
                             });
                             receiverViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                             break;
                         case VIDEO:
                             receiverViewHolder.contentVideo.setVisibility(View.VISIBLE);
-                            receiverViewHolder.contentVideo.setBackgroundResource(R.drawable.background_video);
+                            receiverViewHolder.contentVideo.setBackgroundResource(R.drawable.ic_play_video);
                             receiverViewHolder.contentVideo.setOnClickListener(v -> {
                                 Intent intent = new Intent(context, ViewVideoActivity.class);
                                 Bundle bundle = new Bundle();
@@ -387,6 +415,35 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 context.startActivity(intent);
                             });
                             receiverViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
+                            break;*/
+                        case MEDIA:
+                            final int COLUMNS = 4;
+                            if (messageDto.getContent() != null && !messageDto.getContent().isEmpty()) {
+                                receiverViewHolder.receiverMessage.setVisibility(View.VISIBLE);
+                                receiverViewHolder.receiverMessage.setText(messageDto.getContent());
+                                if (messageDto.isDeleted()) {
+                                    receiverViewHolder.receiverMessage.setTextColor(Color.GRAY);
+                                }
+                            }
+                            List<MyMedia> media = messageDto.getMedia();
+                            if (media != null) {
+                                int numMedia = media.size();
+                                GridLayoutManager layoutManager;
+                                LineItemMediaAdapter mediaAdapter;
+                                if (numMedia > 0 && numMedia < COLUMNS) {
+                                    receiverViewHolder.received_message_rcv_media.setVisibility(View.VISIBLE);
+                                    layoutManager = new GridLayoutManager(context, numMedia);
+                                    receiverViewHolder.received_message_rcv_media.setLayoutManager(layoutManager);
+                                    mediaAdapter = new LineItemMediaAdapter(context, messageDto, numMedia);
+                                    receiverViewHolder.received_message_rcv_media.setAdapter(mediaAdapter);
+                                } else {
+                                    receiverViewHolder.received_message_rcv_media.setVisibility(View.VISIBLE);
+                                    layoutManager = new GridLayoutManager(context, COLUMNS);
+                                    receiverViewHolder.received_message_rcv_media.setLayoutManager(layoutManager);
+                                    mediaAdapter = new LineItemMediaAdapter(context, messageDto, COLUMNS);
+                                    receiverViewHolder.received_message_rcv_media.setAdapter(mediaAdapter);
+                                }
+                            }
                             break;
                     }
                     // hiện danh sách những người đã xem tin nhắn
@@ -442,12 +499,12 @@ public class MessageAdapter extends RecyclerView.Adapter {
         holder.setIsRecyclable(false);
     }
 
-    private void showImageViewActivity(MessageDto messageDto) {
+    private void showImageViewActivity(String activityTitle, String activitySubTitle, String url) {
         Intent intent = new Intent(context, ViewImageActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putString("activityTitle", messageDto.getSender().getDisplayName());
-        bundle.putString("activitySubTitle", messageDto.getCreateAt());
-        bundle.putString("imageUrl", messageDto.getContent());
+        bundle.putString("activityTitle", activityTitle);
+        bundle.putString("activitySubTitle", activitySubTitle);
+        bundle.putString("imageUrl", url);
         intent.putExtras(bundle);
         context.startActivity(intent);
     }
@@ -532,6 +589,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         LinearLayout send_message_rcv_readby_one_many;
         TextView send_message_reply_content;
         TextView send_message_reply_name;
+        RecyclerView send_message_rcv_media;
 
         public SenderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -543,6 +601,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
             contentImage = itemView.findViewById(R.id.send_message_content_image);
             contentVideo = itemView.findViewById(R.id.send_message_content_video);
             messageLayout = itemView.findViewById(R.id.blank);
+            send_message_rcv_media = itemView.findViewById(R.id.send_message_rcv_media);
 
             send_message_reply_layout = itemView.findViewById(R.id.send_message_reply_layout);
             send_message_reply_content = itemView.findViewById(R.id.send_message_reply_content);
@@ -557,6 +616,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
             timeOfMessage.setVisibility(View.GONE);
             contentVideo.setVisibility(View.GONE);
             contentImage.setVisibility(View.GONE);
+            send_message_rcv_media.setVisibility(View.GONE);
 
             rcv_read_one.addItemDecoration(new ItemDecorator(-15));
             rcv_read_many.addItemDecoration(new ItemDecorator(-15));
@@ -583,6 +643,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
         LinearLayout receiver_message_rcv_readby_one_many;
         TextView receiver_message_reply_content;
         TextView receiver_message_reply_name;
+        RecyclerView received_message_rcv_media;
 
         public ReceiverViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -595,6 +656,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
             contentImage = itemView.findViewById(R.id.receiver_message_content_image);
             contentVideo = itemView.findViewById(R.id.receiver_message_content_video);
             messageLayout = itemView.findViewById(R.id.blank);
+            received_message_rcv_media = itemView.findViewById(R.id.received_message_rcv_media);
 
             receiver_message_reply_layout = itemView.findViewById(R.id.receiver_message_reply_layout);
             receiver_message_reply_content = itemView.findViewById(R.id.receiver_message_reply_content);
@@ -609,6 +671,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
             timeOfMessage.setVisibility(View.GONE);
             contentVideo.setVisibility(View.GONE);
             contentImage.setVisibility(View.GONE);
+            received_message_rcv_media.setVisibility(View.GONE);
 
             rcv_read_one.addItemDecoration(new ItemDecorator(-15));
             rcv_read_many.addItemDecoration(new ItemDecorator(-15));

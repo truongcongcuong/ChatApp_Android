@@ -89,7 +89,7 @@ public class ProfileDialog extends Dialog {
         listView.setAdapter(menuAdapter);
         if (userProfileDto != null) {
             Glide.with(context).load(userProfileDto.getImageUrl())
-                    .placeholder(R.drawable.image_placeholer)
+                    .placeholder(R.drawable.img_avatar_placeholer)
                     .centerCrop().circleCrop()
                     .into(profile_image_dialog);
             profile_name_dialog.setText(userProfileDto.getDisplayName());

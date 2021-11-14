@@ -15,7 +15,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.chatapp.R;
 import com.example.chatapp.custom.MyVideoView;
-import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.utils.TimeAgo;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
@@ -26,7 +25,6 @@ import java.text.ParseException;
 public class ViewVideoActivity extends AppCompatActivity {
 
     private MyVideoView videoView;
-    private MessageDto messageDto;
     private ProgressBar progressBar;
 
     @Override
@@ -45,33 +43,34 @@ public class ViewVideoActivity extends AppCompatActivity {
 
         Slidr.attach(this, config);
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null)
-            messageDto = (MessageDto) bundle.getSerializable("message");
-
         Toolbar toolbar = findViewById(R.id.toolbar_view_video_activity);
         videoView = findViewById(R.id.video_content_view_video_activity);
+
         progressBar = findViewById(R.id.progressbar_video_view_activity);
         progressBar.setVisibility(View.VISIBLE);
 
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
+
         setSupportActionBar(toolbar);
 
         /*
         hiện nút mũi tên quay lại trên toolbar
          */
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        if (messageDto != null) {
-            if (messageDto.getSender() != null) {
-                toolbar.setTitle(messageDto.getSender().getDisplayName());
-                setTitle(messageDto.getSender().getDisplayName());
-            }
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            String activityTitle = bundle.getString("activityTitle");
+            String activitySubTitle = bundle.getString("activitySubTitle");
+            String videoUrl = bundle.getString("videoUrl");
+
+            setTitle(activityTitle);
             try {
-                toolbar.setSubtitle(TimeAgo.getTime(messageDto.getCreateAt()));
-            } catch (ParseException e) {
+                toolbar.setSubtitle(TimeAgo.getTime(activitySubTitle));
+            } catch (ParseException | NullPointerException e) {
                 toolbar.setSubtitle("");
             }
 
@@ -79,7 +78,7 @@ public class ViewVideoActivity extends AppCompatActivity {
             mediaController.setMediaPlayer(videoView);
             mediaController.setAnchorView(videoView);
 
-            Uri uri = Uri.parse(messageDto.getContent());
+            Uri uri = Uri.parse(videoUrl);
             videoView.setVideoURI(uri);
             videoView.setMediaController(mediaController);
             videoView.requestFocus();
@@ -90,6 +89,7 @@ public class ViewVideoActivity extends AppCompatActivity {
                 videoView.start();
             });
         }
+
     }
 
     @Override

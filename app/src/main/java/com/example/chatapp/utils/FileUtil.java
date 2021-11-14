@@ -1,6 +1,6 @@
 package com.example.chatapp.utils;
 
-import com.example.chatapp.enumvalue.MessageType;
+import com.example.chatapp.enumvalue.MediaType;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -16,23 +16,23 @@ public class FileUtil {
             "3gp", "3g2" // 3gp
     );
 
-    public static MessageType getMessageType(File file) {
+    public static MediaType getMessageType(File file) {
         if (images.contains(FilenameUtils.getExtension(file.getName()).toLowerCase())) {
-            return MessageType.IMAGE;
+            return MediaType.IMAGE;
         } else if (videos.contains(FilenameUtils.getExtension(file.getName()).toLowerCase())) {
-            return MessageType.VIDEO;
+            return MediaType.VIDEO;
         } else {
-            return MessageType.FILE;
+            return MediaType.FILE;
         }
     }
 
-    public static MessageType getMessageType(String url) {
+    public static MediaType getMessageType(String url) {
         if (images.contains(FilenameUtils.getExtension(url).toLowerCase())) {
-            return MessageType.IMAGE;
+            return MediaType.IMAGE;
         } else if (videos.contains(FilenameUtils.getExtension(url).toLowerCase())) {
-            return MessageType.VIDEO;
+            return MediaType.VIDEO;
         } else {
-            return MessageType.FILE;
+            return MediaType.FILE;
         }
     }
 }

@@ -45,6 +45,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
+import com.example.chatapp.adapter.LineItemPictureBeforeSendAdapter;
 import com.example.chatapp.adapter.MessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
@@ -53,6 +54,7 @@ import com.example.chatapp.cons.SendingData;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
+import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.ReactionReceiver;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
@@ -61,7 +63,6 @@ import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.OnlineStatus;
 import com.example.chatapp.enumvalue.RoomType;
-import com.example.chatapp.utils.FileUtil;
 import com.example.chatapp.utils.MultiPartFileRequest;
 import com.example.chatapp.utils.PathUtil;
 import com.example.chatapp.utils.TimeAgo;
@@ -126,6 +127,8 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     private Button btnScrollToBottom;
     private StompClient stompClient;
     private LinearLayout layout_reply_chat_activity;
+    private List<File> fileList;
+    private LineItemPictureBeforeSendAdapter adapterBeforeSend;
 
     private final BroadcastReceiver addMember = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -397,21 +400,35 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
 
         ibt_chat_send_message.setOnClickListener(v -> {
             String message = edt_chat_message_send.getText().toString().trim();
-            if (!message.isEmpty()) {
-                checkInboxExistsBeforeSendMessage(message, MessageType.TEXT);
+            if (fileList != null && !fileList.isEmpty()) {
+                ArrayList<File> copyFileList = new ArrayList<>(fileList);
+                try {
+                    fileList.clear();
+                    adapterBeforeSend.notifyDataSetChanged();
+                } catch (Exception e) {
+                    fileList = new ArrayList<>();
+                    adapterBeforeSend.setList(fileList);
+                }
+                checkInboxExistsBeforeSendMessage(message, copyFileList);
                 edt_chat_message_send.getText().clear();
                 edt_chat_message_send.setText("");
-                replyMessageId = null;
                 layout_reply_chat_activity.setVisibility(View.GONE);
                 edt_chat_message_send.postDelayed(() -> edt_chat_message_send.requestFocus(), 200);
             } else {
-                edt_chat_message_send.requestFocus();
-                /*
-                mở bàn phím
-                 */
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(edt_chat_message_send, InputMethodManager.SHOW_IMPLICIT);
+                if (message.isEmpty()) {
+                    edt_chat_message_send.requestFocus();
+//                    mở bàn phím
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(edt_chat_message_send, InputMethodManager.SHOW_IMPLICIT);
+                } else {
+                    checkInboxExistsBeforeSendMessage(message, fileList);
+                    edt_chat_message_send.getText().clear();
+                    edt_chat_message_send.setText("");
+                    layout_reply_chat_activity.setVisibility(View.GONE);
+                    edt_chat_message_send.postDelayed(() -> edt_chat_message_send.requestFocus(), 200);
+                }
             }
+
         });
 
         adapter = new MessageAdapter(ChatActivity.this, new ArrayList<>());
@@ -448,7 +465,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         final Context context = getApplication().getApplicationContext();
 
         if (isValidContextForGlide(context)) {
-            Glide.with(context).load(url).placeholder(R.drawable.image_placeholer)
+            Glide.with(context).load(url).placeholder(R.drawable.img_avatar_placeholer)
                     .centerCrop().circleCrop().into(img_chat_user_avt);
         }
     }
@@ -472,12 +489,13 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
             btnScrollToBottom.setVisibility(View.GONE);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("CheckResult")
-    private void checkInboxExistsBeforeSendMessage(String message, MessageType messageType) {
+    private void checkInboxExistsBeforeSendMessage(String message, List<File> files) {
         if (inboxDto.getId() == null) {
-            createInboxIfNotExistsAndSendMessage(inboxDto.getRoom().getTo().getId(), message, messageType);
+            checkInboxExistsAndSendMessage(message, files);
         } else {
-            sendMessage(message, messageType);
+            uploadAndSend(message, files);
         }
     }
 
@@ -490,12 +508,20 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         return true;
     }
 
-    private void sendMessage(String message, MessageType type) {
+    private void sendMessage(String message, List<MyMedia> media) {
         MessageSendToServer messageSendToServer = new MessageSendToServer();
-        messageSendToServer.setContent(message);
+        if (message.trim().isEmpty())
+            messageSendToServer.setContent(null);
+        else
+            messageSendToServer.setContent(message);
         messageSendToServer.setRoomId(inboxDto.getRoom().getId());
         messageSendToServer.setReplyId(replyMessageId);
-        messageSendToServer.setType(type);
+        if (media == null || media.isEmpty())
+            messageSendToServer.setType(MessageType.TEXT);
+        else {
+            messageSendToServer.setMedia(media);
+            messageSendToServer.setType(MessageType.MEDIA);
+        }
         Log.e("send : ", Json.encode(messageSendToServer));
 
         stompClient
@@ -503,18 +529,20 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 .subscribe(() -> {
 
                 });
+        replyMessageId = null;
     }
 
     /*
     hai người chưa có room chung nên phải tạo room và inbox trước khi gửi tin nhắn đầu tiên
      */
-    private void createInboxIfNotExistsAndSendMessage(String toUserId, String message, MessageType messageType) {
+    /*@RequiresApi(api = Build.VERSION_CODES.N)
+    private void createInboxIfNotExistsAndSendMessage(String toUserId, String message, List<File> files) {
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_INBOX + "/with/" + toUserId,
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         inboxDto = gson.fromJson(res, InboxDto.class);
-                        sendMessage(message, messageType);
+                        uploadAndSend(message, files);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -532,7 +560,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
-    }
+    }*/
 
     @SuppressLint("CheckResult")
     private void sendReadMessageNotification() {
@@ -555,7 +583,6 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     }
 
     private void loadMoreData() {
-        page++;
         updateList();
     }
 
@@ -565,6 +592,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
             StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + inboxDto.getId() + "?size=" + size + "&page=" + page,
                     response -> {
                         try {
+                            page++;
                             String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                             JSONObject object = new JSONObject(res);
                             JSONArray array = (JSONArray) object.get("content");
@@ -660,7 +688,12 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 files.add(file);
             }
             Log.d("--file da chon", files.toString());
-            checkInboxExistsAndSendFileMessage(files);
+            fileList = files;
+            RecyclerView recyclerView = findViewById(R.id.rcv_picture_before_send);
+            adapterBeforeSend = new LineItemPictureBeforeSendAdapter(this, fileList);
+            LinearLayoutManager beforeSendLayoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false);
+            recyclerView.setAdapter(adapterBeforeSend);
+            recyclerView.setLayoutManager(beforeSendLayoutManager);
         } else {
             // chưa có hình ảnh nào được chọn
         }
@@ -678,9 +711,10 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     /*
     gửi tin nhắn file, hình ảnh, video
      */
-    private void checkInboxExistsAndSendFileMessage(List<File> files) {
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void checkInboxExistsAndSendMessage(String message, List<File> files) {
         Log.d("--", inboxDto.toString());
-        if (inboxDto.getId() != null) {
+        if (inboxDto.getId() == null) {
             if (inboxDto.getRoom().getType().equals(RoomType.ONE)) {
                 StringRequest request = new StringRequest(Request.Method.POST, Constant.API_INBOX + "/with/" + inboxDto.getRoom().getTo().getId(),
                         response -> {
@@ -688,7 +722,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                                 Log.d("--", "sad");
                                 String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                                 inboxDto = gson.fromJson(res, InboxDto.class);
-                                sendFileMessage(files);
+                                uploadAndSend(message, files);
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
@@ -707,54 +741,67 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 request.setRetryPolicy(retryPolicy);
                 requestQueue.add(request);
             } else if (inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
-                sendFileMessage(files);
+                uploadAndSend(message, files);
             }
+        } else {
+            uploadAndSend(message, files);
         }
     }
 
-    private void sendFileMessage(List<File> files) {
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void uploadAndSend(String message, List<File> files) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("roomId", inboxDto.getRoom().getId());
         Log.d("--", "send mes");
-        MultiPartFileRequest<String> restApiMultiPartRequest =
-                new MultiPartFileRequest<String>(Request.Method.POST, Constant.API_FILE,
-                        params, // danh sách request param
-                        files,
-                        response -> {
-                            Log.d("--", "respone");
-                            try {
-                                Log.d("--", "try");
-                                String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                                Type listType = new TypeToken<List<String>>() {
-                                }.getType();
-                                List<String> urls = new Gson().fromJson(res, listType);
-                                for (String url : urls) {
-                                    sendMessage(url, FileUtil.getMessageType(url));
+        if (files != null && !files.isEmpty()) {
+            MultiPartFileRequest<String> restApiMultiPartRequest =
+                    new MultiPartFileRequest<String>(Request.Method.POST, Constant.API_FILE,
+                            params, // danh sách request param
+                            files,
+                            response -> {
+                                Log.d("--", "respone");
+                                try {
+                                    Log.d("--", "try");
+                                    String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                                    Type listType = new TypeToken<List<MyMedia>>() {
+                                    }.getType();
+                                    List<MyMedia> media = new Gson().fromJson(res, listType);
+                                    sendMessage(message, media);
+                                } catch (UnsupportedEncodingException e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                        },
-                        error -> {
-                            Log.i("upload error", error.toString());
-                        }) {
+                            },
+                            error -> {
+                                try {
+                                    fileList.clear();
+                                    adapterBeforeSend.notifyDataSetChanged();
+                                } catch (Exception e) {
+                                    fileList = new ArrayList<>();
+                                    adapterBeforeSend.setList(fileList);
+                                }
+                                Log.i("upload error", error.toString());
+                            }) {
 
-                    @Override
-                    public Map<String, String> getHeaders() {
-                        HashMap<String, String> map = new HashMap<>();
-                        map.put("Authorization", "Bearer " + access_token);
-                        return map;
-                    }
+                        @Override
+                        public Map<String, String> getHeaders() {
+                            HashMap<String, String> map = new HashMap<>();
+                            map.put("Authorization", "Bearer " + access_token);
+                            return map;
+                        }
 
-                    @Override
-                    protected Map<String, String> getParams() {
-                        Map<String, String> params = new HashMap<String, String>();
-                        return params;
-                    }
-                };
+                        @Override
+                        protected Map<String, String> getParams() {
+                            Map<String, String> params = new HashMap<String, String>();
+                            return params;
+                        }
+                    };
 
-        restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
-        Volley.newRequestQueue(this).add(restApiMultiPartRequest);
+            restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
+            Volley.newRequestQueue(this).add(restApiMultiPartRequest);
+        } else {
+            sendMessage(message, null);
+        }
+
     }
 
     @Override

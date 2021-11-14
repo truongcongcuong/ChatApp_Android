@@ -30,23 +30,23 @@
 
             <LinearLayout
                 android:id="@+id/receiver_message_reply_layout"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
                 android:background="@drawable/background_reply_message"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="15dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="10dp"
+                android:paddingStart="8dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="5dp"
                 android:visibility="visible">
 
                 <View
-                    android:layout_width="2dp"
+                    android:layout_width="1dp"
                     android:layout_height="match_parent"
                     android:background="@color/purple_200" />
 
@@ -60,6 +60,8 @@
                         android:id="@+id/receiver_message_reply_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
                         android:textColor="#666666"
                         android:textSize="14sp">
 
@@ -69,6 +71,9 @@
                         android:id="@+id/receiver_message_reply_content"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:autoLink="all"
+                        android:ellipsize="end"
+                        android:maxLines="3"
                         android:textColor="#666666"
                         android:textSize="14sp">
 
@@ -78,22 +83,15 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/receiver_message_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/received_message_rcv_media"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:gravity="center_vertical"
-                android:minHeight="25dp"
-                android:minEms="2"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:layout_marginTop="5dp" />
 
             <ImageView
                 android:id="@+id/receiver_message_content_image"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="0dp"
                 android:layout_marginTop="5dp"
@@ -103,17 +101,30 @@
 
             <ImageView
                 android:id="@+id/receiver_message_content_video"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="0dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp" />
 
+            <TextView
+                android:id="@+id/receiver_message_content"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:autoLink="all"
+                android:gravity="center_vertical"
+                android:minHeight="25dp"
+                android:minEms="2"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/receiver_message_time"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="2dp"

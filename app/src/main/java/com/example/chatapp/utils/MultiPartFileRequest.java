@@ -7,7 +7,7 @@ import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.example.chatapp.enumvalue.MessageType;
+import com.example.chatapp.enumvalue.MediaType;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.Consts;
@@ -41,12 +41,12 @@ public class MultiPartFileRequest<T> extends Request<T> {
             "3gp", "3g2" // 3gp
     );
 
-    public MultiPartFileRequest(int method ,String url,
+    public MultiPartFileRequest(int method, String url,
                                 Map<String, String> stringParts,
                                 List<File> mFileParts,
                                 Response.Listener<T> listener,
                                 Response.ErrorListener errorListener) {
-        super(method,url, errorListener);
+        super(method, url, errorListener);
         mListener = listener;
         mStringParts = stringParts;
         this.mFileParts = mFileParts;
@@ -74,11 +74,11 @@ public class MultiPartFileRequest<T> extends Request<T> {
             set type cho file IMAGE, VIDEO, FILE
              */
             if (images.contains(FilenameUtils.getExtension(file.getName()).toLowerCase())) {
-                imageContentType = ContentType.create(MessageType.IMAGE.toString());
+                imageContentType = ContentType.create(MediaType.IMAGE.toString());
             } else if (videos.contains(FilenameUtils.getExtension(file.getName()).toLowerCase())) {
-                imageContentType = ContentType.create(MessageType.VIDEO.toString());
+                imageContentType = ContentType.create(MediaType.VIDEO.toString());
             } else {
-                imageContentType = ContentType.create(MessageType.FILE.toString());
+                imageContentType = ContentType.create(MediaType.FILE.toString());
             }
             mBuilder.addBinaryBody("files", file, imageContentType, file.getName());
         }

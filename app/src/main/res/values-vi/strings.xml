@@ -163,4 +163,5 @@
     <string name="friend_request_received_from_user">%1$s đã gửi cho bạn một lời mời kết bạn.</string>
     <string name="relation_is_friend">Hai bạn giờ đây đã là bạn bè của nhau. Hãy trò chuyện cùng nhau.</string>
     <string name="relation_is_none">Kết bạn với %1$s để tạo nên những khoảnh khắc đáng nhớ.</string>
+    <string name="view_image_before_send">Xem trước ảnh</string>
 </resources>

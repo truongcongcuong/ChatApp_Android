@@ -29,8 +29,10 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.enumvalue.MediaType;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.ui.ChatActivity;
@@ -132,19 +134,32 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
                 }
                 String content = lastMessage.getContent();
                 if (lastMessage.getSender() != null) {
-                    if (!lastMessage.getType().equals(MessageType.TEXT)) {
-                        if (lastMessage.getType().equals(MessageType.IMAGE))
-                            content = String.format("[%s]", context.getString(R.string.message_type_image));
-                        else if (lastMessage.getType().equals(MessageType.VIDEO))
-                            content = String.format("[%s]", context.getString(R.string.message_type_video));
-                        else if (lastMessage.getType().equals(MessageType.LINK))
-                            content = String.format("[%s]", context.getString(R.string.message_type_link));
-                        else if (lastMessage.getType().equals(MessageType.FILE))
-                            content = String.format("[%s]", context.getString(R.string.message_type_file));
+                    if (lastMessage.getType().equals(MessageType.TEXT)) {
+                        content = lastMessage.getContent();
+                    } else if (lastMessage.getType().equals(MessageType.MEDIA)) {
+                        List<MyMedia> mediaList = lastMessage.getMedia();
+                        if (mediaList != null && !mediaList.isEmpty()) {
+                            MyMedia media = mediaList.get(mediaList.size() - 1);
+                            if (media.getType().equals(MediaType.IMAGE)) {
+                                content = String.format("[%s]", context.getString(R.string.message_type_image));
+                                if (lastMessage.getContent() != null)
+                                    content = String.format("%s %s", content, lastMessage.getContent());
+                            } else if (media.getType().equals(MediaType.VIDEO)) {
+                                content = String.format("[%s]", context.getString(R.string.message_type_video));
+                                if (lastMessage.getContent() != null)
+                                    content = String.format("%s %s", content, lastMessage.getContent());
+                            } else if (media.getType().equals(MediaType.FILE)) {
+                                content = String.format("[%s]", context.getString(R.string.message_type_file));
+                                if (lastMessage.getContent() != null)
+                                    content = String.format("%s %s", content, media.getName());
+                            }
+                        }
+                    } else if (lastMessage.getType().equals(MessageType.LINK)) {
+                        content = String.format("[%s]", context.getString(R.string.message_type_link));
+                        if (lastMessage.getContent() != null)
+                            content = String.format("%s %s", content, lastMessage.getContent());
                     }
-                /*
-                nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
-                 */
+//                    nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
                     if (user.getId().equals(lastMessage.getSender().getId()))
                         content = String.format("%s: %s", context.getString(R.string.you), content);
                     else {

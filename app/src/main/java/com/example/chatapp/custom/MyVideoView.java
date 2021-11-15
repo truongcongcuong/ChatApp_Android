@@ -32,7 +32,12 @@ public class MyVideoView extends VideoView {
     public void setVideoURI(Uri uri) {
         new Thread(() -> {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(uri.toString(), new HashMap<>());
+            try {
+                retriever.setDataSource(uri.toString(), new HashMap<>());
+            } catch (Exception e) {
+                e.printStackTrace();
+                retriever.setDataSource(uri.toString());
+            }
             mVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
             mVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
         }).start();

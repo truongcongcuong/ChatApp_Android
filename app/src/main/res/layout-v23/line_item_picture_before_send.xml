@@ -15,21 +15,28 @@
         android:paddingEnd="10dp"
         android:paddingBottom="5dp">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_picture_before_send"
-            android:paddingStart="1.5dp"
-            android:paddingTop="0dp"
-            android:paddingEnd="1.5dp"
-            android:paddingBottom="0dp">
+            android:paddingStart="2dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="2dp"
+            android:paddingBottom="2dp">
 
             <ImageView
                 android:id="@+id/item_picture_before_send_img_content"
                 android:layout_width="50dp"
                 android:layout_height="70dp"
                 android:visibility="visible" />
-        </LinearLayout>
+
+            <ImageView
+                android:id="@+id/item_picture_before_send_icon_center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+        </RelativeLayout>
     </LinearLayout>
 
     <ImageView

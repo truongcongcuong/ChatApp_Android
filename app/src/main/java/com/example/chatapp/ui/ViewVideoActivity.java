@@ -71,7 +71,7 @@ public class ViewVideoActivity extends AppCompatActivity {
             try {
                 toolbar.setSubtitle(TimeAgo.getTime(activitySubTitle));
             } catch (ParseException | NullPointerException e) {
-                toolbar.setSubtitle("");
+                toolbar.setSubtitle(activitySubTitle);
             }
 
             MediaController mediaController = new MediaController(this);

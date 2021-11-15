@@ -33,6 +33,7 @@ import com.example.chatapp.dto.ReadByDto;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.Reaction;
+import com.example.chatapp.enumvalue.MediaType;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.ui.ViewImageActivity;
 import com.google.gson.Gson;
@@ -252,29 +253,6 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 senderViewHolder.senderMessage.setTextColor(Color.GRAY);
                             }
                             break;
-                        /*case IMAGE:
-                            senderViewHolder.contentImage.setVisibility(View.VISIBLE);
-                            Glide.with(context).load(messageDto.getContent())
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCorners(48)))
-                                    .into(senderViewHolder.contentImage);
-
-                            senderViewHolder.contentImage.setOnClickListener(v -> {
-                                showImageViewActivity(messageDto.getSender().getDisplayName(), messageDto.getCreateAt(), messageDto.getContent());
-                            });
-                            senderViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
-                            break;
-                        case VIDEO:
-                            senderViewHolder.contentVideo.setVisibility(View.VISIBLE);
-                            senderViewHolder.contentVideo.setBackgroundResource(R.drawable.ic_play_video);
-                            senderViewHolder.contentVideo.setOnClickListener(v -> {
-                                Intent intent = new Intent(context, ViewVideoActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putSerializable("message", messageDto);
-                                intent.putExtras(bundle);
-                                context.startActivity(intent);
-                            });
-                            senderViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
-                            break;*/
                         case MEDIA:
                             final int COLUMNS = 4;
                             if (messageDto.getContent() != null && !messageDto.getContent().isEmpty()) {
@@ -286,18 +264,35 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             }
                             List<MyMedia> media = messageDto.getMedia();
                             if (media != null) {
+                                media.sort((o1, o2) -> o1.getType().compareTo(o2.getType()));
                                 int numMedia = media.size();
                                 GridLayoutManager layoutManager;
                                 LineItemMediaAdapter mediaAdapter;
                                 if (numMedia > 0 && numMedia < COLUMNS) {
                                     senderViewHolder.send_message_rcv_media.setVisibility(View.VISIBLE);
                                     layoutManager = new GridLayoutManager(context, numMedia);
+                                    layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                        @Override
+                                        public int getSpanSize(int position) {
+                                            if (media.get(position).getType().equals(MediaType.FILE))
+                                                return numMedia;
+                                            return 1;
+                                        }
+                                    });
                                     senderViewHolder.send_message_rcv_media.setLayoutManager(layoutManager);
                                     mediaAdapter = new LineItemMediaAdapter(context, messageDto, numMedia);
                                     senderViewHolder.send_message_rcv_media.setAdapter(mediaAdapter);
                                 } else {
                                     senderViewHolder.send_message_rcv_media.setVisibility(View.VISIBLE);
                                     layoutManager = new GridLayoutManager(context, COLUMNS);
+                                    layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                        @Override
+                                        public int getSpanSize(int position) {
+                                            if (media.get(position).getType().equals(MediaType.FILE))
+                                                return COLUMNS;
+                                            return 1;
+                                        }
+                                    });
                                     senderViewHolder.send_message_rcv_media.setLayoutManager(layoutManager);
                                     mediaAdapter = new LineItemMediaAdapter(context, messageDto, COLUMNS);
                                     senderViewHolder.send_message_rcv_media.setAdapter(mediaAdapter);
@@ -398,29 +393,6 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 receiverViewHolder.receiverMessage.setTextColor(Color.GRAY);
                             }
                             break;
-                        /*case IMAGE:
-                            receiverViewHolder.contentImage.setVisibility(View.VISIBLE);
-                            Glide.with(context).load(messageDto.getContent())
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCorners(48)))
-                                    .into(receiverViewHolder.contentImage);
-
-                            receiverViewHolder.contentImage.setOnClickListener(v -> {
-                                showImageViewActivity(messageDto.getSender().getDisplayName(), messageDto.getCreateAt(), messageDto.getContent());
-                            });
-                            receiverViewHolder.contentImage.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
-                            break;
-                        case VIDEO:
-                            receiverViewHolder.contentVideo.setVisibility(View.VISIBLE);
-                            receiverViewHolder.contentVideo.setBackgroundResource(R.drawable.ic_play_video);
-                            receiverViewHolder.contentVideo.setOnClickListener(v -> {
-                                Intent intent = new Intent(context, ViewVideoActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putSerializable("message", messageDto);
-                                intent.putExtras(bundle);
-                                context.startActivity(intent);
-                            });
-                            receiverViewHolder.contentVideo.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
-                            break;*/
                         case MEDIA:
                             final int COLUMNS = 4;
                             if (messageDto.getContent() != null && !messageDto.getContent().isEmpty()) {
@@ -433,17 +405,34 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             List<MyMedia> media = messageDto.getMedia();
                             if (media != null) {
                                 int numMedia = media.size();
+                                media.sort((o1, o2) -> o1.getType().compareTo(o2.getType()));
                                 GridLayoutManager layoutManager;
                                 LineItemMediaAdapter mediaAdapter;
                                 if (numMedia > 0 && numMedia < COLUMNS) {
                                     receiverViewHolder.received_message_rcv_media.setVisibility(View.VISIBLE);
                                     layoutManager = new GridLayoutManager(context, numMedia);
+                                    layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                        @Override
+                                        public int getSpanSize(int position) {
+                                            if (media.get(position).getType().equals(MediaType.FILE))
+                                                return numMedia;
+                                            return 1;
+                                        }
+                                    });
                                     receiverViewHolder.received_message_rcv_media.setLayoutManager(layoutManager);
                                     mediaAdapter = new LineItemMediaAdapter(context, messageDto, numMedia);
                                     receiverViewHolder.received_message_rcv_media.setAdapter(mediaAdapter);
                                 } else {
                                     receiverViewHolder.received_message_rcv_media.setVisibility(View.VISIBLE);
                                     layoutManager = new GridLayoutManager(context, COLUMNS);
+                                    layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                        @Override
+                                        public int getSpanSize(int position) {
+                                            if (media.get(position).getType().equals(MediaType.FILE))
+                                                return COLUMNS;
+                                            return 1;
+                                        }
+                                    });
                                     receiverViewHolder.received_message_rcv_media.setLayoutManager(layoutManager);
                                     mediaAdapter = new LineItemMediaAdapter(context, messageDto, COLUMNS);
                                     receiverViewHolder.received_message_rcv_media.setAdapter(mediaAdapter);

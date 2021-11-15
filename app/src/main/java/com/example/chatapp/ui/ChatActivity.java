@@ -56,6 +56,7 @@ import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
 import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.ReactionReceiver;
+import com.example.chatapp.dto.ReadByDto;
 import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
 import com.example.chatapp.dto.RoomDTO;
@@ -88,6 +89,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.reactivex.functions.Action;
 import io.vertx.core.json.Json;
@@ -566,19 +568,31 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     private void sendReadMessageNotification() {
         Log.d("--------", "send read mess");
         MessageDto lastMessage = adapter.getLastMessage();
+        System.out.println("lastMessage = " + lastMessage);
+        boolean find = false;
         if (lastMessage != null) {
-            ReadBySend readBySend = ReadBySend.builder()
-                    .messageId(lastMessage.getId())
-                    .readAt(new Date())
-                    .roomId(lastMessage.getRoomId())
-                    .userId(user.getId())
-                    .build();
+            Set<ReadByDto> readTracking = lastMessage.getReadbyes();
+            for (ReadByDto read : readTracking) {
+                if (read.getReadByUser() != null &&
+                        user.getId().equals(read.getReadByUser().getId())) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                ReadBySend readBySend = ReadBySend.builder()
+                        .messageId(lastMessage.getId())
+                        .readAt(new Date())
+                        .roomId(lastMessage.getRoomId())
+                        .userId(user.getId())
+                        .build();
 
-            stompClient
-                    .send("/app/read", Json.encode(readBySend))
-                    .subscribe(() -> {
+                stompClient
+                        .send("/app/read", Json.encode(readBySend))
+                        .subscribe(() -> {
 
-                    });
+                        });
+            }
         }
     }
 

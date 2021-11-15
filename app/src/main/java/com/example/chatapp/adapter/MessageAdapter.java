@@ -307,20 +307,25 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     }
                     // hiện danh sách người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
-                        messageDto.getReadbyes().removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
+                        int numSeen = 0;
+                        for (ReadByDto read : messageDto.getReadbyes()) {
+                            if (!user.getId().equals(read.getReadByUser().getId()))
+                                numSeen++;
+                        }
+//                        messageDto.getReadbyes().removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
 
                         // nhiều người đã xem tin nhắn
-                        if (messageDto.getReadbyes().size() > 1) {
+                        if (numSeen > 1) {
                             if (senderViewHolder.rcv_read_many.getLayoutManager() == null)
                                 senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_many.setAdapter(readbyAdapter);
                             senderViewHolder.send_message_rcv_readby_one_many.setVisibility(View.VISIBLE);
                         }
                         // chỉ có một người đã xem tin nhắn
-                        if (messageDto.getReadbyes().size() == 1) {
+                        if (numSeen == 1) {
                             if (senderViewHolder.rcv_read_one.getLayoutManager() == null)
                                 senderViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_one.setAdapter(readbyAdapter);
@@ -448,13 +453,18 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     }
                     // hiện danh sách những người đã xem tin nhắn
                     if (messageDto.getReadbyes() != null) {
-                        messageDto.getReadbyes().removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
+                        int numSeen = 0;
+                        for (ReadByDto read : messageDto.getReadbyes()) {
+                            if (!user.getId().equals(read.getReadByUser().getId()))
+                                numSeen++;
+                        }
+//                        messageDto.getReadbyes().removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
                         ReadbyAdapter readbyAdapter = new ReadbyAdapter(messageDto, context);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                         layoutManager.setStackFromEnd(true);
 
                         // nhiều người đã xem tin nhắn
-                        if (messageDto.getReadbyes().size() > 1) {
+                        if (numSeen > 1) {
                             if (receiverViewHolder.rcv_read_many.getLayoutManager() == null)
                                 receiverViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_many.setAdapter(readbyAdapter);
@@ -462,7 +472,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             receiverViewHolder.receiver_message_rcv_readby_one_many.setVisibility(View.VISIBLE);
                         }
                         // chỉ có một người đã xem tin nhắn
-                        if (messageDto.getReadbyes().size() == 1) {
+                        if (numSeen == 1) {
                             if (receiverViewHolder.rcv_read_one.getLayoutManager() == null)
                                 receiverViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_one.setAdapter(readbyAdapter);

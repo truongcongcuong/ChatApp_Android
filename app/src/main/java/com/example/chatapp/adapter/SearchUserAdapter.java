@@ -18,6 +18,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.UserProfileDto;
+import com.example.chatapp.enumvalue.OnlineStatus;
 import com.example.chatapp.utils.TimeAgo;
 
 import java.text.ParseException;
@@ -68,7 +69,8 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
                 holder.txt_search_user_detail.setText(String.format("%s: %s",
                         context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
             } catch (ParseException | NullPointerException e) {
-                holder.txt_search_user_detail.setText("");
+                if (user.getOnlineStatus() == OnlineStatus.ONLINE)
+                    holder.txt_search_user_detail.setText(context.getString(R.string.present_online));
             }
 
             holder.itemView.setOnClickListener(v -> {

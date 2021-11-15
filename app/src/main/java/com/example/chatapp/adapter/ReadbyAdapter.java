@@ -1,6 +1,7 @@
 package com.example.chatapp.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
@@ -19,6 +20,8 @@ import com.example.chatapp.R;
 import com.example.chatapp.dialog.ViewAllReadTrackingDialog;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReadByDto;
+import com.example.chatapp.dto.UserSummaryDTO;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +39,13 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
         else
             this.list = new ArrayList<>();
         this.context = context;
-//        Gson gson = new Gson();
-//        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-//        UserSummaryDTO user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
+        Gson gson = new Gson();
+        SharedPreferences sharedPreferencesToken = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        UserSummaryDTO user = gson.fromJson(sharedPreferencesToken.getString("user-info", null), UserSummaryDTO.class);
         /*
         xóa reaction của người dùng hiện tại, không hiện lên
          */
-//        list.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
+        list.removeIf(x -> x.getReadByUser().getId().equals(user.getId()));
     }
 
     @NonNull

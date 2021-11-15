@@ -101,74 +101,6 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/layout_reply_chat_activity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="0dp"
-            android:background="@drawable/background_reply_message"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="5dp"
-            android:paddingBottom="5dp"
-            android:visibility="visible">
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/purple_200" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/txt_name_reply_chat_activity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#666666"
-                    android:textSize="14sp">
-
-                </TextView>
-
-                <TextView
-                    android:id="@+id/txt_content_reply_chat_activity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:autoLink="all"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:textColor="#666666"
-                    android:textSize="14sp">
-
-                </TextView>
-
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/img_close_reply_chat_activity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:src="@drawable/ic_baseline_close_circle_24">
-
-            </ImageView>
-
-        </LinearLayout>
-
-        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/purple_200"
@@ -185,6 +117,74 @@
                 android:layout_weight="1"
                 android:background="@drawable/message_background"
                 android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/layout_reply_chat_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="0dp"
+                    android:background="@drawable/background_reply_message"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="5dp"
+                    android:visibility="visible">
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/purple_200" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/txt_name_reply_chat_activity"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#666666"
+                            android:textSize="14sp">
+
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/txt_content_reply_chat_activity"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:autoLink="all"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:textColor="#666666"
+                            android:textSize="14sp">
+
+                        </TextView>
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/img_close_reply_chat_activity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:src="@drawable/ic_baseline_close_circle_24">
+
+                    </ImageView>
+
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rcv_picture_before_send"

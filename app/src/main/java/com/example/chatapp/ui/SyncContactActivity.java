@@ -387,4 +387,14 @@ public class SyncContactActivity extends AppCompatActivity {
 
         return super.onCreateOptionsMenu(menu);
     }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestReceived);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestAccept);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestRecall);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestDelete);
+        super.onDestroy();
+    }
+
 }

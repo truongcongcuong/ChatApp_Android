@@ -220,4 +220,12 @@ public class MemberActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(addMember);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteMember);
+        super.onDestroy();
+    }
+
 }

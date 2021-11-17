@@ -318,4 +318,13 @@ public class FriendRequestActivity extends AppCompatActivity implements SendData
         queue.add(request);
     }
 
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestReceived);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestAccept);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestRecall);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestDelete);
+        super.onDestroy();
+    }
+
 }

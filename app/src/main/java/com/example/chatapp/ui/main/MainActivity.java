@@ -28,6 +28,8 @@ import com.example.chatapp.cons.SendingData;
 import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.cons.ZoomOutPageTransformer;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.ReactionReceiver;
+import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.FriendRequest;
@@ -274,6 +276,52 @@ public class MainActivity extends AppCompatActivity implements SendingData {
                 }, throwable -> {
                     Log.i("erro--", throwable.getMessage());
                 });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/read")
+                .subscribe(x -> {
+                    ReadByReceiver readByReceiver = gson.fromJson(x.getPayload(), ReadByReceiver.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("messages/read");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", readByReceiver);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/reaction")
+                .subscribe(x -> {
+                    ReactionReceiver reactionReceiver = gson.fromJson(x.getPayload(), ReactionReceiver.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("messages/reaction");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", reactionReceiver);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/messages/delete")
+                .subscribe(x -> {
+                    MessageDto deletedMessage = gson.fromJson(x.getPayload(), MessageDto.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("messages/delete");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", deletedMessage);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
         bnv_menu.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         viewPager = findViewById(R.id.pager);
@@ -448,4 +496,10 @@ public class MainActivity extends AppCompatActivity implements SendingData {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(changeLanguage);
+
+        super.onDestroy();
+    }
 }

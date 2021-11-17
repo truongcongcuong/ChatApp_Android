@@ -714,4 +714,13 @@ public class RoomDetailActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(addMember);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteMember);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(renameRoom);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(changeImageRoom);
+        super.onDestroy();
+    }
+
 }

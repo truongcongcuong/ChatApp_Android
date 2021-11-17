@@ -51,6 +51,7 @@ import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.cons.SendDataReplyMessage;
 import com.example.chatapp.cons.SendingData;
+import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MessageSendToServer;
@@ -84,21 +85,16 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import io.reactivex.functions.Action;
 import io.vertx.core.json.Json;
 import lombok.SneakyThrows;
-import ua.naiksoftware.stomp.Stomp;
-import ua.naiksoftware.stomp.StompClient;
-import ua.naiksoftware.stomp.dto.StompCommand;
-import ua.naiksoftware.stomp.dto.StompHeader;
-import ua.naiksoftware.stomp.dto.StompMessage;
 
 public class ChatActivity extends AppCompatActivity implements SendingData, SendDataReplyMessage {
 
@@ -127,10 +123,11 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     private Gson gson;
     private UserSummaryDTO user;
     private Button btnScrollToBottom;
-    private StompClient stompClient;
     private LinearLayout layout_reply_chat_activity;
     private List<File> fileList;
     private LineItemPictureBeforeSendAdapter adapterBeforeSend;
+    private Timer timer;
+    public static final int DELAY = 1500;
 
     private final BroadcastReceiver addMember = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -185,18 +182,52 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         }
     };
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver newMessage = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 MessageDto newMessage = (MessageDto) bundle.getSerializable("dto");
-                Log.d("-new mess in chat acti", newMessage.toString());
-
                 if (newMessage.getSender() != null)
                     adapter.deleteOldReadTracking(newMessage.getSender().getId());
                 updateMessageRealTime(newMessage);
+            }
+        }
+    };
+
+    private final BroadcastReceiver readMessage = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                ReadByReceiver readByReceiver = (ReadByReceiver) bundle.getSerializable("dto");
+                adapter.updateReadToMessage(readByReceiver);
+            }
+        }
+    };
+
+    private final BroadcastReceiver reactionMessage = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                ReactionReceiver readByReceiver = (ReactionReceiver) bundle.getSerializable("dto");
+                adapter.updateReactionToMessage(readByReceiver);
+            }
+        }
+    };
+
+    private final BroadcastReceiver deleteMessage = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                MessageDto deletedMessage = (MessageDto) bundle.getSerializable("dto");
+                adapter.updateDeletedMessage(deletedMessage);
             }
         }
     };
@@ -208,11 +239,14 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("messages/new"));
         LocalBroadcastManager.getInstance(this).registerReceiver(addMember, new IntentFilter("room/members/add"));
         LocalBroadcastManager.getInstance(this).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
         LocalBroadcastManager.getInstance(this).registerReceiver(renameRoom, new IntentFilter("room/rename"));
         LocalBroadcastManager.getInstance(this).registerReceiver(changeImageRoom, new IntentFilter("room/changeImage"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(newMessage, new IntentFilter("messages/new"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(readMessage, new IntentFilter("messages/read"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(reactionMessage, new IntentFilter("messages/reaction"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteMessage, new IntentFilter("messages/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -223,6 +257,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 .build();
 
         Slidr.attach(this, config);
+        timer = new Timer();
 
         txt_chat_user_name = findViewById(R.id.txt_chat_user_name);
         txt_chat_detail = findViewById(R.id.txt_chat_detail);
@@ -335,57 +370,6 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 openFileChoose();
             }
         });
-
-//        stompClient = WebsocketClient.getInstance().getStompClient();
-        stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, Constant.WEB_SOCKET);
-        List<StompHeader> headers = new ArrayList<>();
-        headers.add(new StompHeader("userId", user.getId()));
-        headers.add(new StompHeader("access_token", access_token));
-
-        Log.i("userId", user.getId());
-        Log.i("access_token", access_token);
-
-        stompClient.connect(headers);
-
-//        stompClient
-//                .topic("/users/queue/messages")
-//                .subscribe(x -> {
-//                    Log.i("chat activ subcri mess", x.getPayload());
-//                    MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
-//                    if (messageDto.getSender() != null)
-//                        adapter.deleteOldReadTracking(messageDto.getSender().getId());
-//                    updateMessageRealTime(messageDto);
-//                }, throwable -> {
-//                    Log.i("chat activ subcri erro", throwable.getMessage());
-//                });
-
-        stompClient
-                .topic("/users/queue/read")
-                .subscribe(x -> {
-                    ReadByReceiver readByReceiver = gson.fromJson(x.getPayload(), ReadByReceiver.class);
-                    adapter.updateReadToMessage(readByReceiver);
-                }, throwable -> {
-                    Log.i("chat activ subc read er", throwable.getMessage());
-                });
-
-        stompClient
-                .topic("/users/queue/reaction")
-                .subscribe(x -> {
-                    ReactionReceiver receiver = gson.fromJson(x.getPayload(), ReactionReceiver.class);
-                    adapter.updateReactionToMessage(receiver);
-                }, throwable -> {
-                    Log.i("chat activ react error", throwable.getMessage());
-                });
-
-        stompClient
-                .topic("/users/queue/messages/delete")
-                .subscribe(x -> {
-                    Log.d("--deleted mes", x.getPayload());
-                    MessageDto deletedMessage = gson.fromJson(x.getPayload(), MessageDto.class);
-                    adapter.updateDeletedMessage(deletedMessage);
-                }, throwable -> {
-                    Log.i("chat activ react error", throwable.getMessage());
-                });
 
         /*
         sự kiện focus trên edittext
@@ -526,7 +510,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         }
         Log.e("send : ", Json.encode(messageSendToServer));
 
-        stompClient
+        WebSocketClient.getInstance().getStompClient()
                 .send("/app/chat", Json.encode(messageSendToServer))
                 .subscribe(() -> {
 
@@ -587,7 +571,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                         .userId(user.getId())
                         .build();
 
-                stompClient
+                WebSocketClient.getInstance().getStompClient()
                         .send("/app/read", Json.encode(readBySend))
                         .subscribe(() -> {
 
@@ -617,14 +601,17 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                             if (!list.isEmpty()) {
                                 adapter.updateList(list);
                                 if (isFirstTimeRun) {
-                                    new Thread(() -> {
-                                        try {
-                                            Thread.sleep(1500);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                        sendReadMessageNotification();
-                                    }).start();
+                                    timer.cancel();
+                                    timer = new Timer();
+                                    timer.schedule(
+                                            new TimerTask() {
+                                                @Override
+                                                public void run() {
+                                                    sendReadMessageNotification();
+                                                }
+                                            },
+                                            DELAY
+                                    );
                                     isFirstTimeRun = false;
                                 }
                                 if (page == 0) {
@@ -665,16 +652,17 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                                     rcv_chat_list.getAdapter().getItemCount());
                 }
             });
-            new Thread(() -> {
-                if (messageDto.getSender() != null && !messageDto.getSender().getId().equals(user.getId())) {
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    sendReadMessageNotification();
-                }
-            }).start();
+            timer.cancel();
+            timer = new Timer();
+            timer.schedule(
+                    new TimerTask() {
+                        @Override
+                        public void run() {
+                            sendReadMessageNotification();
+                        }
+                    },
+                    DELAY
+            );
         }
     }
 
@@ -837,38 +825,20 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         Intent resultIntent = new Intent();
         resultIntent.putExtra("dto", inboxDto);
         setResult(Activity.RESULT_OK, resultIntent);
-        stompClient
-                .send(new StompMessage(StompCommand.UNSUBSCRIBE,
-                        Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/read"))),
-                        null))
-                .subscribe(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        Log.d("unsubscribe read", "ok");
-                    }
-                });
-
-        stompClient
-                .send(new StompMessage(StompCommand.UNSUBSCRIBE,
-                        Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/messages"))),
-                        null))
-                .subscribe(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        Log.d("unsubscribe message", "ok");
-                    }
-                });
-        stompClient
-                .send(new StompMessage(StompCommand.UNSUBSCRIBE,
-                        Collections.singletonList(new StompHeader(StompHeader.ID, stompClient.getTopicId("/users/queue/reaction"))),
-                        null))
-                .subscribe(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        Log.d("unsubscribe reaction", "ok");
-                    }
-                });
         super.finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(addMember);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteMember);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(renameRoom);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(changeImageRoom);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(newMessage);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(readMessage);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(reactionMessage);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteMessage);
+        super.onDestroy();
     }
 
     @SuppressLint("SetTextI18n")

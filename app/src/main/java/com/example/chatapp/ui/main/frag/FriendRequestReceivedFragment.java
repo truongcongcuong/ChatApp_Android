@@ -72,6 +72,17 @@ public class FriendRequestReceivedFragment extends Fragment {
     private Button btnLoadMore;
     private int totalElements = 0;
 
+    private final BroadcastReceiver friendRequestReceivedEmpty = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean empty = intent.getBooleanExtra("dto", true);
+            if (empty)
+                totalElements = 0;
+            shouldShowMessageEmpty();
+        }
+    };
+
     public FriendRequestReceivedFragment(FriendRequestActivity parent) {
         this.parent = parent;
     }
@@ -92,15 +103,7 @@ public class FriendRequestReceivedFragment extends Fragment {
         /*
         khi list ở adapter trống thì hiện dòng text thông báo
          */
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                boolean empty = intent.getBooleanExtra("dto", true);
-                if (empty)
-                    totalElements = 0;
-                shouldShowMessageEmpty();
-            }
-        }, new IntentFilter("friendRequest/received/empty"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(friendRequestReceivedEmpty, new IntentFilter("friendRequest/received/empty"));
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -281,6 +284,12 @@ public class FriendRequestReceivedFragment extends Fragment {
             totalElements--;
         adapter.setList(list);
         shouldShowMessageEmpty();
+    }
+
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(friendRequestReceivedEmpty);
+        super.onDestroy();
     }
 
 }

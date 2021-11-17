@@ -542,4 +542,11 @@ public class ContactFragment extends Fragment {
         setHasOptionsMenu(isVisible());
     }
 
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeLanguage);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(acceptFriend);
+        super.onDestroy();
+    }
+
 }

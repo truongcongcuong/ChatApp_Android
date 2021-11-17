@@ -560,4 +560,11 @@ public class AddMemberActivity extends AppCompatActivity implements SendDataCrea
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
 
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(addMember);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteMember);
+        super.onDestroy();
+    }
+
 }

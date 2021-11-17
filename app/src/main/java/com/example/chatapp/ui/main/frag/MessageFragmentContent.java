@@ -299,4 +299,15 @@ public class MessageFragmentContent extends Fragment {
         request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
     }
+
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(addMember);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(deleteMember);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(renameRoom);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeImageRoom);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeLanguage);
+        super.onDestroy();
+    }
+
 }

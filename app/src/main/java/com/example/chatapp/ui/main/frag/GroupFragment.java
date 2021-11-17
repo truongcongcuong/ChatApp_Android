@@ -522,4 +522,12 @@ public class GroupFragment extends Fragment {
         setHasOptionsMenu(isVisible());
     }
 
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(renameRoom);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeImageRoom);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeLanguage);
+        super.onDestroy();
+    }
+
 }

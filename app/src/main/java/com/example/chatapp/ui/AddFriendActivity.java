@@ -411,4 +411,13 @@ public class AddFriendActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
 
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestReceived);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestAccept);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestRecall);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestDelete);
+        super.onDestroy();
+    }
+
 }

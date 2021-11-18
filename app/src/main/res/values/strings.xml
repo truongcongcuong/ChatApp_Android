@@ -173,6 +173,7 @@
     <string name="relation_is_none">Make friends with %1$s to create memorable moments.</string>
     <string name="view_image_before_send">Image Preview</string>
     <string name="view_video_before_send">Video Preview</string>
+    <string name="remove_friend_with_user">Remove friend with %1$s?</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

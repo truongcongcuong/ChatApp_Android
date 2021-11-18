@@ -556,26 +556,28 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         boolean find = false;
         if (lastMessage != null) {
             Set<ReadByDto> readTracking = lastMessage.getReadbyes();
-            for (ReadByDto read : readTracking) {
-                if (read.getReadByUser() != null &&
-                        user.getId().equals(read.getReadByUser().getId())) {
-                    find = true;
-                    break;
+            if (readTracking != null) {
+                for (ReadByDto read : readTracking) {
+                    if (read.getReadByUser() != null &&
+                            user.getId().equals(read.getReadByUser().getId())) {
+                        find = true;
+                        break;
+                    }
                 }
-            }
-            if (!find) {
-                ReadBySend readBySend = ReadBySend.builder()
-                        .messageId(lastMessage.getId())
-                        .readAt(new Date())
-                        .roomId(lastMessage.getRoomId())
-                        .userId(user.getId())
-                        .build();
+                if (!find) {
+                    ReadBySend readBySend = ReadBySend.builder()
+                            .messageId(lastMessage.getId())
+                            .readAt(new Date())
+                            .roomId(lastMessage.getRoomId())
+                            .userId(user.getId())
+                            .build();
 
-                WebSocketClient.getInstance().getStompClient()
-                        .send("/app/read", Json.encode(readBySend))
-                        .subscribe(() -> {
+                    WebSocketClient.getInstance().getStompClient()
+                            .send("/app/read", Json.encode(readBySend))
+                            .subscribe(() -> {
 
-                        });
+                            });
+                }
             }
         }
     }

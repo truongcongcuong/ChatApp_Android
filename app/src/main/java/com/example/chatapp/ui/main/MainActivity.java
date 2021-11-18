@@ -27,6 +27,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.SendingData;
 import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.cons.ZoomOutPageTransformer;
+import com.example.chatapp.dto.FriendDeleteDto;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.ReactionReceiver;
 import com.example.chatapp.dto.ReadByReceiver;
@@ -174,12 +175,6 @@ public class MainActivity extends AppCompatActivity implements SendingData {
                         bundle.putSerializable("dto", dto);
                         intent.putExtras(bundle);
                         LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
-
-                        /*
-                        khi đồng ý thêm bạn bè thì sẽ thông báo đến contact fragment để update lại list friend
-                         */
-                        Intent acceptFriendIntent = new Intent("accept_friend");
-                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(acceptFriendIntent);
                     });
                 }, throwable -> {
                     Log.i("erro--", throwable.getMessage());
@@ -315,6 +310,21 @@ public class MainActivity extends AppCompatActivity implements SendingData {
                         Intent intent = new Intent("messages/delete");
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("dto", deletedMessage);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/friends/delete")
+                .subscribe(x -> {
+                    FriendDeleteDto friendDeleteDto = gson.fromJson(x.getPayload(), FriendDeleteDto.class);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("friends/delete");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", friendDeleteDto);
                         intent.putExtras(bundle);
                         LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
                     });

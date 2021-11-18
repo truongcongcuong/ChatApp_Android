@@ -33,6 +33,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.SearchPhoneAdapter;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.dto.FriendDeleteDto;
 import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.FriendRequest;
@@ -178,6 +179,34 @@ public class AddFriendActivity extends AppCompatActivity {
         }
     };
 
+    private final BroadcastReceiver deleteFriend = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendDeleteDto dto = (FriendDeleteDto) bundle.getSerializable("dto");
+                if (currentUser.getId().equals(dto.getUserId())) {
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(dto.getFriendId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            break;
+                        }
+                    }
+                    searchPhoneAdapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFriendId())) {
+                    for (UserProfileDto user : searchUserResult) {
+                        if (user.getId().equals(dto.getUserId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            break;
+                        }
+                    }
+                    searchPhoneAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
@@ -188,6 +217,8 @@ public class AddFriendActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestAccept, new IntentFilter("friendRequest/accept"));
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestRecall, new IntentFilter("friendRequest/recall"));
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestDelete, new IntentFilter("friendRequest/delete"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteFriend, new IntentFilter("friends/delete"));
+
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -417,6 +448,7 @@ public class AddFriendActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestAccept);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestRecall);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestDelete);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteFriend);
         super.onDestroy();
     }
 

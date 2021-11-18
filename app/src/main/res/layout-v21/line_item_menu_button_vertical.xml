@@ -27,6 +27,7 @@
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:maxLines="1"
+        android:paddingStart="0dp"
         android:paddingEnd="5dp"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/imv_item_menu_button"

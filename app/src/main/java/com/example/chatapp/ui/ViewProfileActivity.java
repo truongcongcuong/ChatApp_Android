@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,10 +17,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
@@ -33,8 +37,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.dto.FriendDeleteDto;
 import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.dto.ViewProfileDto;
@@ -64,6 +71,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     private UserSummaryDTO currentUser;
     private TextView view_profile_txt_message;
     private ViewProfileDto viewProfileDto;
+    private Menu menuOpts;
 
     private final BroadcastReceiver friendRequestReceived = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -129,6 +137,22 @@ public class ViewProfileActivity extends AppCompatActivity {
         }
     };
 
+    private final BroadcastReceiver friendDelete = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendDeleteDto dto = (FriendDeleteDto) bundle.getSerializable("dto");
+                if (currentUser.getId().equals(dto.getUserId()) && userId.equals(dto.getFriendId())) {
+                    setEventOnClickButton(FriendStatus.NONE, dto.getFriendId());
+                } else if (currentUser.getId().equals(dto.getFriendId()) && userId.equals(dto.getUserId())) {
+                    setEventOnClickButton(FriendStatus.NONE, dto.getUserId());
+                }
+            }
+        }
+    };
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("RestrictedApi")
     @Override
@@ -141,6 +165,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestAccept, new IntentFilter("friendRequest/accept"));
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestRecall, new IntentFilter("friendRequest/recall"));
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestDelete, new IntentFilter("friendRequest/delete"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendDelete, new IntentFilter("friends/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -151,6 +176,21 @@ public class ViewProfileActivity extends AppCompatActivity {
                 .build();
 
         Slidr.attach(this, config);
+
+        RelativeLayout view_profile_top_layout = findViewById(R.id.view_profile_top_layout);
+        Glide.with(this).load(R.drawable.bg_infor)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        view_profile_top_layout.setBackground(resource);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
 
         img_view_profile_activity = findViewById(R.id.img_view_profile_activity);
         view_profile_txt_message = findViewById(R.id.view_profile_txt_message);
@@ -210,16 +250,26 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         final Activity activity = this;
         menu.findItem(R.id.menu_view_profile).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 View view = activity.findViewById(item.getItemId());
 
                 final PopupMenu popupMenu = new PopupMenu(activity.getApplicationContext(), view);
-                Menu menuOpts = popupMenu.getMenu();
+                menuOpts = popupMenu.getMenu();
                 popupMenu.getMenuInflater().inflate(R.menu.popup_menu_view_profile_fragment, menuOpts);
 
                 menuOpts.getItem(0).setTitle(getString(R.string.view_information));
                 menuOpts.getItem(1).setTitle(getString(R.string.remove_friend));
+                if (viewProfileDto == null) {
+                    menuOpts.getItem(1).setVisible(false);
+                    menuOpts.getItem(1).setEnabled(false);
+                } else {
+                    if (!viewProfileDto.getFriendStatus().equals(FriendStatus.FRIEND)) {
+                        menuOpts.getItem(1).setVisible(false);
+                        menuOpts.getItem(1).setEnabled(false);
+                    }
+                }
 
                 /*
                 hiển thị icon trên popup menu
@@ -242,9 +292,19 @@ public class ViewProfileActivity extends AppCompatActivity {
 
                 popupMenu.setOnMenuItemClickListener(item1 -> {
                     if (item1.getItemId() == R.id.view_profile_item_view_information) {
-                        Toast.makeText(ViewProfileActivity.this, "view information", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(activity, ViewInformationOfOtherUserActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("otherUserId", userId);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
                     } else if (item1.getItemId() == R.id.view_profile_item_remove_friend) {
-                        Toast.makeText(ViewProfileActivity.this, "remove friend", Toast.LENGTH_SHORT).show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                        builder.setMessage(getString(R.string.remove_friend_with_user, viewProfileDto.getDisplayName()))
+                                .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
+                                .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
+                                    deleteFriend(userId);
+                                });
+                        builder.create().show();
                     }
                     return true;
                 });
@@ -295,9 +355,9 @@ public class ViewProfileActivity extends AppCompatActivity {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         viewProfileDto = gson.fromJson(res, ViewProfileDto.class);
-                        setEventOnClickButton(viewProfileDto.getFriendStatus(), viewProfileDto.getUser().getId());
-                        setTitle(viewProfileDto.getUser().getDisplayName());
-                        Glide.with(this).load(viewProfileDto.getUser().getImageUrl())
+                        setEventOnClickButton(viewProfileDto.getFriendStatus(), viewProfileDto.getId());
+                        setTitle(viewProfileDto.getDisplayName());
+                        Glide.with(this).load(viewProfileDto.getImageUrl())
                                 .placeholder(R.drawable.img_avatar_placeholer)
                                 .transition(DrawableTransitionOptions.withCrossFade())
                                 .centerCrop().circleCrop()
@@ -305,9 +365,9 @@ public class ViewProfileActivity extends AppCompatActivity {
                         img_view_profile_activity.setOnClickListener(v -> {
                             Intent intent = new Intent(this, ViewImageActivity.class);
                             Bundle bundle = new Bundle();
-                            bundle.putString("activityTitle", viewProfileDto.getUser().getDisplayName());
+                            bundle.putString("activityTitle", viewProfileDto.getDisplayName());
                             bundle.putString("activitySubTitle", getString(R.string.avatar));
-                            bundle.putString("imageUrl", viewProfileDto.getUser().getImageUrl());
+                            bundle.putString("imageUrl", viewProfileDto.getImageUrl());
                             intent.putExtras(bundle);
                             startActivity(intent);
                         });
@@ -334,24 +394,43 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setEventOnClickButton(FriendStatus status, String userId) {
+        if (menuOpts != null) {
+            MenuItem item = menuOpts.getItem(1);
+            if (item != null) {
+                item.setVisible(false);
+                item.setEnabled(false);
+            }
+        }
         if (status.equals(FriendStatus.SENT)) {
+
+            viewProfileDto.setFriendStatus(FriendStatus.SENT);
             btn_friend_status_view_profile_activity.setText(getString(R.string.recall_button));
             btn_friend_status_view_profile_activity.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
             btn_friend_status_view_profile_activity.setIcon(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_recall_24));
-            view_profile_txt_message.setText(getString(R.string.friend_request_sent_to_user, viewProfileDto.getUser().getDisplayName()));
+            view_profile_txt_message.setText(getString(R.string.friend_request_sent_to_user, viewProfileDto.getDisplayName()));
             btn_friend_status_view_profile_activity.setOnClickListener(v -> {
                 deleteSentRequest(userId);
             });
         } else if (status.equals(FriendStatus.RECEIVED)) {
 
+            viewProfileDto.setFriendStatus(FriendStatus.RECEIVED);
             btn_friend_status_view_profile_activity.setText(getString(R.string.accept));
             btn_friend_status_view_profile_activity.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
             btn_friend_status_view_profile_activity.setIcon(AppCompatResources.getDrawable(this, R.drawable.ic_round_accept_24));
-            view_profile_txt_message.setText(getString(R.string.friend_request_received_from_user, viewProfileDto.getUser().getDisplayName()));
+            view_profile_txt_message.setText(getString(R.string.friend_request_received_from_user, viewProfileDto.getDisplayName()));
             btn_friend_status_view_profile_activity.setOnClickListener(v -> {
                 acceptFriendRequest(userId);
             });
         } else if (status.equals(FriendStatus.FRIEND)) {
+
+            viewProfileDto.setFriendStatus(FriendStatus.FRIEND);
+            if (menuOpts != null) {
+                MenuItem item = menuOpts.getItem(1);
+                if (item != null) {
+                    item.setVisible(true);
+                    item.setEnabled(true);
+                }
+            }
 
             btn_friend_status_view_profile_activity.setText(getString(R.string.friend));
             btn_friend_status_view_profile_activity.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
@@ -360,16 +439,18 @@ public class ViewProfileActivity extends AppCompatActivity {
             btn_friend_status_view_profile_activity.setOnClickListener(null);
         } else if (status.equals(FriendStatus.NONE)) {
 
+            viewProfileDto.setFriendStatus(FriendStatus.NONE);
             btn_friend_status_view_profile_activity.setText(getString(R.string.add_friend));
             btn_friend_status_view_profile_activity.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
             btn_friend_status_view_profile_activity.setIcon(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_person_add_alt_24));
-            view_profile_txt_message.setText(getString(R.string.relation_is_none, viewProfileDto.getUser().getDisplayName()));
+            view_profile_txt_message.setText(getString(R.string.relation_is_none, viewProfileDto.getDisplayName()));
             btn_friend_status_view_profile_activity.setOnClickListener(v -> {
                 sendFriendRequest(userId);
             });
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void deleteSentRequest(String userId) {
         if (userId != null) {
             StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_FRIEND_REQUEST + "/" + userId,
@@ -393,6 +474,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void acceptFriendRequest(String userId) {
         if (userId != null) {
             StringRequest request = new StringRequest(Request.Method.PUT, Constant.API_FRIEND_REQUEST + "/" + userId,
@@ -416,6 +498,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void sendFriendRequest(String userId) {
         if (userId != null) {
             StringRequest request = new StringRequest(Request.Method.POST, Constant.API_FRIEND_REQUEST + "/" + userId,
@@ -437,6 +520,40 @@ public class ViewProfileActivity extends AppCompatActivity {
             request.setRetryPolicy(retryPolicy);
             requestQueue.add(request);
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void deleteFriend(String userId) {
+        if (userId != null) {
+            StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_FRIEND_LIST + "/" + userId,
+                    response -> {
+//                        setEventOnClickButton(FriendStatus.NONE, userId);
+                    }, error -> {
+                Log.e("error: ", error.toString());
+
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("Authorization", "Bearer " + token);
+                    return map;
+                }
+            };
+            RequestQueue queue = Volley.newRequestQueue(this);
+            DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            request.setRetryPolicy(retryPolicy);
+            queue.add(request);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestReceived);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestAccept);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestRecall);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestDelete);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendDelete);
+        super.onDestroy();
     }
 
 }

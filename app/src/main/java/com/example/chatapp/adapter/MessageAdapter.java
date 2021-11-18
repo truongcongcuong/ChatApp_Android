@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.MessageOptionDialog;
-import com.example.chatapp.dialog.ProfileDialog;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.ReactionReceiver;
@@ -36,6 +35,7 @@ import com.example.chatapp.entity.Reaction;
 import com.example.chatapp.enumvalue.MediaType;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.ui.ViewImageActivity;
+import com.example.chatapp.ui.ViewProfileActivity;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -481,8 +481,12 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     }
                     receiverViewHolder.messageLayout.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                     receiverViewHolder.receiverImage.setOnClickListener(v -> {
-                        ProfileDialog profileDialog = new ProfileDialog(context, messageDto.getSender(), null);
-                        profileDialog.show();
+                        Intent intent = new Intent(context, ViewProfileActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("userId", messageDto.getSender().getId());
+                        intent.putExtras(bundle);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
                     });
                     break;
                 case ITEM_SYSTEM:

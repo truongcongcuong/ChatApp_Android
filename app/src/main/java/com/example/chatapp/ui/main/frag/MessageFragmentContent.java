@@ -17,6 +17,7 @@ import android.widget.Button;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -196,6 +197,9 @@ public class MessageFragmentContent extends Fragment {
         this.adapter = new ListMessageAdapter(context, new ArrayList<>());
         this.rcv_list_message.setAdapter(adapter);
         updateListInbox();
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcv_list_message.getContext(), DividerItemDecoration.VERTICAL);
+        rcv_list_message.addItemDecoration(dividerItemDecoration);
 
         /*
         sự kiện kéo để làm mới

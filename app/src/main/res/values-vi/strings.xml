@@ -165,4 +165,5 @@
     <string name="relation_is_none">Kết bạn với %1$s để tạo nên những khoảnh khắc đáng nhớ.</string>
     <string name="view_image_before_send">Xem trước ảnh</string>
     <string name="view_video_before_send">Xem trước video</string>
+    <string name="remove_friend_with_user">Xóa bạn bè với %1$s?</string>
 </resources>

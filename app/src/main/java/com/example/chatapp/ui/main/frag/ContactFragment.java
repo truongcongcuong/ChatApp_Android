@@ -44,7 +44,10 @@ import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.FriendDTO;
+import com.example.chatapp.dto.FriendDeleteDto;
 import com.example.chatapp.dto.MyMenuItem;
+import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.ui.AddFriendActivity;
 import com.example.chatapp.ui.FriendRequestActivity;
 import com.example.chatapp.ui.SyncContactActivity;
@@ -85,6 +88,7 @@ public class ContactFragment extends Fragment {
     private MenuButtonAdapterVertical menuAdapter;
     private Button btn_contact_refresh;
     private int totalElements = 0;
+    private UserSummaryDTO currentUser;
 
     /*
     kéo để làm mới
@@ -120,11 +124,73 @@ public class ContactFragment extends Fragment {
         }
     };
 
+    /*
+    sự kiện đồng ý kết bạn
+     */
     private final BroadcastReceiver acceptFriend = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateListFriends();
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    FriendDTO friendDTO = new FriendDTO();
+                    friendDTO.setFriend(dto.getTo());
+                    friendDTO.setCreateAt(dto.getCreateAt());
+                    list.add(0, friendDTO);
+                    adapter.notifyItemInserted(0);
+                } else if (currentUser.getId().equals(dto.getTo().getId())) {
+                    FriendDTO friendDTO = new FriendDTO();
+                    friendDTO.setFriend(dto.getFrom());
+                    friendDTO.setCreateAt(dto.getCreateAt());
+                    list.add(0, friendDTO);
+                    adapter.notifyItemInserted(0);
+                }
+                totalElements = list.size();
+                contact_frg_count.setText(String.format("%s (%d)", getString(R.string.all_contact), totalElements));
+            }
+        }
+    };
+
+    /*
+    sự kiện xóa bạn bè
+     */
+    private final BroadcastReceiver deleteFriend = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendDeleteDto dto = (FriendDeleteDto) bundle.getSerializable("dto");
+                if (currentUser.getId().equals(dto.getUserId())) {
+                    int index = -1;
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i).getFriend().getId().equals(dto.getFriendId())) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    boolean remove = list.removeIf(x -> x.getFriend().getId().equals(dto.getFriendId()));
+                    if (remove) {
+                        adapter.notifyItemRemoved(index);
+                    }
+                } else if (currentUser.getId().equals(dto.getFriendId())) {
+                    int index = -1;
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i).getFriend().getId().equals(dto.getUserId())) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    boolean remove = list.removeIf(x -> x.getFriend().getId().equals(dto.getUserId()));
+                    if (remove) {
+                        adapter.notifyItemRemoved(index);
+                    }
+                }
+                totalElements = list.size();
+                contact_frg_count.setText(String.format("%s (%d)", getString(R.string.all_contact), totalElements));
+            }
         }
     };
 
@@ -145,11 +211,8 @@ public class ContactFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(changeLanguage, new IntentFilter("language/change"));
-
-        /*
-        khi đồng ý kết bạn ở activity friend request thì contact fragment load lại danh sách bạn bè
-         */
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(acceptFriend, new IntentFilter("accept_friend"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(acceptFriend, new IntentFilter("friendRequest/accept"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(deleteFriend, new IntentFilter("friends/delete"));
         /*
         enable menu trên action bar
          */
@@ -166,6 +229,10 @@ public class ContactFragment extends Fragment {
         getNewAccessToken.sendGetNewTokenRequest();
         SharedPreferences sharedPreferencesToken = getActivity().getApplicationContext().getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
+
+        gson = new Gson();
+        SharedPreferences sharedPreferencesUser = getActivity().getSharedPreferences("user", Context.MODE_PRIVATE);
+        currentUser = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
     }
 
     @Override
@@ -546,6 +613,7 @@ public class ContactFragment extends Fragment {
     public void onDestroy() {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeLanguage);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(acceptFriend);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(deleteFriend);
         super.onDestroy();
     }
 

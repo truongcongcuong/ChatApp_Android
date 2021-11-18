@@ -6,15 +6,15 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical"
-    tools:context=".ui.ViewInformationActivity">
+    tools:context=".ui.ViewInformationOfOtherUserActivity">
 
     <RelativeLayout
-        android:id="@+id/update_information_top_layout"
+        android:id="@+id/view_info_other_user_top_layout"
         android:layout_width="match_parent"
         android:layout_height="250dp">
 
         <ImageView
-            android:id="@+id/img_update_infor_avt"
+            android:id="@+id/view_info_other_user_avt"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_alignParentStart="true"
@@ -34,7 +34,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/update_information_top_layout"
+        android:layout_below="@+id/view_info_other_user_top_layout"
         android:fillViewport="true">
 
         <LinearLayout
@@ -46,33 +46,18 @@
             android:paddingEnd="10dp">
 
             <ListView
-                android:id="@+id/lsv_update_infor"
+                android:id="@+id/lsv_view_info_other_user"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
             </ListView>
 
-            <Button
-                android:id="@+id/btn_update_infor"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/background_btn_friend_phonebook"
-                android:gravity="center_vertical|center_horizontal"
-                android:maxLines="1"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="@string/update_info"
-                android:textAlignment="center"
-                app:backgroundTint="@null">
-
-            </Button>
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_update_info_activity"
+        android:id="@+id/toolbar_view_info_other_user"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@null"

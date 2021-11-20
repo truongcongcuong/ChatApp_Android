@@ -18,7 +18,7 @@
     <string name="gender_female">Nữ</string>
     <string name="phone_number">Nhập số điện thoại</string>
     <string name="email">Nhập email</string>
-    <string name="enter_password">Nhập mật khẩu</string>
+    <string name="enter_password">Mật khẩu</string>
     <string name="enter_new_password">Nhập mật khẩu mới</string>
     <string name="pls_enter_new_password">Vui lòng nhập mật khẩu mới</string>
     <string name="enter_old_password">Nhập mật khẩu hiện tại</string>
@@ -166,4 +166,5 @@
     <string name="view_image_before_send">Xem trước ảnh</string>
     <string name="view_video_before_send">Xem trước video</string>
     <string name="remove_friend_with_user">Xóa bạn bè với %1$s?</string>
+    <string name="waiting">Vui lòng đợi.</string>
 </resources>

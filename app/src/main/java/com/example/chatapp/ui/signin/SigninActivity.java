@@ -8,8 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.EditText;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -29,6 +29,8 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.ui.main.MainActivity;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
@@ -42,17 +44,22 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.vertx.core.json.Json;
 
 public class SigninActivity extends AppCompatActivity {
 
-    private EditText edt_sign_in_user_name;
-    private EditText edt_sign_in_password;
+    private TextInputLayout edt_sign_in_user_name;
+    private TextInputLayout edt_sign_in_password;
     private TextView txt_sign_in_error;
     private String username, password;
     private String rfCookie;
     private Gson gson;
+    private ProgressBar progress_bar;
+    private MaterialButton btn_sign_in;
+    private Timer timer;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -82,34 +89,51 @@ public class SigninActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        Button btn_sign_in = findViewById(R.id.btn_sign_in);
+        btn_sign_in = findViewById(R.id.btn_sign_in);
         edt_sign_in_user_name = findViewById(R.id.edt_sign_in_user_name);
         edt_sign_in_password = findViewById(R.id.edt_sign_in_password);
         txt_sign_in_error = findViewById(R.id.txt_sign_in_error);
+        progress_bar = findViewById(R.id.sigin_activity_progress_bar);
+        progress_bar.setVisibility(View.GONE);
         gson = new Gson();
+        timer = new Timer();
 
         btn_sign_in.setOnClickListener(v -> {
-            username = edt_sign_in_user_name.getText().toString();
+            username = edt_sign_in_user_name.getEditText().getText().toString().trim();
             if (TextUtils.isEmpty(username)) {
-                txt_sign_in_error.setText(R.string.check_user_name_empty);
+                edt_sign_in_user_name.setError(getString(R.string.check_user_name_empty));
                 return;
             }
-            password = edt_sign_in_password.getText().toString();
+            edt_sign_in_user_name.setError(null);
+            password = edt_sign_in_password.getEditText().getText().toString().trim();
             if (TextUtils.isEmpty(password)) {
-                txt_sign_in_error.setText(R.string.check_password_empty);
+                edt_sign_in_password.setError(getString(R.string.check_password_empty));
                 return;
             }
-            sendSignInRequest();
+            edt_sign_in_password.setError(null);
+            btn_sign_in.setVisibility(View.GONE);
+            progress_bar.setVisibility(View.VISIBLE);
+            txt_sign_in_error.setText(getString(R.string.waiting));
+            timer.cancel();
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    sendSignInRequest();
+                }
+            }, 1500);
         });
 
     }
 
     private void sendSignInRequest() {
-        Log.e("signin","request");
+        Log.e("signin", "request");
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_AUTH + "signin",
                 response -> {
+                    btn_sign_in.setVisibility(View.VISIBLE);
+                    progress_bar.setVisibility(View.GONE);
                     try {
-                        Log.e("signin-res",response.toString());
+                        Log.e("signin-res", response);
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
                         JSONObject object = new JSONObject(res);
 
@@ -142,10 +166,12 @@ public class SigninActivity extends AppCompatActivity {
 
                     } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
-                        Log.e("signin-err",e.getMessage());
+                        Log.e("signin-err", e.getMessage());
                     }
                 },
                 error -> {
+                    btn_sign_in.setVisibility(View.VISIBLE);
+                    progress_bar.setVisibility(View.GONE);
                     NetworkResponse response = error.networkResponse;
                     if (error instanceof ServerError) {
                         try {
@@ -155,7 +181,6 @@ public class SigninActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
                     }
                 }) {
             @Override

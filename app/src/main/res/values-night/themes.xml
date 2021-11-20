@@ -42,4 +42,21 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    <style name="CustomTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+        <item name="endIconMode">clear_text</item>
+        <item name="errorEnabled">true</item>
+        <item name="colorError">@color/red</item>
+
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryDark">@color/purple_200</item>
+    </style>
+
+    <style name="ErrorTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:textSize">14sp</item>
+    </style>
+
 </resources>

@@ -17,7 +17,7 @@
     <string name="gender_female">Female</string>
     <string name="phone_number">Enter your phone number</string>
     <string name="email">Enter your email</string>
-    <string name="enter_password">Enter your password</string>
+    <string name="enter_password">Password</string>
     <string name="enter_new_password">Enter your new password</string>
     <string name="pls_enter_new_password">Please enter your new password</string>
     <string name="enter_old_password">Enter your current password</string>
@@ -174,6 +174,7 @@
     <string name="view_image_before_send">Image Preview</string>
     <string name="view_video_before_send">Video Preview</string>
     <string name="remove_friend_with_user">Remove friend with %1$s?</string>
+    <string name="waiting">Please wait.</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

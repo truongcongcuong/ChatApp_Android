@@ -23,12 +23,15 @@
     <string name="pls_enter_new_password">Vui lòng nhập mật khẩu mới</string>
     <string name="enter_old_password">Nhập mật khẩu hiện tại</string>
     <string name="pls_enter_old_password">Vui lòng nhập mật khẩu hiện tại</string>
-    <string name="re_enter_password">Xác nhận lại mật khẩu mới</string>
+    <string name="re_enter_password">Xác nhận lại mật khẩu</string>
     <string name="pls_re_enter_password">Vui lòng xác nhận lại mật khẩu mới</string>
     <string name="check_password">Mật khẩu không khớp. Vui lòng thử lại</string>
     <string name="check_password_empty">Vui lòng nhập mật khẩu của bạn …</string>
     <string name="check_email_empty">Vui lòng nhập Email của bạn …</string>
     <string name="check_user_name_empty">Vui lòng nhập tên đăng nhập của bạn …</string>
+    <string name="check_name_empty">Vui lòng nhập tên đầy đủ của bạn …</string>
+    <string name="check_phone_empty">Vui lòng nhập số điện thoại …</string>
+    <string name="check_phone_regex">Số điện thoại không hợp lệ …</string>
 
     <string name="success_text">Thành công</string>
     <string name="continue_text">Tiếp tục</string>

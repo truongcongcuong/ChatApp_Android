@@ -3,7 +3,6 @@ package com.example.chatapp.ui.signup;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -22,6 +21,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.UserSignUpDTO;
+import com.google.android.material.textfield.TextInputLayout;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
@@ -34,10 +34,10 @@ import java.util.Map;
 
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText edt_sign_up_re_enter_password;
-    private EditText edt_sign_up_name;
-    private EditText edt_sign_up_phone_number;
-    private EditText edt_sign_up_enter_password;
+    private TextInputLayout edt_sign_up_re_enter_password;
+    private TextInputLayout edt_sign_up_name;
+    private TextInputLayout edt_sign_up_phone_number;
+    private TextInputLayout edt_sign_up_enter_password;
     private TextView txt_sign_up_error_response;
 
     @Override
@@ -74,20 +74,54 @@ public class SignUpActivity extends AppCompatActivity {
         ImageButton ibt_sign_up_next_step1 = findViewById(R.id.ibt_sign_up_next_step1);
         txt_sign_up_error_response = findViewById(R.id.txt_sign_up_error_response);
 
-
         ibt_sign_up_next_step1.setOnClickListener(v -> {
-            if (!edt_sign_up_enter_password.getText().toString().equals(edt_sign_up_re_enter_password.getText().toString())) {
-                txt_sign_up_error_response.setText(R.string.check_password);
-                return;
+            if (valid()) {
+                UserSignUpDTO user = new UserSignUpDTO();
+                user.setPassword(edt_sign_up_enter_password.getEditText().getText().toString().trim());
+                user.setDisplayName(edt_sign_up_name.getEditText().getText().toString().trim());
+                user.setPhoneNumber(edt_sign_up_phone_number.getEditText().getText().toString().trim());
+                sendSignUpUserToServer(user);
             }
-
-            UserSignUpDTO user = new UserSignUpDTO();
-            user.setPassword(edt_sign_up_enter_password.getText().toString());
-            user.setDisplayName(edt_sign_up_name.getText().toString());
-            user.setPhoneNumber(edt_sign_up_phone_number.getText().toString());
-            sendSignUpUserToServer(user);
         });
 
+    }
+
+    private boolean valid() {
+        txt_sign_up_error_response.setText("");
+        if (edt_sign_up_name.getEditText().getText().toString().trim().isEmpty()) {
+            edt_sign_up_name.setError(getString(R.string.check_name_empty));
+            return false;
+        }
+        edt_sign_up_name.setError(null);
+
+        if (edt_sign_up_enter_password.getEditText().getText().toString().trim().isEmpty()) {
+            edt_sign_up_enter_password.setError(getString(R.string.check_password_empty));
+            return false;
+        }
+        if (!edt_sign_up_enter_password.getEditText().getText().toString().trim().matches("[\\w]{8,}")) {
+            edt_sign_up_enter_password.setError(getString(R.string.change_password_detail_8_char));
+            return false;
+        }
+        edt_sign_up_enter_password.setError(null);
+
+        if (!edt_sign_up_enter_password.getEditText().getText().toString().trim().equals(edt_sign_up_re_enter_password.getEditText().getText().toString())) {
+            edt_sign_up_re_enter_password.setError(getString(R.string.check_password));
+            return false;
+        }
+        edt_sign_up_re_enter_password.setError(null);
+
+        if (edt_sign_up_phone_number.getEditText().getText().toString().trim().isEmpty()) {
+            edt_sign_up_phone_number.setError(getString(R.string.check_phone_empty));
+            return false;
+        }
+        edt_sign_up_phone_number.setError(null);
+
+        if (!edt_sign_up_phone_number.getEditText().getText().toString().trim().matches("[0-9]{10,11}")) {
+            edt_sign_up_phone_number.setError(getString(R.string.check_phone_regex));
+            return false;
+        }
+        edt_sign_up_phone_number.setError(null);
+        return true;
     }
 
     private void sendSignUpUserToServer(UserSignUpDTO user) {

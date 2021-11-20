@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +25,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.SendingData;
 import com.example.chatapp.dto.UserSignUpDTO;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SignupEnterEmailFragment extends Fragment {
-    private EditText edt_sign_up_email;
-    private EditText edt_sign_up_verify;
+    private TextInputLayout edt_sign_up_email;
+    private TextInputLayout edt_sign_up_verify;
     private Button btn_sign_up_confirm_verify;
     private TextView txt_sign_up_verify;
     private TextView txt_sign_up_check_verification_code;
@@ -90,7 +90,7 @@ public class SignupEnterEmailFragment extends Fragment {
         txt_sign_up_verify.setVisibility(View.INVISIBLE);
 
         btn_sign_up_confirm_email.setOnClickListener(v -> {
-            String email = edt_sign_up_email.getText().toString();
+            String email = edt_sign_up_email.getEditText().getText().toString();
             if (!TextUtils.isEmpty(email))
                 sendVerificationCode(email);
             else {
@@ -101,7 +101,7 @@ public class SignupEnterEmailFragment extends Fragment {
         });
 
         btn_sign_up_confirm_verify.setOnClickListener(v -> {
-            String code = edt_sign_up_verify.getText().toString();
+            String code = edt_sign_up_verify.getEditText().getText().toString();
             if (!TextUtils.isEmpty(code)) {
                 verify(code);
             } else {

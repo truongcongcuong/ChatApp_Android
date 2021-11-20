@@ -60,4 +60,8 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="HelperTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:textSize">14sp</item>
+    </style>
+
 </resources>

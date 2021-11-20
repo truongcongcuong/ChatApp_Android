@@ -22,12 +22,15 @@
     <string name="pls_enter_new_password">Please enter your new password</string>
     <string name="enter_old_password">Enter your current password</string>
     <string name="pls_enter_old_password">Please enter your current password</string>
-    <string name="re_enter_password">Re-enter your new password</string>
+    <string name="re_enter_password">Re-enter your password</string>
+    <string name="check_phone_empty">Please enter phone number …</string>
+    <string name="check_phone_regex">Phone number invalid …</string>
     <string name="pls_re_enter_password">Please re-enter your new password</string>
     <string name="check_password">These passwords don\'t match. Try again</string>
     <string name="check_password_empty">Please enter your password …</string>
     <string name="check_email_empty">Please enter your email …</string>
     <string name="check_user_name_empty">Please enter your username …</string>
+    <string name="check_name_empty">Please enter your full name …</string>
     <string name="success_text">Success</string>
     <string name="continue_text">Continue</string>
     <string name="sign_in_button">Sign In</string>

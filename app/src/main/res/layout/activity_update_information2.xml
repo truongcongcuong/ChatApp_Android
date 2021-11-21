@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -23,95 +23,177 @@
         app:contentInsetStartWithNavigation="0dp" />
 
     <RelativeLayout
+        android:id="@+id/update_info_content_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
-        android:padding="10dp">
+        android:layout_below="@+id/toolbar_update_information2_activity"
+        android:paddingStart="10dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp">
 
         <ImageView
             android:id="@+id/img_edit_profile_avt"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:background="@drawable/border_for_circle_image"
             android:padding="1dp">
 
         </ImageView>
 
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_toEndOf="@+id/img_edit_profile_avt"
-            app:cardElevation="5dp">
+            android:orientation="vertical">
 
-            <LinearLayout
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edt_edit_profile_display_name"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
-                android:orientation="vertical">
+                android:ems="10"
+                android:hint="@string/edit_profile_display_name"
+                android:inputType="textPersonName"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:theme="@style/CustomTextInputLayout"
+                app:endIconMode="clear_text"
+                app:errorTextAppearance="@style/ErrorTextInputLayout"
+                app:helperText="@string/helper_text_update_info_display_name"
+                app:helperTextEnabled="true"
+                app:helperTextTextAppearance="@style/HelperTextInputLayout">
 
-                <EditText
-                    android:id="@+id/edt_edit_profile_display_name"
+                <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edt_edit_profile_username"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:ems="10"
+                android:hint="@string/edit_profile_username"
+                android:inputType="textPersonName"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:theme="@style/CustomTextInputLayout"
+                app:endIconMode="clear_text"
+                app:errorTextAppearance="@style/ErrorTextInputLayout"
+                app:helperText="@string/helper_text_update_info_user_name"
+                app:helperTextEnabled="true"
+                app:helperTextTextAppearance="@style/HelperTextInputLayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edt_edit_profile_birthday"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:editable="false"
+                android:ems="10"
+                android:hint="@string/birthday"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:theme="@style/CustomTextInputLayout"
+                app:endIconMode="none"
+                app:errorTextAppearance="@style/ErrorTextInputLayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_baseline_edit_24"
-                    android:hint="@string/edit_profile_display_name"
-                    android:textColor="@color/black">
+                    android:editable="false"
+                    android:textSize="16sp" />
 
-                </EditText>
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <RadioGroup
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                    <RadioButton
-                        android:id="@+id/rbt_edit_profile_gender_male"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="5dp"
-                        android:text="@string/gender_male"
-                        android:textIsSelectable="true"
-                        android:textSize="20sp">
+                <RadioButton
+                    android:id="@+id/rbt_edit_profile_gender_male"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gender_male"
+                    android:textIsSelectable="true"
+                    android:textSize="18sp">
 
-                    </RadioButton>
+                </RadioButton>
 
-                    <RadioButton
-                        android:id="@+id/rbt_edit_profile_gender_female"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="50dp"
-                        android:text="@string/gender_female"
-                        android:textSize="20sp">
+                <RadioButton
+                    android:id="@+id/rbt_edit_profile_gender_female"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="50dp"
+                    android:text="@string/gender_female"
+                    android:textSize="18sp">
 
-                    </RadioButton>
-                </RadioGroup>
+                </RadioButton>
+            </RadioGroup>
 
-                <EditText
-                    android:id="@+id/edt_edit_profile_birthday"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:drawableEnd="@drawable/ic_baseline_edit_24"
-                    android:textColor="@color/black">
+            <TextView
+                android:id="@+id/update_info_txt_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/red"
+                android:textSize="16sp" />
 
-                </EditText>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
     </RelativeLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_edit_profile_save"
+        style="@style/Widget.MaterialComponents.Button.Icon"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/background_btn_friend_phonebook"
+        android:layout_height="60dp"
+        android:layout_below="@+id/update_info_content_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
         android:gravity="center_vertical|center_horizontal"
+        android:includeFontPadding="false"
         android:maxLines="1"
-        android:text="@string/update_info"
+        android:minWidth="200dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="@string/update"
         android:textAlignment="center"
-        app:backgroundTint="@null">
+        android:textColor="@color/white"
+        app:backgroundTint="@color/purple_200"
+        app:cornerRadius="16dp"
+        app:iconGravity="textStart" />
 
-    </Button>
+    <ProgressBar
+        android:id="@+id/update_info_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/update_info_content_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp">
 
-</LinearLayout>
+    </ProgressBar>
+
+</RelativeLayout>

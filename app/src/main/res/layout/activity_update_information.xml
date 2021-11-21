@@ -52,21 +52,25 @@
 
             </ListView>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_update_infor"
+                style="@style/Widget.MaterialComponents.Button.Icon"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="20dp"
-                android:background="@drawable/background_btn_friend_phonebook"
                 android:gravity="center_vertical|center_horizontal"
+                android:includeFontPadding="false"
                 android:maxLines="1"
+                android:minWidth="200dp"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
                 android:text="@string/update_info"
                 android:textAlignment="center"
-                app:backgroundTint="@null">
+                android:textColor="@color/white"
+                app:backgroundTint="@color/purple_200"
+                app:cornerRadius="16dp"
+                app:iconGravity="textStart" />
 
-            </Button>
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

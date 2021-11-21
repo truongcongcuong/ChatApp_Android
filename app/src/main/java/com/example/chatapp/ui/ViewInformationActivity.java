@@ -1,7 +1,10 @@
 package com.example.chatapp.ui;
 
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -19,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -65,9 +69,7 @@ import lombok.SneakyThrows;
 public class ViewInformationActivity extends AppCompatActivity {
     private ImageView img_update_info_avt;
     private ListView lsv_update_info;
-    //    private String userToString;
     private String token;
-    //    private User user;
     private Gson gson;
     private UserDetailDTO userDetailDTO;
     private static final int REQUEST_GALLERY = 1;
@@ -75,11 +77,24 @@ public class ViewInformationActivity extends AppCompatActivity {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private final BroadcastReceiver updateInfoSuccess = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                userDetailDTO = (UserDetailDTO) bundle.getSerializable("dto");
+                updateItems();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_ChatApp_SlidrActivityTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(updateInfoSuccess, new IntentFilter("user/update/success"));
 
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)
@@ -119,12 +134,7 @@ public class ViewInformationActivity extends AppCompatActivity {
         lsv_update_info = findViewById(R.id.lsv_update_infor);
         img_update_info_avt = findViewById(R.id.img_update_infor_avt);
         Button btn_update_info = findViewById(R.id.btn_update_infor);
-//        NestedScrollView nsv_update_infor = findViewById(R.id.nsv_update_infor);
-
-//        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", MODE_PRIVATE);
-//        userToString = sharedPreferencesUser.getString("user-infor",null);
         gson = new Gson();
-//        user = gson.fromJson(userToString,User.class);
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
@@ -199,10 +209,13 @@ public class ViewInformationActivity extends AppCompatActivity {
                     .name(sdf.format(sdfFull.parse(userDetailDTO.getDateOfBirth())))
                     .build());
         }
-
         items.add(MyMenuItem.builder()
                 .key(getResources().getString(R.string.mobile))
                 .name(userDetailDTO.getPhoneNumber())
+                .build());
+        items.add(MyMenuItem.builder()
+                .key(getResources().getString(R.string.email_title))
+                .name(userDetailDTO.getEmail())
                 .build());
         MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button_vertical);
         lsv_update_info.setAdapter(adapter);
@@ -226,19 +239,22 @@ public class ViewInformationActivity extends AppCompatActivity {
                     Bundle extras = data.getExtras();
                     Bitmap selectedImage = (Bitmap) extras.get("data");
                     Log.e("uri camera", selectedImage.toString());
-                    Glide.with(this).load(selectedImage)
-                            .centerCrop().circleCrop().into(img_update_info_avt);
                     files.add(new File(PathUtil.getPath(this, getImageUri(this, selectedImage))));
-                    userDetailDTO.setImageUrl(getImageUri(this, selectedImage).toString());
                 }
                 break;
             case 1:
                 if (resultCode == RESULT_OK) {
-                    Uri selectedImage = data.getData();
-                    Glide.with(this).load(selectedImage)
-                            .centerCrop().circleCrop().into(img_update_info_avt);
-                    Log.e("gallery", "done");
-                    files.add(new File(PathUtil.getPath(this, selectedImage)));
+                    if (data.getClipData() != null) {
+                        int count = data.getClipData().getItemCount();
+                        for (int i = 0; i < count; i++) {
+                            Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                            File file = new File(PathUtil.getPath(ViewInformationActivity.this, imageUri));
+                            files.add(file);
+                        }
+                    } else {
+                        File file = new File(PathUtil.getPath(ViewInformationActivity.this, data.getData()));
+                        files.add(file);
+                    }
                 }
                 break;
         }
@@ -246,46 +262,79 @@ public class ViewInformationActivity extends AppCompatActivity {
     }
 
     private void uploadMultiFiles(List<File> files) {
-        MultiPartFileRequest<String> restApiMultiPartRequest =
-                new MultiPartFileRequest<String>(Request.Method.PUT, Constant.API_USER + "me/changeImage",
-                        new HashMap<>(), // danh sách request param
-                        files,
-                        response -> {
-                            Log.i("upload succ", "success");
-                        },
-                        error -> {
-                            Log.i("upload error", "error");
-                            NetworkResponse response = error.networkResponse;
-                            if (error instanceof ServerError) {
+        if (!files.isEmpty()) {
+            MultiPartFileRequest<String> restApiMultiPartRequest =
+                    new MultiPartFileRequest<String>(Request.Method.PUT, Constant.API_USER + "me/changeImage",
+                            new HashMap<>(), // danh sách request param
+                            files,
+                            response -> {
                                 try {
-                                    String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-//                                    JSONObject object = new JSONObject(res);
-                                    Log.e("400 : ", res);
-                                } catch (Exception e) {
+                                    String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                                    Log.i("upload succ", res);
+                                    userDetailDTO = gson.fromJson(res, UserDetailDTO.class);
+                                    Glide.with(this)
+                                            .load(userDetailDTO.getImageUrl())
+                                            .centerCrop().circleCrop().placeholder(R.drawable.img_avatar_placeholer)
+                                            .transition(DrawableTransitionOptions.withCrossFade())
+                                            .into(img_update_info_avt);
+                                    sendBroadcastUpdateSuccess(userDetailDTO);
+                                } catch (UnsupportedEncodingException e) {
                                     e.printStackTrace();
                                 }
+                            },
+                            error -> {
+                                Log.i("upload error", "error");
+                                NetworkResponse response = error.networkResponse;
+                                if (error instanceof ServerError) {
+                                    try {
+                                        String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+//                                    JSONObject object = new JSONObject(res);
+                                        Log.e("400 : ", res);
+                                        showAlertDialogError(getString(R.string.change_avatar_fail));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
 
-                            }
-                        }) {
+                                }
+                            }) {
 
-                    @Override
-                    public Map<String, String> getHeaders() {
-                        HashMap<String, String> map = new HashMap<>();
-                        map.put("Authorization", "Bearer " + token);
-                        return map;
-                    }
+                        @Override
+                        public Map<String, String> getHeaders() {
+                            HashMap<String, String> map = new HashMap<>();
+                            map.put("Authorization", "Bearer " + token);
+                            return map;
+                        }
 
-                    @Override
-                    protected Map<String, String> getParams() {
-                        Map<String, String> params = new HashMap<String, String>();
-                        return params;
-                    }
-                };
+                        @Override
+                        protected Map<String, String> getParams() {
+                            Map<String, String> params = new HashMap<String, String>();
+                            return params;
+                        }
+                    };
 
 //        restApiMultiPartRequest.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
-        Volley.newRequestQueue(this).add(restApiMultiPartRequest);
+            Volley.newRequestQueue(this).add(restApiMultiPartRequest);
+        }
     }
 
+    private void showAlertDialogError(String toString) {
+        AlertDialog dialog = new AlertDialog.Builder(this).
+                setTitle(getString(R.string.error_dialog_title))
+                .setMessage(toString)
+                .setNegativeButton(R.string.confirm_button, null)
+                .create();
+        dialog.show();
+    }
+
+    private void sendBroadcastUpdateSuccess(UserDetailDTO userDetailDTO) {
+        ViewInformationActivity.this.runOnUiThread(() -> {
+            Intent intent = new Intent("user/update/success");
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("dto", userDetailDTO);
+            intent.putExtras(bundle);
+            LocalBroadcastManager.getInstance(ViewInformationActivity.this).sendBroadcast(intent);
+        });
+    }
 
     public Uri getImageUri(Context inContext, Bitmap inImage) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -304,6 +353,12 @@ public class ViewInformationActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+    }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(updateInfoSuccess);
+        super.onDestroy();
     }
 
 }

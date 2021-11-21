@@ -9,7 +9,6 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -72,15 +71,14 @@ public class ChangeAvatarDialog extends Dialog {
                     context.startActivity(intent);
                     break;
                 case "takeFromGallery":
-                    Toast.makeText(context, "Action take photo active", Toast.LENGTH_LONG).show();
                     Intent galleryIntent = new Intent();
-                    galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
                     galleryIntent.setType("image/*");
+                    galleryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
+                    galleryIntent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
                     ((Activity) context).startActivityForResult(galleryIntent, REQUEST_GALLERY);
-
                     break;
                 case "takeNew":
-                    Toast.makeText(context, "Action take photo from gallery active", Toast.LENGTH_LONG).show();
                     Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     ((Activity) context).startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
                     break;

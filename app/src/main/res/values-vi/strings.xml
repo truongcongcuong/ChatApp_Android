@@ -46,6 +46,7 @@
     <string name="all_contact">Tất cả liên hệ</string>
     <string name="refresh">Tải lại</string>
     <string name="update_info">Chỉnh sửa thông tin</string>
+    <string name="update">Cập nhật</string>
     <string name="name">Tên</string>
     <string name="username">Tên đăng nhập</string>
     <string name="birthday">Ngày sinh</string>
@@ -54,8 +55,8 @@
     <string name="take_photo">Chụp ảnh mới</string>
     <string name="choose_from_gallery">Chọn ảnh từ bộ sưu tập</string>
     <string name="edit_profile">Chỉnh sửa trang cá nhân</string>
-    <string name="edit_profile_display_name">Nhập tên của bạn</string>
-    <string name="edit_profile_username">Nhập tên đăng nhập</string>
+    <string name="edit_profile_display_name">Tên</string>
+    <string name="edit_profile_username">Username</string>
 
     <string name="error_dialog_title">Lỗi …</string>
     <string name="cancel_button">Hủy</string>
@@ -170,4 +171,9 @@
     <string name="view_video_before_send">Xem trước video</string>
     <string name="remove_friend_with_user">Xóa bạn bè với %1$s?</string>
     <string name="waiting">Vui lòng đợi.</string>
+    <string name="email_title">Email</string>
+    <string name="helper_text_update_info_display_name">Tên này sẽ được hiển thị với những người khác.</string>
+    <string name="helper_text_update_info_user_name">Username là duy nhất và sẽ không thể thay đổi hoặc xóa sau khi tạo. Bạn có thể sử dụng username và mật khẩu để đăng nhập.</string>
+    <string name="update_info_success">Cập nhật thông tin thành công.</string>
+    <string name="change_avatar_fail">Đổi ảnh đại diện không thành công. Vui lòng thử lại sau.</string>
 </resources>

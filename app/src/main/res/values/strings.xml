@@ -44,6 +44,7 @@
     <string name="all_contact">All contacts</string>
     <string name="refresh">Refresh</string>
     <string name="update_info">Update Information</string>
+    <string name="update">Update</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="birthday">Birthday</string>
@@ -52,8 +53,8 @@
     <string name="take_photo">Take photo</string>
     <string name="choose_from_gallery">Choose from Gallery</string>
     <string name="edit_profile">Edit profile</string>
-    <string name="edit_profile_display_name">Enter your display name</string>
-    <string name="edit_profile_username">Enter your username</string>
+    <string name="edit_profile_display_name">Name</string>
+    <string name="edit_profile_username">Username</string>
     <string name="error_dialog_title">Error …</string>
     <string name="cancel_button">Cancel</string>
     <string name="un_name_group">Unnamed group</string>
@@ -178,6 +179,11 @@
     <string name="view_video_before_send">Video Preview</string>
     <string name="remove_friend_with_user">Remove friend with %1$s?</string>
     <string name="waiting">Please wait.</string>
+    <string name="email_title">Email</string>
+    <string name="helper_text_update_info_display_name">This name will be visible to others.</string>
+    <string name="helper_text_update_info_user_name">Username is unique and will not be changed or deleted once created. You can use username and password to login.</string>
+    <string name="update_info_success">Update information successfully.</string>
+    <string name="change_avatar_fail">Change avatar failed. Please try again later.</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

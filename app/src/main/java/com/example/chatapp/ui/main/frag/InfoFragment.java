@@ -1,8 +1,10 @@
 package com.example.chatapp.ui.main.frag;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -38,6 +40,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.MyMenuItem;
+import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.Language;
 import com.example.chatapp.ui.ChangePasswordActivity;
@@ -54,6 +57,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.vertx.core.json.Json;
+
 public class InfoFragment extends Fragment {
     private TextView txt_info_name;
     private ImageView image_info_image;
@@ -67,6 +72,26 @@ public class InfoFragment extends Fragment {
 
     private String mParam1;
     private String mParam2;
+
+    private final BroadcastReceiver updateInfoSuccess = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                UserDetailDTO userDetailDTO = (UserDetailDTO) bundle.getSerializable("dto");
+
+                SharedPreferences sharedPreferencesUser = getActivity().getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
+                UserSummaryDTO user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+                user.setUsername(userDetailDTO.getUsername());
+                user.setDisplayName(userDetailDTO.getDisplayName());
+                user.setImageUrl(userDetailDTO.getImageUrl());
+                displayInformation(user);
+
+                SharedPreferences.Editor editor = sharedPreferencesUser.edit();
+                editor.putString("user-info", Json.encode(user)).apply();
+            }
+        }
+    };
 
     public InfoFragment() {
     }
@@ -83,6 +108,9 @@ public class InfoFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(updateInfoSuccess, new IntentFilter("user/update/success"));
+
         /*
         enable menu trên action bar
          */
@@ -287,6 +315,10 @@ public class InfoFragment extends Fragment {
     private void getUserInfo() {
         SharedPreferences sharedPreferencesUser = getActivity().getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         UserSummaryDTO user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+        displayInformation(user);
+    }
+
+    private void displayInformation(UserSummaryDTO user) {
         txt_info_name.setText(user.getDisplayName());
         Glide.with(this).load(user.getImageUrl())
                 .placeholder(R.drawable.img_avatar_placeholer)
@@ -347,6 +379,12 @@ public class InfoFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu_info_fragment, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(updateInfoSuccess);
+        super.onDestroy();
     }
 
 }

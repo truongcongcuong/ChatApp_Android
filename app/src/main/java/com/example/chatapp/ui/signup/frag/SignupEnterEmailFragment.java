@@ -95,7 +95,7 @@ public class SignupEnterEmailFragment extends Fragment {
                 sendVerificationCode(email);
             else {
                 txt_sign_up_check_email.setText(R.string.check_email_empty);
-                txt_sign_up_check_email.setTextColor(getResources().getColor(R.color.error));
+                txt_sign_up_check_email.setTextColor(getResources().getColor(R.color.red));
             }
 
         });
@@ -106,7 +106,7 @@ public class SignupEnterEmailFragment extends Fragment {
                 verify(code);
             } else {
                 txt_sign_up_check_verification_code.setText(R.string.enter_confirmation);
-                txt_sign_up_check_verification_code.setTextColor(getResources().getColor(R.color.error));
+                txt_sign_up_check_verification_code.setTextColor(getResources().getColor(R.color.red));
             }
         });
 

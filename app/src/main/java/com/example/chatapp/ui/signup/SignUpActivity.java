@@ -16,7 +16,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.ServerError;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
@@ -90,34 +90,40 @@ public class SignUpActivity extends AppCompatActivity {
         txt_sign_up_error_response.setText("");
         if (edt_sign_up_name.getEditText().getText().toString().trim().isEmpty()) {
             edt_sign_up_name.setError(getString(R.string.check_name_empty));
+            edt_sign_up_name.requestFocus();
             return false;
         }
         edt_sign_up_name.setError(null);
 
         if (edt_sign_up_enter_password.getEditText().getText().toString().trim().isEmpty()) {
             edt_sign_up_enter_password.setError(getString(R.string.check_password_empty));
+            edt_sign_up_enter_password.requestFocus();
             return false;
         }
         if (!edt_sign_up_enter_password.getEditText().getText().toString().trim().matches("[\\w]{8,}")) {
             edt_sign_up_enter_password.setError(getString(R.string.change_password_detail_8_char));
+            edt_sign_up_enter_password.requestFocus();
             return false;
         }
         edt_sign_up_enter_password.setError(null);
 
         if (!edt_sign_up_enter_password.getEditText().getText().toString().trim().equals(edt_sign_up_re_enter_password.getEditText().getText().toString())) {
             edt_sign_up_re_enter_password.setError(getString(R.string.check_password));
+            edt_sign_up_re_enter_password.requestFocus();
             return false;
         }
         edt_sign_up_re_enter_password.setError(null);
 
         if (edt_sign_up_phone_number.getEditText().getText().toString().trim().isEmpty()) {
             edt_sign_up_phone_number.setError(getString(R.string.check_phone_empty));
+            edt_sign_up_phone_number.requestFocus();
             return false;
         }
         edt_sign_up_phone_number.setError(null);
 
         if (!edt_sign_up_phone_number.getEditText().getText().toString().trim().matches("[0-9]{10,11}")) {
             edt_sign_up_phone_number.setError(getString(R.string.check_phone_regex));
+            edt_sign_up_phone_number.requestFocus();
             return false;
         }
         edt_sign_up_phone_number.setError(null);
@@ -125,11 +131,21 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void sendSignUpUserToServer(UserSignUpDTO user) {
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_SIGNUP + "save_information",
+        JSONObject objectRequest = new JSONObject();
+        try {
+            objectRequest.put("displayName", user.getDisplayName());
+            objectRequest.put("password", user.getPassword());
+            objectRequest.put("phoneNumber", user.getPhoneNumber());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
+                Constant.API_SIGNUP + "save_information",
+                objectRequest,
                 response -> {
                     try {
-                        JSONObject object = new JSONObject(response);
-                        user.setId((object.getString("id")));
+//                        JSONObject object = new JSONObject(response);
+                        user.setId((response.getString("id")));
                         Intent intent = new Intent(SignUpActivity.this, SignUpStep2Activity.class);
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("user", user);
@@ -144,20 +160,30 @@ public class SignUpActivity extends AppCompatActivity {
                 try {
                     String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
                     JSONObject object = new JSONObject(res);
-                    txt_sign_up_error_response.setText(object.getString("message"));
+                    String fieldName = object.getString("field");
+                    if (fieldName != null) {
+                        if (fieldName.equalsIgnoreCase("phoneNumber")) {
+                            edt_sign_up_phone_number.setError(object.getString("message"));
+                            edt_sign_up_phone_number.requestFocus();
+                        } else if (fieldName.equalsIgnoreCase("displayName")) {
+                            edt_sign_up_name.setError(object.getString("message"));
+                            edt_sign_up_name.requestFocus();
+                        } else if (fieldName.equalsIgnoreCase("password")) {
+                            edt_sign_up_enter_password.setError(object.getString("message"));
+                            edt_sign_up_enter_password.requestFocus();
+                        }
+                    } else {
+                        txt_sign_up_error_response.setText(object.getString("message"));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
         }) {
             @Nullable
             @Override
             protected Map<String, String> getParams() {
                 HashMap<String, String> map = new HashMap<>();
-                map.put("displayName", user.getDisplayName());
-                map.put("password", user.getPassword());
-                map.put("phoneNumber", user.getPhoneNumber());
                 return map;
             }
         };

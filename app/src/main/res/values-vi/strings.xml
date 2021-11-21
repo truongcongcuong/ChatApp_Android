@@ -27,7 +27,7 @@
     <string name="pls_re_enter_password">Vui lòng xác nhận lại mật khẩu mới</string>
     <string name="check_password">Mật khẩu không khớp. Vui lòng thử lại</string>
     <string name="check_password_empty">Vui lòng nhập mật khẩu của bạn …</string>
-    <string name="check_email_empty">Vui lòng nhập Email của bạn …</string>
+    <string name="check_email_empty">Vui lòng nhập email của bạn …</string>
     <string name="check_user_name_empty">Vui lòng nhập tên đăng nhập của bạn …</string>
     <string name="check_name_empty">Vui lòng nhập tên đầy đủ của bạn …</string>
     <string name="check_phone_empty">Vui lòng nhập số điện thoại …</string>
@@ -176,4 +176,5 @@
     <string name="helper_text_update_info_user_name">Username là duy nhất và sẽ không thể thay đổi hoặc xóa sau khi tạo. Bạn có thể sử dụng username và mật khẩu để đăng nhập.</string>
     <string name="update_info_success">Cập nhật thông tin thành công.</string>
     <string name="change_avatar_fail">Đổi ảnh đại diện không thành công. Vui lòng thử lại sau.</string>
+    <string name="hint_signin_username">Tên đăng nhập, số điện thoại hoặc email.</string>
 </resources>

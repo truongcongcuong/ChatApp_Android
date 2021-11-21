@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -203,10 +204,15 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .key(getResources().getString(R.string.gender))
                 .name(userDetailDTO.getGender())
                 .build());
-        if (userDetailDTO.getDateOfBirth() != null) {
+        try {
             items.add(MyMenuItem.builder()
                     .key(getResources().getString(R.string.birthday))
                     .name(sdf.format(sdfFull.parse(userDetailDTO.getDateOfBirth())))
+                    .build());
+        } catch (ParseException | NullPointerException e) {
+            items.add(MyMenuItem.builder()
+                    .key(getResources().getString(R.string.birthday))
+                    .name("")
                     .build());
         }
         items.add(MyMenuItem.builder()

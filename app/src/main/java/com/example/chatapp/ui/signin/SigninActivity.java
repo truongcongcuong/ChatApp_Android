@@ -99,21 +99,23 @@ public class SigninActivity extends AppCompatActivity {
         timer = new Timer();
 
         btn_sign_in.setOnClickListener(v -> {
+            txt_sign_in_error.setText("");
             username = edt_sign_in_user_name.getEditText().getText().toString().trim();
             if (TextUtils.isEmpty(username)) {
                 edt_sign_in_user_name.setError(getString(R.string.check_user_name_empty));
+                edt_sign_in_user_name.requestFocus();
                 return;
             }
             edt_sign_in_user_name.setError(null);
             password = edt_sign_in_password.getEditText().getText().toString().trim();
             if (TextUtils.isEmpty(password)) {
                 edt_sign_in_password.setError(getString(R.string.check_password_empty));
+                edt_sign_in_password.requestFocus();
                 return;
             }
             edt_sign_in_password.setError(null);
             btn_sign_in.setVisibility(View.GONE);
             progress_bar.setVisibility(View.VISIBLE);
-            txt_sign_in_error.setText(getString(R.string.waiting));
             timer.cancel();
             timer = new Timer();
             timer.schedule(new TimerTask() {
@@ -130,7 +132,6 @@ public class SigninActivity extends AppCompatActivity {
         Log.e("signin", "request");
         StringRequest request = new StringRequest(Request.Method.POST, Constant.API_AUTH + "signin",
                 response -> {
-                    btn_sign_in.setVisibility(View.VISIBLE);
                     progress_bar.setVisibility(View.GONE);
                     try {
                         Log.e("signin-res", response);
@@ -176,6 +177,7 @@ public class SigninActivity extends AppCompatActivity {
                     if (error instanceof ServerError) {
                         try {
                             String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                            System.out.println("res signin= " + res);
                             JSONObject object = new JSONObject(res);
                             txt_sign_in_error.setText(object.getString("message"));
                         } catch (Exception e) {

@@ -184,6 +184,7 @@
     <string name="helper_text_update_info_user_name">Username is unique and will not be changed or deleted once created. You can use username and password to login.</string>
     <string name="update_info_success">Update information successfully.</string>
     <string name="change_avatar_fail">Change avatar failed. Please try again later.</string>
+    <string name="hint_signin_username">Username, phone or email.</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

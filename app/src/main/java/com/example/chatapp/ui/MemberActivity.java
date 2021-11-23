@@ -82,6 +82,32 @@ public class MemberActivity extends AppCompatActivity {
         }
     };
 
+    private final BroadcastReceiver setAdmin = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                loadMemberList();
+            }
+        }
+    };
+
+    private final BroadcastReceiver recallAdmin = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                RoomDTO newRoom = (RoomDTO) bundle.getSerializable("dto");
+                inboxDto.setRoom(newRoom);
+                loadMemberList();
+            }
+        }
+    };
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +116,8 @@ public class MemberActivity extends AppCompatActivity {
         setContentView(R.layout.activity_member);
         LocalBroadcastManager.getInstance(this).registerReceiver(addMember, new IntentFilter("room/members/add"));
         LocalBroadcastManager.getInstance(this).registerReceiver(deleteMember, new IntentFilter("room/members/delete"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(setAdmin, new IntentFilter("room/members/admin/setNew"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(recallAdmin, new IntentFilter("room/members/admin/recall"));
 
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)
@@ -225,6 +253,8 @@ public class MemberActivity extends AppCompatActivity {
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(addMember);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(deleteMember);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(setAdmin);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(recallAdmin);
         super.onDestroy();
     }
 

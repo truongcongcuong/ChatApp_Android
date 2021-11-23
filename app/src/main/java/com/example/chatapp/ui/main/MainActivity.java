@@ -273,6 +273,38 @@ public class MainActivity extends AppCompatActivity implements SendingData {
                 });
 
         WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/room/members/admin/setNew")
+                .subscribe(x -> {
+                    RoomDTO newRoom = gson.fromJson(x.getPayload(), RoomDTO.class);
+                    System.out.println("set admin realtime = " + newRoom);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("room/members/admin/setNew");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", newRoom);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
+                .topic("/users/queue/room/members/admin/recall")
+                .subscribe(x -> {
+                    RoomDTO newRoom = gson.fromJson(x.getPayload(), RoomDTO.class);
+                    System.out.println("recall admin realtime = " + newRoom);
+                    MainActivity.this.runOnUiThread(() -> {
+                        Intent intent = new Intent("room/members/admin/recall");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("dto", newRoom);
+                        intent.putExtras(bundle);
+                        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+                    });
+                }, throwable -> {
+                    Log.i("erro--", throwable.getMessage());
+                });
+
+        WebSocketClient.getInstance().getStompClient()
                 .topic("/users/queue/read")
                 .subscribe(x -> {
                     ReadByReceiver readByReceiver = gson.fromJson(x.getPayload(), ReadByReceiver.class);

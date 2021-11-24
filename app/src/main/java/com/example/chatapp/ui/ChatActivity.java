@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
@@ -35,6 +36,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -62,6 +64,7 @@ import com.example.chatapp.dto.ReadByReceiver;
 import com.example.chatapp.dto.ReadBySend;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.enumvalue.MediaType;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.OnlineStatus;
 import com.example.chatapp.enumvalue.RoomType;
@@ -105,6 +108,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     private int page = 0;
     private int first = 0;
     private int last = first;
+    private boolean lastPage = false;
     private boolean isFirstTimeRun = true;
 
     private String access_token;
@@ -189,9 +193,9 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 MessageDto newMessage = (MessageDto) bundle.getSerializable("dto");
-                if (newMessage.getSender() != null)
-                    adapter.deleteOldReadTracking(newMessage.getSender().getId());
                 updateMessageRealTime(newMessage);
+                if (newMessage.getSender() != null)
+                    adapter.deleteOldReadTracking(newMessage, newMessage.getSender().getId());
             }
         }
     };
@@ -313,6 +317,12 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         MyLinerLayoutManager linearLayoutManager = new MyLinerLayoutManager(ChatActivity.this);
         linearLayoutManager.setStackFromEnd(true);
         rcv_chat_list.setLayoutManager(linearLayoutManager);
+        rcv_chat_list.setItemAnimator(new DefaultItemAnimator() {
+            @Override
+            public boolean canReuseUpdatedViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, @NonNull List<Object> payloads) {
+                return true;
+            }
+        });
 
         // scroll event
         rcv_chat_list.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -353,18 +363,20 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         });
 
         ibt_chat_send_media.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     new AlertDialog.Builder(this)
                             .setTitle(getString(R.string.permission_needed_title))
                             .setMessage(getString(R.string.permission_needed_message))
                             .setPositiveButton(getString(R.string.confirm_button), (dialog, which) ->
                                     ActivityCompat.requestPermissions(ChatActivity.this,
-                                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                                                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                             REQUEST_PERMISSION))
                             .setNegativeButton(getString(R.string.cancel_button), (dialog, which) -> dialog.cancel()).create().show();
                 } else {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
                 }
             } else {
                 openFileChoose();
@@ -554,7 +566,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         MessageDto lastMessage = adapter.getLastMessage();
         System.out.println("lastMessage = " + lastMessage);
         boolean find = false;
-        if (lastMessage != null) {
+        if (lastMessage != null && lastMessage.getId() != null) {
             Set<ReadByDto> readTracking = lastMessage.getReadbyes();
             if (readTracking != null) {
                 for (ReadByDto read : readTracking) {
@@ -587,58 +599,61 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     }
 
     private void updateList() {
-        Log.e("url : ", Constant.API_CHAT + inboxDto.getId());
-        if (inboxDto != null && inboxDto.getId() != null) {
-            StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + inboxDto.getId() + "?size=" + size + "&page=" + page,
-                    response -> {
-                        try {
-                            page++;
-                            String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
-                            JSONObject object = new JSONObject(res);
-                            JSONArray array = (JSONArray) object.get("content");
+        if (!lastPage) {
+            Log.e("url : ", Constant.API_CHAT + inboxDto.getId());
+            if (inboxDto != null && inboxDto.getId() != null) {
+                StringRequest request = new StringRequest(Request.Method.GET, Constant.API_CHAT + inboxDto.getId() + "?size=" + size + "&page=" + page,
+                        response -> {
+                            try {
+                                page++;
+                                String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                                JSONObject object = new JSONObject(res);
+                                JSONArray array = (JSONArray) object.get("content");
+                                lastPage = (boolean) object.get("last");
 
-                            Type listType = new TypeToken<List<MessageDto>>() {
-                            }.getType();
-                            List<MessageDto> list = gson.fromJson(array.toString(), listType);
-                            if (!list.isEmpty()) {
-                                adapter.updateList(list);
-                                if (isFirstTimeRun) {
-                                    timer.cancel();
-                                    timer = new Timer();
-                                    timer.schedule(
-                                            new TimerTask() {
-                                                @Override
-                                                public void run() {
-                                                    sendReadMessageNotification();
-                                                }
-                                            },
-                                            DELAY
-                                    );
-                                    isFirstTimeRun = false;
+                                Type listType = new TypeToken<List<MessageDto>>() {
+                                }.getType();
+                                List<MessageDto> list = gson.fromJson(array.toString(), listType);
+                                if (!list.isEmpty()) {
+                                    adapter.updateList(list);
+                                    if (isFirstTimeRun) {
+                                        timer.cancel();
+                                        timer = new Timer();
+                                        timer.schedule(
+                                                new TimerTask() {
+                                                    @Override
+                                                    public void run() {
+                                                        sendReadMessageNotification();
+                                                    }
+                                                },
+                                                DELAY
+                                        );
+                                        isFirstTimeRun = false;
+                                    }
+                                    if (page == 0) {
+                                        rcv_chat_list.scrollToPosition(list.size() - 1);
+                                    } else {
+                                        rcv_chat_list.scrollToPosition(size + (last - first) - 1);
+                                    }
                                 }
-                                if (page == 0) {
-                                    rcv_chat_list.scrollToPosition(list.size() - 1);
-                                } else {
-                                    rcv_chat_list.scrollToPosition(size + (last - first) - 1);
-                                }
+                            } catch (JSONException | UnsupportedEncodingException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException | UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                    },
-                    error -> Log.i("chat activ get mess er", error.toString())) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    HashMap<String, String> map = new HashMap<>();
-                    map.put("Authorization", "Bearer " + access_token);
-                    return map;
-                }
-            };
+                        },
+                        error -> Log.i("chat activ get mess er", error.toString())) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + access_token);
+                        return map;
+                    }
+                };
 
-            DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-            request.setRetryPolicy(retryPolicy);
-            RequestQueue requestQueue = Volley.newRequestQueue(this);
-            requestQueue.add(request);
+                DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                request.setRetryPolicy(retryPolicy);
+                RequestQueue requestQueue = Volley.newRequestQueue(this);
+                requestQueue.add(request);
+            }
         }
     }
 
@@ -646,14 +661,10 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     private void updateMessageRealTime(MessageDto messageDto) {
         if (messageDto.getRoomId().equals(inboxDto.getRoom().getId())) {
             this.adapter.updateMessage(messageDto);
-            ChatActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    rcv_chat_list.getLayoutManager()
-                            .smoothScrollToPosition(rcv_chat_list,
-                                    new RecyclerView.State(),
-                                    rcv_chat_list.getAdapter().getItemCount());
-                }
-            });
+            rcv_chat_list.getLayoutManager()
+                    .smoothScrollToPosition(rcv_chat_list,
+                            new RecyclerView.State(),
+                            rcv_chat_list.getAdapter().getItemCount());
             timer.cancel();
             timer = new Timer();
             timer.schedule(
@@ -847,7 +858,27 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     @Override
     public void reply(MessageDto messageDto) {
         layout_reply_chat_activity.setVisibility(View.VISIBLE);
-        txt_content_reply_chat_activity.setText(messageDto.getContent());
+        if (messageDto.getType().equals(MessageType.TEXT))
+            txt_content_reply_chat_activity.setText(messageDto.getContent());
+        else if (messageDto.getType().equals(MessageType.LINK)) {
+            String s = String.format("[%s] %s", getString(R.string.message_type_link), messageDto.getContent());
+            txt_content_reply_chat_activity.setText(s);
+        } else {
+            List<MyMedia> mediaList = messageDto.getMedia();
+            if (mediaList != null && !mediaList.isEmpty()) {
+                MyMedia media = mediaList.get(mediaList.size() - 1);
+                String content = messageDto.getContent() != null ? messageDto.getContent() : "";
+                String s = String.format("[%s] %s", getString(R.string.message_type_file), content);
+                if (media.getType().equals(MediaType.VIDEO)) {
+                    s = String.format("[%s] %s", getString(R.string.message_type_video), content);
+                } else if (media.getType().equals(MediaType.IMAGE)) {
+                    s = String.format("[%s] %s", getString(R.string.message_type_image), content);
+                }
+                txt_content_reply_chat_activity.setText(s);
+            } else {
+                txt_content_reply_chat_activity.setText(messageDto.getContent());
+            }
+        }
         txt_name_reply_chat_activity.setText(String.format("%s %s", getString(R.string.reply), messageDto.getSender().getDisplayName()));
         replyMessageId = messageDto.getId();
         edt_chat_message_send.requestFocus();

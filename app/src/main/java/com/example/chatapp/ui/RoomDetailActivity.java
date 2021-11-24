@@ -226,6 +226,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                     .build());
         } else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
             showImageAndNameOfRoom(context, inboxDto);
+            room_detail_create_at.setVisibility(View.VISIBLE);
             room_detail_create_at.setText(String.format("%s: %s", getString(R.string.created), inboxDto.getRoom().getCreateAt()));
             myMenuItems.add(MyMenuItem.builder()
                     .key("viewMembers")
@@ -249,6 +250,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                         .name(getString(R.string.delete_group))
                         .build());
             }
+            btn_change_image_of_room.setVisibility(View.VISIBLE);
             btn_change_image_of_room.setPadding(3, 0, 3, 3);
             if (isValidContextForGlide(context)) {
                 Glide.with(context)

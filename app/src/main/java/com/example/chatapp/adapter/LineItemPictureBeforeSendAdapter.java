@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -59,12 +60,6 @@ public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineI
         if (files != null && position < files.size()) {
             File f = files.get(position);
 
-            Glide.with(context)
-                    .load(f)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .apply(RequestOptions.bitmapTransform(new RoundedCorners(30)))
-                    .into(holder.item_picture_before_send_img_content);
-
             holder.item_picture_before_send_img_delete.setOnClickListener(v -> {
                 int index = files.indexOf(f);
                 files.remove(f);
@@ -75,6 +70,12 @@ public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineI
             click vào ảnh để xem
              */
             if (FileUtil.getMessageType(f).equals(MediaType.IMAGE)) {
+                Glide.with(context)
+                        .load(f)
+                        .transition(DrawableTransitionOptions.withCrossFade())
+                        .apply(RequestOptions.bitmapTransform(new RoundedCorners(30)))
+                        .into(holder.item_picture_before_send_img_content);
+
                 holder.item_picture_before_send_img_content.setOnClickListener(v -> {
                     Intent intent = new Intent(context, ViewImageActivity.class);
                     Bundle bundle = new Bundle();
@@ -85,6 +86,12 @@ public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineI
                     context.startActivity(intent);
                 });
             } else if (FileUtil.getMessageType(f).equals(MediaType.VIDEO)) {
+                Glide.with(context)
+                        .load(f)
+                        .transition(DrawableTransitionOptions.withCrossFade())
+                        .apply(RequestOptions.bitmapTransform(new RoundedCorners(30)))
+                        .into(holder.item_picture_before_send_img_content);
+
                 holder.item_picture_before_send_icon_center.setVisibility(View.VISIBLE);
                 holder.item_picture_before_send_icon_center.setImageResource(R.drawable.ic_play_video_24);
                 holder.item_picture_before_send_img_content.setOnClickListener(v -> {
@@ -96,6 +103,13 @@ public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineI
                     intent.putExtras(bundle);
                     context.startActivity(intent);
                 });
+            } else if (FileUtil.getMessageType(f).equals(MediaType.FILE)) {
+                holder.itemView.setOnClickListener(v -> {
+                    Toast.makeText(context, f.getName() + " - " + FileUtils.byteCountToDisplaySize(f.length()), Toast.LENGTH_SHORT).show();
+                });
+
+                holder.item_picture_before_send_icon_center.setVisibility(View.VISIBLE);
+                holder.item_picture_before_send_icon_center.setImageResource(R.drawable.ic_round_file_24);
             }
         }
     }

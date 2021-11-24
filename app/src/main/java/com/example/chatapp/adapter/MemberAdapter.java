@@ -71,11 +71,11 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
         /*
         kiểm tra xem người dùng hiện tại có phải admin của room hay không
          */
-        if (members != null && !members.isEmpty()) {
+        if (this.members != null && !this.members.isEmpty()) {
             boolean find = false;
             int i = 0;
             do {
-                MemberDto mem = members.get(i);
+                MemberDto mem = this.members.get(i);
                 if (mem.getUser().getId().equals(user.getId())) {
                     currentUserIsAdmin = mem.isAdmin();
                     memberDto = mem;
@@ -83,9 +83,9 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                 }
                 i++;
             }
-            while (!find && i < members.size());
-            members.removeIf(x -> x.getUser().getId().equals(user.getId()));
-            members.add(0, memberDto);
+            while (!find && i < this.members.size());
+            this.members.removeIf(x -> x.getUser().getId().equals(user.getId()));
+            this.members.add(0, memberDto);
 
             Log.d("isAdmin", currentUserIsAdmin + "");
             Log.d("current member", memberDto.toString());
@@ -117,55 +117,61 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                         .into(imageOfMember);
 
                 String creatorId = inboxDto.getRoom().getCreateByUserId();
-            /*
-            nếu người dùng hiện tại là người tạo nhóm, có quyền cao nhất
-             */
-                if (creatorId != null && creatorId.equals(user.getId())) {
                 /*
-                hiện icon set admin và xóa trên các thành viên còn lại
+                nếu người dùng hiện tại là người tạo nhóm, có quyền cao nhất
                  */
+                if (creatorId != null && creatorId.equals(user.getId())) {
+                    /*
+                    hiện icon set admin và xóa trên các thành viên còn lại
+                     */
                     if (!member.getUser().getId().equals(user.getId())) {
                         if (!member.isAdmin()) {
-                        /*
-                        nếu thành viên k phải admin thì hiện thêm icon set admin
-                         */
-                            setAdmin.setImageResource(R.drawable.ic_baseline_admin_panel_settings_24);
+                            /*
+                            nếu thành viên k phải admin thì hiện thêm icon set admin
+                             */
+                            setAdmin.setImageResource(R.drawable.ic_baseline_set_admin_24);
                             setAdmin.setOnClickListener(v -> setAdminForMember(member));
                         } else {
-                        /*
-                        nếu thành viên là admin rồi thì k hiện icon set admin
-                         */
-                            setAdmin.setImageDrawable(null);
-                            setAdmin.setClickable(false);
+                            /*
+                            nếu thành viên là admin rồi thì hiện icon thu hồi quyền admin
+                             */
+                            setAdmin.setImageResource(R.drawable.ic_baseline_recall_admin_24);
+                            setAdmin.setOnClickListener(v -> recallAdminForMember(member));
                         }
                         delete.setImageResource(R.drawable.ic_baseline_delete_forever_24);
                         delete.setOnClickListener(v -> deleteMember(member));
                     }
                 } else {
-                /*
-                nếu người dùng hiện tại  k phải người tạo nhóm nhưng là admin
-                 */
-                    if (currentUserIsAdmin) {
                     /*
-                    thêm icon set admin và xóa trên những người còn lại
+                    nếu người dùng hiện tại  k phải người tạo nhóm nhưng là admin
                      */
+                    if (currentUserIsAdmin) {
+                        /*
+                        thêm icon set admin và xóa trên những người còn lại
+                         */
                         if (!member.isAdmin() && creatorId != null && !creatorId.equals(member.getUser().getId())) {
-                            setAdmin.setImageResource(R.drawable.ic_baseline_admin_panel_settings_24);
+                            setAdmin.setImageResource(R.drawable.ic_baseline_set_admin_24);
                             delete.setImageResource(R.drawable.ic_baseline_delete_forever_24);
 
                             setAdmin.setOnClickListener(v -> setAdminForMember(member));
-
+                            delete.setOnClickListener(v -> deleteMember(member));
+                        }
+                    } else {
+                        /*
+                        nếu là thành viên bình thường thì có quyền xóa thành viên nào mà mình đã thêm vào
+                         */
+                        if (!member.isAdmin() && member.getAddByUser() != null && user.getId().equals(member.getAddByUser().getId())) {
+                            delete.setImageResource(R.drawable.ic_baseline_delete_forever_24);
                             delete.setOnClickListener(v -> deleteMember(member));
                         }
                     }
                 }
 
-                if (member.isAdmin()) {
-                    String dt = context.getString(R.string.group_admin);
-                    if (creatorId != null && creatorId.equals(member.getUser().getId())) {
-                        dt += " " + context.getString(R.string.group_creator);
-                    }
-                    detail.setText(dt);
+                if (creatorId != null && creatorId.equals(member.getUser().getId())) {
+                    String s = context.getString(R.string.group_admin) + " " + context.getString(R.string.group_creator);
+                    detail.setText(s);
+                } else if (member.isAdmin()) {
+                    detail.setText(context.getString(R.string.group_admin));
                 } else {
                     try {
                         String s = context.getString(R.string.member_add_by, member.getAddByUser().getDisplayName(), member.getAddTime());
@@ -174,12 +180,47 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                         detail.setText(context.getString(R.string.member_add_by_undefine));
                     }
                 }
-            } catch (Exception ignored) {
-
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
         return view;
+    }
+
+    private void recallAdminForMember(MemberDto member) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        String message = context.getString(R.string.recall_admin_for_member, member.getUser().getDisplayName());
+        builder.setMessage(message)
+                .setPositiveButton(R.string.cancel_button, (dialog, id) -> dialog.cancel())
+                .setNegativeButton(R.string.confirm_button, (dialog, id) -> {
+                    StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_ROOM + "admin/" + inboxDto.getRoom().getId() + "/" + member.getUser().getId(),
+                            response -> {
+                                for (MemberDto m : members) {
+                                    if (m.getUser().getId().equals(member.getUser().getId()))
+                                        m.setAdmin(false);
+                                }
+                                notifyDataSetChanged();
+                                AlertDialog.Builder alert = new AlertDialog.Builder(context);
+                                alert.setMessage(context.getString(R.string.recall_admin_for_member_success, member.getUser().getDisplayName()))
+                                        .setPositiveButton(R.string.confirm_button, (dial, identify) -> dialog.cancel());
+                                alert.setCancelable(false);
+                                alert.create().show();
+                            },
+                            error -> Log.i("recall admin error", error.toString())) {
+                        @Override
+                        public Map<String, String> getHeaders() {
+                            HashMap<String, String> map = new HashMap<>();
+                            map.put("Authorization", "Bearer " + access_token);
+                            return map;
+                        }
+                    };
+                    RequestQueue requestQueue = Volley.newRequestQueue(context);
+                    DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                    request.setRetryPolicy(retryPolicy);
+                    requestQueue.add(request);
+                });
+        builder.create().show();
     }
 
     /*
@@ -241,7 +282,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                                 }
                                 notifyDataSetChanged();
                                 AlertDialog.Builder alert = new AlertDialog.Builder(context);
-                                alert.setMessage(context.getString(R.string.set_member_to_admin_success))
+                                alert.setMessage(context.getString(R.string.set_member_to_admin_success, member.getUser().getDisplayName()))
                                         .setPositiveButton(R.string.confirm_button, (dial, identify) -> dialog.cancel());
                                 alert.setCancelable(false);
                                 alert.create().show();

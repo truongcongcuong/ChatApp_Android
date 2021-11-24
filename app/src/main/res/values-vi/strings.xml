@@ -177,4 +177,6 @@
     <string name="update_info_success">Cập nhật thông tin thành công.</string>
     <string name="change_avatar_fail">Đổi ảnh đại diện không thành công. Vui lòng thử lại sau.</string>
     <string name="hint_signin_username">Tên đăng nhập, số điện thoại hoặc email.</string>
+    <string name="recall_admin_for_member">Thu hồi quyền quản trị nhóm của %1$s?</string>
+    <string name="recall_admin_for_member_success">Thu hồi quyền quản trị nhóm của %1$s thành công.</string>
 </resources>

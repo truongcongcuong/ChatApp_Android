@@ -185,6 +185,8 @@
     <string name="update_info_success">Update information successfully.</string>
     <string name="change_avatar_fail">Change avatar failed. Please try again later.</string>
     <string name="hint_signin_username">Username, phone or email.</string>
+    <string name="recall_admin_for_member">Revoke %1$s\'s group admin rights?</string>
+    <string name="recall_admin_for_member_success">Successfully revoked %1$s\'s group admin rights.</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

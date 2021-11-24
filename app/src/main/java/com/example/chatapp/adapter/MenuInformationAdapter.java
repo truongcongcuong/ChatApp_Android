@@ -1,5 +1,6 @@
 package com.example.chatapp.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,20 +17,24 @@ import java.util.List;
 
 public class MenuInformationAdapter extends ArrayAdapter<MyMenuItem> {
     private final Context context;
-    private final List<MyMenuItem> items;
+    private List<MyMenuItem> items;
+    private final int resource;
 
     public MenuInformationAdapter(Context context, List<MyMenuItem> items, int resource) {
         super(context, resource, items);
         this.context = context;
         this.items = items;
+        this.resource = resource;
+    }
+
+    public void setItems(List<MyMenuItem> items) {
+        this.items = items;
+        notifyDataSetChanged();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (view == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.line_item_information, parent, false);
-        }
+        @SuppressLint("ViewHolder") View view = LayoutInflater.from(context).inflate(resource, parent, false);
 
         MyMenuItem item = items.get(position);
 

@@ -7,12 +7,14 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -46,7 +48,7 @@ import java.util.Set;
 public class MessageAdapter extends RecyclerView.Adapter {
 
     private final Context context;
-    private final List<MessageDto> list;
+    private List<MessageDto> list;
     private static final int ITEM_SEND = 1;
     private static final int ITEM_RECEIVER = 2;
     private static final int ITEM_SYSTEM = 3;
@@ -79,18 +81,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                 reactions.add(reaction);
 
                 m.setReactions(reactions);
-
-                /*
-                tìm holder tại vị trí message đó, set recyclable=true để cập nhật lại reaction
-                sau đó set lại recyclable=false để khi cuộn dữ liệu không bị sai
-                 */
-                RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
-                if (holder != null) {
-                    holder.setIsRecyclable(true);
-                    Activity activity = (Activity) context;
-                    activity.runOnUiThread(this::notifyDataSetChanged);
-                    holder.setIsRecyclable(false);
-                }
+                notifyItemChanged(i);
             }
         }
     }
@@ -112,39 +103,14 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
                 m.setReadbyes(readbyes);
                 Log.i("message readed", m.toString());
-
-                /*
-                tìm holder tại vị trí message, bật recyclable sau đó cập nhật read tracking
-                sau đó tắt recyclable
-                 */
-                try {
-                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
-                    if (holder != null) {
-                        holder.setIsRecyclable(true);
-                        Activity activity = (Activity) context;
-                        activity.runOnUiThread(this::notifyDataSetChanged);
-                        holder.setIsRecyclable(false);
-                    }
-                } catch (Exception ignored) {
-
-                }
+                notifyItemChanged(i);
             }
             // xóa read tracking cũ cho message
-            if (!m.getId().equals(readByReceiver.getMessageId())) {
+            else {
                 if (readbyes != null && !readbyes.isEmpty()) {
                     readbyes.removeIf(x -> x.getReadByUser().getId().equals(readByReceiver.getReadByUser().getId()));
                     m.setReadbyes(readbyes);
-                }
-                try {
-                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
-                    if (holder != null) {
-                        holder.setIsRecyclable(true);
-                        Activity activity = (Activity) context;
-                        activity.runOnUiThread(this::notifyDataSetChanged);
-                        holder.setIsRecyclable(false);
-                    }
-                } catch (Exception ignored) {
-
+                    notifyItemChanged(i);
                 }
             }
         }
@@ -154,25 +120,17 @@ public class MessageAdapter extends RecyclerView.Adapter {
     xóa readTracking cũ
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void deleteOldReadTracking(String userId) {
+    public void deleteOldReadTracking(MessageDto newMessage, String userId) {
         for (int i = 0; i < list.size(); i++) {
             MessageDto m = list.get(i);
-            Set<ReadByDto> readbyes = m.getReadbyes();
-            // xóa readby cũ cho message
-            if (readbyes != null && !readbyes.isEmpty()) {
-                readbyes.removeIf(x -> x.getReadByUser().getId().equals(userId));
-                m.setReadbyes(readbyes);
-            }
-            try {
-                RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
-                if (holder != null) {
-                    holder.setIsRecyclable(true);
-                    Activity activity = (Activity) context;
-                    activity.runOnUiThread(this::notifyDataSetChanged);
-                    holder.setIsRecyclable(false);
+            if (!m.getId().equals(newMessage.getId())) {
+                Set<ReadByDto> readbyes = m.getReadbyes();
+                // xóa readby cũ cho message
+                if (readbyes != null && !readbyes.isEmpty()) {
+                    readbyes.removeIf(x -> x.getReadByUser().getId().equals(userId));
+                    m.setReadbyes(readbyes);
+                    notifyItemChanged(i);
                 }
-            } catch (Exception ignored) {
-
             }
         }
     }
@@ -225,25 +183,82 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     chỉ hiện thời gian ở tin nhắn cuối cùng
                      */
                     if (position == list.size() - 1) {
+                        int top = 0;
+                        if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
+                            if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
+                                top = (int) convertDpToPixel(3, context);
+                        }
+                        senderViewHolder.timeOfMessage.setPadding(
+                                (int) convertDpToPixel(10, context),
+                                top,
+                                (int) convertDpToPixel(10, context),
+                                (int) convertDpToPixel(3, context)
+                        );
                         senderViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                         senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                     } else {
                         if (messageDto.getSender() != null) {
                             if (list.get(position + 1).getSender() == null) {
+                                int top = 0;
+                                if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
+                                    if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
+                                        top = (int) convertDpToPixel(3, context);
+                                }
+                                senderViewHolder.timeOfMessage.setPadding(
+                                        (int) convertDpToPixel(10, context),
+                                        top,
+                                        (int) convertDpToPixel(10, context),
+                                        (int) convertDpToPixel(3, context)
+                                );
                                 senderViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                 senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                             } else if (!messageDto.getSender().getId().equals(list.get(position + 1).getSender().getId())) {
+                                int top = 0;
+                                if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
+                                    if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
+                                        top = (int) convertDpToPixel(3, context);
+                                }
+                                senderViewHolder.timeOfMessage.setPadding(
+                                        (int) convertDpToPixel(10, context),
+                                        top,
+                                        (int) convertDpToPixel(10, context),
+                                        (int) convertDpToPixel(3, context)
+                                );
                                 senderViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                 senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
-                            }
-                        }
+                            } else
+                                senderViewHolder.timeOfMessage.setVisibility(View.GONE);
+                        } else
+                            senderViewHolder.timeOfMessage.setVisibility(View.GONE);
                     }
                     MessageDto replySend = messageDto.getReply();
                     if (replySend != null) {
                         senderViewHolder.send_message_reply_layout.setVisibility(View.VISIBLE);
                         if (replySend.getSender() != null)
                             senderViewHolder.send_message_reply_name.setText(replySend.getSender().getDisplayName());
-                        senderViewHolder.send_message_reply_content.setText(replySend.getContent());
+                        if (replySend.getType().equals(MessageType.TEXT))
+                            senderViewHolder.send_message_reply_content.setText(replySend.getContent());
+                        else if (replySend.getType().equals(MessageType.LINK)) {
+                            String s = String.format("[%s] %s", context.getString(R.string.message_type_link), replySend.getContent());
+                            senderViewHolder.send_message_reply_content.setText(s);
+                        } else {
+                            List<MyMedia> mediaList = replySend.getMedia();
+                            if (mediaList != null && !mediaList.isEmpty()) {
+                                MyMedia media = mediaList.get(mediaList.size() - 1);
+                                String content = replySend.getContent() != null ? replySend.getContent() : "";
+                                String s = String.format("[%s] %s", context.getString(R.string.message_type_file), content);
+                                if (media.getType().equals(MediaType.VIDEO)) {
+                                    s = String.format("[%s] %s", context.getString(R.string.message_type_video), content);
+                                } else if (media.getType().equals(MediaType.IMAGE)) {
+                                    s = String.format("[%s] %s", context.getString(R.string.message_type_image), content);
+                                }
+                                senderViewHolder.send_message_reply_content.setText(s);
+                            } else {
+                                senderViewHolder.send_message_reply_content.setText(replySend.getContent());
+                            }
+                        }
+                        RelativeLayout.LayoutParams layoutParamsReply = (RelativeLayout.LayoutParams) senderViewHolder.messageLayout.getLayoutParams();
+                        layoutParamsReply.topMargin = (int) -convertDpToPixel(15, context);
                     }
                     switch (messageDto.getType()) {
                         case TEXT:
@@ -252,6 +267,20 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             if (messageDto.isDeleted()) {
                                 senderViewHolder.senderMessage.setTextColor(Color.GRAY);
                             }
+                            int top = 0;
+                            int bottom = 0;
+                            if (senderViewHolder.timeOfMessage.getVisibility() == View.GONE) {
+                                bottom = (int) convertDpToPixel(3, context);
+                            }
+                            if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
+                                top = (int) convertDpToPixel(3, context);
+                            }
+                            senderViewHolder.senderMessage.setPadding(
+                                    (int) convertDpToPixel(10, context),
+                                    top,
+                                    (int) convertDpToPixel(10, context),
+                                    bottom
+                            );
                             break;
                         case MEDIA:
                             final int COLUMNS = 4;
@@ -261,6 +290,35 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 if (messageDto.isDeleted()) {
                                     senderViewHolder.senderMessage.setTextColor(Color.GRAY);
                                 }
+                                int bt = 0;
+                                int tp = 0;
+                                if (senderViewHolder.timeOfMessage.getVisibility() == View.GONE) {
+                                    bt = (int) convertDpToPixel(3, context);
+                                }
+                                if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
+                                    tp = (int) convertDpToPixel(3, context);
+                                }
+                                senderViewHolder.senderMessage.setPadding(
+                                        (int) convertDpToPixel(10, context),
+                                        tp,
+                                        (int) convertDpToPixel(10, context),
+                                        bt
+                                );
+                                LinearLayout.LayoutParams lpMedia = (LinearLayout.LayoutParams) senderViewHolder.send_message_rcv_media.getLayoutParams();
+                                lpMedia.setMargins(
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        0
+                                );
+                            } else {
+                                LinearLayout.LayoutParams lpMedia = (LinearLayout.LayoutParams) senderViewHolder.send_message_rcv_media.getLayoutParams();
+                                lpMedia.setMargins(
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context)
+                                );
                             }
                             List<MyMedia> media = messageDto.getMedia();
                             if (media != null) {
@@ -317,14 +375,20 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             if (senderViewHolder.rcv_read_many.getLayoutManager() == null)
                                 senderViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_many.setAdapter(readbyAdapter);
+                            senderViewHolder.rcv_read_one.setVisibility(View.GONE);
                             senderViewHolder.send_message_rcv_readby_one_many.setVisibility(View.VISIBLE);
-                        }
-                        // chỉ có một người đã xem tin nhắn
-                        if (numSeen == 1) {
+                        } else if (numSeen == 1) {
+                            // chỉ có một người đã xem tin nhắn
+                            senderViewHolder.rcv_read_one.setVisibility(View.VISIBLE);
+                            senderViewHolder.send_message_rcv_readby_one_many.setVisibility(View.GONE);
                             if (senderViewHolder.rcv_read_one.getLayoutManager() == null)
                                 senderViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             senderViewHolder.rcv_read_one.setAdapter(readbyAdapter);
+                        } else {
+                            senderViewHolder.rcv_read_one.setVisibility(View.GONE);
+                            senderViewHolder.send_message_rcv_readby_one_many.setVisibility(View.GONE);
                         }
+
                     }
                     // hiện danh sách cảm xúc
                     if (messageDto.getReactions() != null && !messageDto.getReactions().isEmpty()) {
@@ -337,7 +401,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         senderViewHolder.send_rcv_reaction.setAdapter(reactionAdapter);
 
                         senderViewHolder.send_message_reaction_layout.setVisibility(View.VISIBLE);
-                    }
+                    } else
+                        senderViewHolder.send_message_reaction_layout.setVisibility(View.GONE);
+
                     senderViewHolder.messageLayout.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                     break;
                 case ITEM_RECEIVER:
@@ -353,6 +419,18 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     .into(receiverViewHolder.receiverImage);
                             receiverViewHolder.receiverImage.setBackgroundResource(R.drawable.border_for_circle_image);
 
+                            int top = 0;
+                            if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
+                                if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
+                                    top = (int) convertDpToPixel(3, context);
+                            }
+                            receiverViewHolder.timeOfMessage.setPadding(
+                                    (int) convertDpToPixel(10, context),
+                                    top,
+                                    (int) convertDpToPixel(10, context),
+                                    (int) convertDpToPixel(3, context)
+                            );
+
                             receiverViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                             receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
                         } else {
@@ -362,6 +440,17 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                             .centerCrop().circleCrop().placeholder(R.drawable.img_avatar_placeholer)
                                             .into(receiverViewHolder.receiverImage);
 
+                                    int top = 0;
+                                    if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
+                                        if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
+                                            top = (int) convertDpToPixel(3, context);
+                                    }
+                                    receiverViewHolder.timeOfMessage.setPadding(
+                                            (int) convertDpToPixel(10, context),
+                                            top,
+                                            (int) convertDpToPixel(10, context),
+                                            (int) convertDpToPixel(3, context)
+                                    );
                                     receiverViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                     receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
 
@@ -371,10 +460,31 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                             .into(receiverViewHolder.receiverImage);
                                     receiverViewHolder.receiverImage.setBackgroundResource(R.drawable.border_for_circle_image);
 
+                                    int top = 0;
+                                    if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
+                                        if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
+                                            top = (int) convertDpToPixel(3, context);
+                                    }
+                                    receiverViewHolder.timeOfMessage.setPadding(
+                                            (int) convertDpToPixel(10, context),
+                                            top,
+                                            (int) convertDpToPixel(10, context),
+                                            (int) convertDpToPixel(3, context)
+                                    );
                                     receiverViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                     receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
 
+                                } else {
+                                    receiverViewHolder.timeOfMessage.setVisibility(View.GONE);
+                                    Glide.with(context).load(0)
+                                            .into(receiverViewHolder.receiverImage);
+                                    receiverViewHolder.receiverImage.setBackgroundResource(0);
                                 }
+                            } else {
+                                receiverViewHolder.timeOfMessage.setVisibility(View.GONE);
+                                Glide.with(context).load(0)
+                                        .into(receiverViewHolder.receiverImage);
+                                receiverViewHolder.receiverImage.setBackgroundResource(0);
                             }
                         }
                     }
@@ -383,7 +493,29 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         receiverViewHolder.receiver_message_reply_layout.setVisibility(View.VISIBLE);
                         if (replyReceiver.getSender() != null)
                             receiverViewHolder.receiver_message_reply_name.setText(replyReceiver.getSender().getDisplayName());
-                        receiverViewHolder.receiver_message_reply_content.setText(replyReceiver.getContent());
+                        if (replyReceiver.getType().equals(MessageType.TEXT))
+                            receiverViewHolder.receiver_message_reply_content.setText(replyReceiver.getContent());
+                        else if (replyReceiver.getType().equals(MessageType.LINK)) {
+                            String s = String.format("[%s] %s", context.getString(R.string.message_type_link), replyReceiver.getContent());
+                            receiverViewHolder.receiver_message_reply_content.setText(s);
+                        } else {
+                            List<MyMedia> mediaList = replyReceiver.getMedia();
+                            if (mediaList != null && !mediaList.isEmpty()) {
+                                MyMedia media = mediaList.get(mediaList.size() - 1);
+                                String content = replyReceiver.getContent() != null ? replyReceiver.getContent() : "";
+                                String s = String.format("[%s] %s", context.getString(R.string.message_type_file), content);
+                                if (media.getType().equals(MediaType.VIDEO)) {
+                                    s = String.format("[%s] %s", context.getString(R.string.message_type_video), content);
+                                } else if (media.getType().equals(MediaType.IMAGE)) {
+                                    s = String.format("[%s] %s", context.getString(R.string.message_type_image), content);
+                                }
+                                receiverViewHolder.receiver_message_reply_content.setText(s);
+                            } else {
+                                receiverViewHolder.receiver_message_reply_content.setText(replyReceiver.getContent());
+                            }
+                        }
+                        RelativeLayout.LayoutParams layoutParamsReply = (RelativeLayout.LayoutParams) receiverViewHolder.messageLayout.getLayoutParams();
+                        layoutParamsReply.topMargin = (int) -convertDpToPixel(15, context);
                     }
                     switch (messageDto.getType()) {
                         case TEXT:
@@ -392,6 +524,20 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             if (messageDto.isDeleted()) {
                                 receiverViewHolder.receiverMessage.setTextColor(Color.GRAY);
                             }
+                            int top = 0;
+                            int bottom = 0;
+                            if (receiverViewHolder.timeOfMessage.getVisibility() == View.GONE) {
+                                bottom = (int) convertDpToPixel(3, context);
+                            }
+                            if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
+                                top = (int) convertDpToPixel(3, context);
+                            }
+                            receiverViewHolder.receiverMessage.setPadding(
+                                    (int) convertDpToPixel(10, context),
+                                    top,
+                                    (int) convertDpToPixel(10, context),
+                                    bottom
+                            );
                             break;
                         case MEDIA:
                             final int COLUMNS = 4;
@@ -401,6 +547,35 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 if (messageDto.isDeleted()) {
                                     receiverViewHolder.receiverMessage.setTextColor(Color.GRAY);
                                 }
+                                int bt = 0;
+                                int tp = 0;
+                                if (receiverViewHolder.timeOfMessage.getVisibility() == View.GONE) {
+                                    bt = (int) convertDpToPixel(3, context);
+                                }
+                                if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
+                                    tp = (int) convertDpToPixel(3, context);
+                                }
+                                receiverViewHolder.receiverMessage.setPadding(
+                                        (int) convertDpToPixel(10, context),
+                                        tp,
+                                        (int) convertDpToPixel(10, context),
+                                        bt
+                                );
+                                LinearLayout.LayoutParams lpMedia = (LinearLayout.LayoutParams) receiverViewHolder.received_message_rcv_media.getLayoutParams();
+                                lpMedia.setMargins(
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        0
+                                );
+                            } else {
+                                LinearLayout.LayoutParams lpMedia = (LinearLayout.LayoutParams) receiverViewHolder.received_message_rcv_media.getLayoutParams();
+                                lpMedia.setMargins(
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context),
+                                        (int) convertDpToPixel(4, context)
+                                );
                             }
                             List<MyMedia> media = messageDto.getMedia();
                             if (media != null) {
@@ -458,13 +633,17 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 receiverViewHolder.rcv_read_many.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_many.setAdapter(readbyAdapter);
 
+                            receiverViewHolder.rcv_read_one.setVisibility(View.GONE);
                             receiverViewHolder.receiver_message_rcv_readby_one_many.setVisibility(View.VISIBLE);
-                        }
-                        // chỉ có một người đã xem tin nhắn
-                        if (numSeen == 1) {
+                        } else if (numSeen == 1) {
+                            receiverViewHolder.rcv_read_one.setVisibility(View.VISIBLE);
+                            receiverViewHolder.receiver_message_rcv_readby_one_many.setVisibility(View.GONE);
                             if (receiverViewHolder.rcv_read_one.getLayoutManager() == null)
                                 receiverViewHolder.rcv_read_one.setLayoutManager(layoutManager);
                             receiverViewHolder.rcv_read_one.setAdapter(readbyAdapter);
+                        } else {
+                            receiverViewHolder.rcv_read_one.setVisibility(View.GONE);
+                            receiverViewHolder.receiver_message_rcv_readby_one_many.setVisibility(View.GONE);
                         }
                     }
                     // hiện danh sách cảm xúc
@@ -478,7 +657,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         receiverViewHolder.receiver_rcv_reaction.setAdapter(reactionAdapter);
 
                         receiverViewHolder.receiver_message_reaction_layout.setVisibility(View.VISIBLE);
-                    }
+                    } else
+                        receiverViewHolder.receiver_message_reaction_layout.setVisibility(View.GONE);
+
                     receiverViewHolder.messageLayout.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
                     receiverViewHolder.receiverImage.setOnClickListener(v -> {
                         Intent intent = new Intent(context, ViewProfileActivity.class);
@@ -515,8 +696,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private boolean showReactionCreateDialog(MessageDto messageDto) {
         Log.d("message of user id", messageDto.getSender().getId());
-        MessageOptionDialog messageOptionDialog = new MessageOptionDialog(context, messageDto);
-        messageOptionDialog.show(((AppCompatActivity) context).getSupportFragmentManager(), messageOptionDialog.getTag());
+        if (messageDto != null && messageDto.getId() != null) {
+            MessageOptionDialog messageOptionDialog = new MessageOptionDialog(context, messageDto);
+            messageOptionDialog.show(((AppCompatActivity) context).getSupportFragmentManager(), messageOptionDialog.getTag());
+        }
         return true;
     }
 
@@ -544,6 +727,8 @@ public class MessageAdapter extends RecyclerView.Adapter {
             if (m.getId().equals(deletedMessage.getId())) {
                 m.setContent(deletedMessage.getContent());
                 m.setDeleted(true);
+                m.setType(deletedMessage.getType());
+                m.setMedia(deletedMessage.getMedia());
 
                 Log.d("--del message find", m.toString());
 
@@ -561,6 +746,8 @@ public class MessageAdapter extends RecyclerView.Adapter {
             } else if (reply != null && deletedMessage.getId().equals(reply.getId())) {
                 reply.setContent(deletedMessage.getContent());
                 reply.setDeleted(true);
+                reply.setType(deletedMessage.getType());
+                reply.setMedia(deletedMessage.getMedia());
                 m.setReply(reply);
 
                 RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
@@ -706,15 +893,20 @@ public class MessageAdapter extends RecyclerView.Adapter {
     }
 
     public void updateMessage(MessageDto messageDto) {
-        list.add(messageDto);
-        Activity activity = (Activity) context;
-        activity.runOnUiThread(this::notifyDataSetChanged);
+        int size = list.size();
+        boolean add = list.add(messageDto);
+        if (add) notifyItemInserted(size);
+        notifyItemChanged(size - 1);
     }
 
     public MessageDto getLastMessage() {
         if (list != null && !list.isEmpty())
             return list.get(list.size() - 1);
         return null;
+    }
+
+    public float convertDpToPixel(float dp, Context context) {
+        return dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
 }

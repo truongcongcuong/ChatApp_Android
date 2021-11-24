@@ -719,8 +719,8 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
                 || !usersSelected.isEmpty() || imageGroupFile != null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.confirm_abort_create_group)
-                    .setPositiveButton(R.string.continue_create_group, (dialog, id) -> dialog.dismiss())
-                    .setNegativeButton(R.string.abort_create_group, (dialog, id) -> {
+                    .setNegativeButton(R.string.continue_create_group, (dialog, id) -> dialog.dismiss())
+                    .setPositiveButton(R.string.abort_create_group, (dialog, id) -> {
                         dialog.cancel();
                         super.onBackPressed();
                         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);

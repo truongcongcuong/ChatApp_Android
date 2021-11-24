@@ -181,7 +181,7 @@ public class ViewInformationOfOtherUserActivity extends AppCompatActivity {
                 .key(getResources().getString(R.string.mobile))
                 .name(viewProfileDto.getPhoneNumber())
                 .build());
-        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button_vertical);
+        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_information);
         view_info_other_user_lv.setAdapter(adapter);
         Glide.with(this)
                 .load(viewProfileDto.getImageUrl())

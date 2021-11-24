@@ -13,8 +13,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -223,7 +226,7 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .key(getResources().getString(R.string.email_title))
                 .name(userDetailDTO.getEmail())
                 .build());
-        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_menu_button_vertical);
+        MenuInformationAdapter adapter = new MenuInformationAdapter(this, items, R.layout.line_item_information);
         lsv_update_info.setAdapter(adapter);
         Glide.with(this)
                 .load(userDetailDTO.getImageUrl())
@@ -231,6 +234,29 @@ public class ViewInformationActivity extends AppCompatActivity {
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(img_update_info_avt);
 
+        setListViewHeightBasedOnChildren(lsv_update_info);
+    }
+
+    // set dynamic height for list view
+    private static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            return;
+        }
+
+        int totalHeight = 0;
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+
+        System.out.println("listAdapter.getCount()  = " + listAdapter.getCount());
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
 
 

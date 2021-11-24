@@ -11,7 +11,20 @@
     <RelativeLayout
         android:id="@+id/view_info_other_user_top_layout"
         android:layout_width="match_parent"
-        android:layout_height="250dp">
+        android:layout_height="200dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_view_info_other_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:minHeight="?attr/actionBarSize"
+            app:contentInsetEnd="0dp"
+            app:contentInsetEndWithActions="0dp"
+            app:contentInsetLeft="0dp"
+            app:contentInsetRight="0dp"
+            app:contentInsetStart="0dp"
+            app:contentInsetStartWithNavigation="0dp" />
 
         <ImageView
             android:id="@+id/view_info_other_user_avt"
@@ -55,18 +68,5 @@
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_view_info_other_user"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:minHeight="?attr/actionBarSize"
-        app:contentInsetEnd="0dp"
-        app:contentInsetEndWithActions="0dp"
-        app:contentInsetLeft="0dp"
-        app:contentInsetRight="0dp"
-        app:contentInsetStart="0dp"
-        app:contentInsetStartWithNavigation="0dp" />
 
 </RelativeLayout>

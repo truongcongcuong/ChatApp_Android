@@ -39,6 +39,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.adapter.MenuButtonAdapterVertical;
 import com.example.chatapp.cons.Constant;
+import com.example.chatapp.cons.WebSocketClient;
 import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.UserDetailDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
@@ -331,6 +332,7 @@ public class InfoFragment extends Fragment {
                 response -> {
                     try {
                         String res = URLDecoder.decode(URLEncoder.encode(response, "iso8859-1"), "UTF-8");
+                        WebSocketClient.logout();
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }

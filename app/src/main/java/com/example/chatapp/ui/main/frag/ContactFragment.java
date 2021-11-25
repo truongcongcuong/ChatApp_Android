@@ -134,20 +134,24 @@ public class ContactFragment extends Fragment {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
+                FriendDTO friendDTO = null;
                 if (currentUser.getId().equals(dto.getFrom().getId())) {
-                    FriendDTO friendDTO = new FriendDTO();
+                    friendDTO = new FriendDTO();
                     friendDTO.setFriend(dto.getTo());
                     friendDTO.setCreateAt(dto.getCreateAt());
-                    list.add(0, friendDTO);
-                    adapter.notifyItemInserted(0);
                 } else if (currentUser.getId().equals(dto.getTo().getId())) {
-                    FriendDTO friendDTO = new FriendDTO();
+                    friendDTO = new FriendDTO();
                     friendDTO.setFriend(dto.getFrom());
                     friendDTO.setCreateAt(dto.getCreateAt());
-                    list.add(0, friendDTO);
-                    adapter.notifyItemInserted(0);
                 }
-                totalElements = list.size();
+                if (friendDTO != null) {
+                    int oldSize = list.size();
+                    list.add(0, friendDTO);
+                    if (list.size() > oldSize) {
+                        adapter.notifyItemInserted(0);
+                        totalElements++;
+                    }
+                }
                 contact_frg_count.setText(String.format("%s (%d)", getString(R.string.all_contact), totalElements));
             }
         }
@@ -174,6 +178,7 @@ public class ContactFragment extends Fragment {
                     boolean remove = list.removeIf(x -> x.getFriend().getId().equals(dto.getFriendId()));
                     if (remove) {
                         adapter.notifyItemRemoved(index);
+                        totalElements = totalElements > 0 ? totalElements - 1 : totalElements;
                     }
                 } else if (currentUser.getId().equals(dto.getFriendId())) {
                     int index = -1;
@@ -186,9 +191,9 @@ public class ContactFragment extends Fragment {
                     boolean remove = list.removeIf(x -> x.getFriend().getId().equals(dto.getUserId()));
                     if (remove) {
                         adapter.notifyItemRemoved(index);
+                        totalElements = totalElements > 0 ? totalElements - 1 : totalElements;
                     }
                 }
-                totalElements = list.size();
                 contact_frg_count.setText(String.format("%s (%d)", getString(R.string.all_contact), totalElements));
             }
         }

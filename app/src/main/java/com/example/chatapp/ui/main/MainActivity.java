@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements SendingData {
                     MessageDto messageDto = gson.fromJson(x.getPayload(), MessageDto.class);
                     MainActivity.this.runOnUiThread(() -> {
                         messageFragment.setNewMessage(messageDto);
+                        groupFragment.setNewMessage(messageDto);
                         Intent intent = new Intent("messages/new");
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("dto", messageDto);

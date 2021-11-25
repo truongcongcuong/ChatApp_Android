@@ -27,6 +27,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -41,6 +42,7 @@ import com.example.chatapp.adapter.ListMessageAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.ui.CreateGroupActivity;
@@ -208,6 +210,9 @@ public class GroupFragment extends Fragment {
         this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), null);
         rcv_list_group.setAdapter(adapter);
         updateListInboxGroup();
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcv_list_group.getContext(), DividerItemDecoration.VERTICAL);
+        rcv_list_group.addItemDecoration(dividerItemDecoration);
 
         return view;
     }
@@ -519,6 +524,8 @@ public class GroupFragment extends Fragment {
     public void onResume() {
         super.onResume();
         setHasOptionsMenu(isVisible());
+        if (adapter != null)
+            adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -527,6 +534,11 @@ public class GroupFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeImageRoom);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(changeLanguage);
         super.onDestroy();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void setNewMessage(MessageDto newMessage) {
+        adapter.setNewMessage(newMessage);
     }
 
 }

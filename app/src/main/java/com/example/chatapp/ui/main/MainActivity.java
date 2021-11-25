@@ -74,6 +74,18 @@ public class MainActivity extends AppCompatActivity implements SendingData {
         }
     };
 
+    private final BroadcastReceiver resetUnReadMessage = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                String roomId = bundle.getString("roomId");
+                messageFragment.resetUnReadMessageForRoom(roomId);
+            }
+        }
+    };
+
     /*
     cập nhật lại ui khi thay đổi ngôn ngữ
      */
@@ -115,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements SendingData {
 
         // đăng ký lắng nghe sự kiện thay đổi ngôn ngữ
         LocalBroadcastManager.getInstance(this).registerReceiver(changeLanguage, new IntentFilter("language/change"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(resetUnReadMessage, new IntentFilter("mainActivity/unReadMessage/reset"));
 
         Toolbar toolbar = findViewById(R.id.tlb_main_activity);
         toolbar.setTitleTextColor(Color.WHITE);
@@ -541,6 +554,7 @@ public class MainActivity extends AppCompatActivity implements SendingData {
     @Override
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(changeLanguage);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(resetUnReadMessage);
 
         super.onDestroy();
     }

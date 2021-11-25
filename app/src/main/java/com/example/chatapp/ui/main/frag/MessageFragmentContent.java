@@ -314,4 +314,7 @@ public class MessageFragmentContent extends Fragment {
         super.onDestroy();
     }
 
+    public void resetUnReadMessageForRoom(String roomId) {
+        adapter.resetUnReadMessageForRoom(roomId);
+    }
 }

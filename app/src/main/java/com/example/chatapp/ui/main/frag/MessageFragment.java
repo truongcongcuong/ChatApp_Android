@@ -264,4 +264,7 @@ public class MessageFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    public void resetUnReadMessageForRoom(String roomId) {
+        messageFragmentContent.resetUnReadMessageForRoom(roomId);
+    }
 }

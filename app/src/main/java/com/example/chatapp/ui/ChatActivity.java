@@ -196,6 +196,11 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 updateMessageRealTime(newMessage);
                 if (newMessage.getSender() != null)
                     adapter.deleteOldReadTracking(newMessage, newMessage.getSender().getId());
+                Intent intent2 = new Intent("mainActivity/unReadMessage/reset");
+                Bundle bundle2 = new Bundle();
+                bundle2.putString("roomId", newMessage.getRoomId());
+                intent2.putExtras(bundle2);
+                LocalBroadcastManager.getInstance(ChatActivity.this).sendBroadcast(intent2);
             }
         }
     };

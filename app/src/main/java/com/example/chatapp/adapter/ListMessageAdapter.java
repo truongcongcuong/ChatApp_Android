@@ -291,6 +291,8 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         if (list != null) {
             list.sort((x, y) -> {
                 try {
+                    if (x.getLastMessage() == null || y.getLastMessage() == null)
+                        return 0;
                     Date d1 = dateFormat.parse(x.getLastMessage().getCreateAt());
                     Date d2 = dateFormat.parse(y.getLastMessage().getCreateAt());
                     if (d1 == null || d2 == null)
@@ -309,6 +311,17 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
         if (list == null)
             return 0;
         return list.size();
+    }
+
+    public void resetUnReadMessageForRoom(String roomId) {
+        for (int i = 0; i < list.size(); i++) {
+            InboxDto inboxDto = list.get(i);
+            if (inboxDto.getRoom().getId().equals(roomId)) {
+                inboxDto.setCountNewMessage(0);
+                notifyItemChanged(i);
+                break;
+            }
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

@@ -30,20 +30,23 @@ public class Constant {
     public static final String API_ROOM = "http://10.0.2.2:8080/api/rooms/";
     public static final String API_FILE = "http://10.0.2.2:8080/api/file";
     public static final String API_FRIEND_REQUEST = "http://10.0.2.2:8080/api/friend-request";
+    public static final String API_BLOCK = "http://10.0.2.2:8080/api/blocks";
 
-//    public static final String API_SIGNUP = "http://3.1.20.128:8080/api/auth/signup/";
-//    public static final String API_AUTH = "http://3.1.20.128:8080/api/auth/";
-//    public static final String API_INBOX = "http://3.1.20.128:8080/api/inboxs";
-//    public static final String API_CHAT = "http://3.1.20.128:8080/api/messages/inbox/";
-//    public static final String API_FRIEND_LIST = "http://3.1.20.128:8080/api/friends";
-//    public static final String API_CHAT_TO = "http://3.1.20.128:8080/chat";
-//    public static final String API_ME = "http://3.1.20.128:8080/api/user/me";
-//    public static final String API_USER = "http://3.1.20.128:8080/api/user/";
-//    public static final String API_MESSAGE = "http://3.1.20.128:8080/api/messages/";
-//    public static final String WEB_SOCKET = "ws://3.1.20.128:8080/ws/websocket";
-//    public static final String API_ROOM = "http://3.1.20.128:8080/api/rooms/";
-//    public static final String API_FILE = "http://3.1.20.128:8080/api/file";
-//    public static final String API_FRIEND_REQUEST = "http://3.1.20.128:8080/api/friend-request";
+
+//    public static final String API_SIGNUP = "http://18.136.106.105:8080/api/auth/signup/";
+//    public static final String API_AUTH = "http://18.136.106.105:8080/api/auth/";
+//    public static final String API_INBOX = "http://18.136.106.105:8080/api/inboxs";
+//    public static final String API_CHAT = "http://18.136.106.105:8080/api/messages/inbox/";
+//    public static final String API_FRIEND_LIST = "http://18.136.106.105:8080/api/friends";
+//    public static final String API_CHAT_TO = "http://18.136.106.105:8080/chat";
+//    public static final String API_ME = "http://18.136.106.105:8080/api/user/me";
+//    public static final String API_USER = "http://18.136.106.105:8080/api/user/";
+//    public static final String API_MESSAGE = "http://18.136.106.105:8080/api/messages/";
+//    public static final String WEB_SOCKET = "ws://18.136.106.105:8080/ws/websocket";
+//    public static final String API_ROOM = "http://18.136.106.105:8080/api/rooms/";
+//    public static final String API_FILE = "http://18.136.106.105:8080/api/file";
+//    public static final String API_FRIEND_REQUEST = "http://18.136.106.105:8080/api/friend-request";
+//    public static final String API_BLOCK = "http://18.136.106.105:8080/api/blocks";
 
     public class Value {
         public static final int DEFAULT_LANGUAGE_ID = 0;

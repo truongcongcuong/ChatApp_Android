@@ -563,7 +563,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     @SuppressLint("CheckResult")
     private void sendReadMessageNotification() {
         Log.d("--------", "send read mess");
-        MessageDto lastMessage = adapter.getLastMessage();
+        MessageDto lastMessage = adapter.getLastMessageNotSystem();
         System.out.println("lastMessage = " + lastMessage);
         boolean find = false;
         if (lastMessage != null && lastMessage.getId() != null) {

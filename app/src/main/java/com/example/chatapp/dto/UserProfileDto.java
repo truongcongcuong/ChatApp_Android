@@ -18,5 +18,7 @@ public class UserProfileDto implements Serializable {
     private String lastOnline;
     private FriendStatus friendStatus;
     private String phoneNumber;
+    private boolean blockMe;
+    private boolean meBLock;
 
 }

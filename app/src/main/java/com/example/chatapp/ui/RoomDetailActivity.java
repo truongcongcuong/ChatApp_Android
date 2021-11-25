@@ -53,6 +53,7 @@ import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.RoomDTO;
+import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.ui.main.MainActivity;
@@ -88,6 +89,10 @@ public class RoomDetailActivity extends AppCompatActivity {
     private TextView nameOfRoom;
     private NestedScrollView scrollView;
     private String token;
+    private ImageButton btn_change_image_of_room;
+    private ImageButton btn_change_name_of_room;
+    private UserSummaryDTO currentUser;
+    private ListView lv_menu_items;
 
     private final BroadcastReceiver addMember = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -163,13 +168,12 @@ public class RoomDetailActivity extends AppCompatActivity {
         Slidr.attach(this, config);
 
         Toolbar toolbar = findViewById(R.id.tlb_chat_room_detail);
-        ListView lv_menu_items = findViewById(R.id.lv_room_detail_menu);
+        lv_menu_items = findViewById(R.id.lv_room_detail_menu);
         imageOfRoom = findViewById(R.id.image_of_room_detail);
         nameOfRoom = findViewById(R.id.name_of_room_detail);
-        TextView room_detail_create_at = findViewById(R.id.room_detail_create_at);
         scrollView = findViewById(R.id.nested_scroll_room_detail);
-        ImageButton btn_change_image_of_room = findViewById(R.id.ibt_change_image_of_room);
-        ImageButton btn_change_name_of_room = findViewById(R.id.ibt_change_name_of_room);
+        btn_change_image_of_room = findViewById(R.id.ibt_change_image_of_room);
+        btn_change_name_of_room = findViewById(R.id.ibt_change_name_of_room);
 
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
@@ -191,124 +195,32 @@ public class RoomDetailActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferencesUser = getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
         String userJson = sharedPreferencesUser.getString("user-info", null);
-        UserSummaryDTO user = gson.fromJson(userJson, UserSummaryDTO.class);
+        currentUser = gson.fromJson(userJson, UserSummaryDTO.class);
 
         myMenuItems = new ArrayList<>();
-        myMenuItems.add(MyMenuItem.builder()
-                .key("viewStoredMedia")
-                .imageResource(R.drawable.ic_baseline_folder_open_24)
-                .name(getString(R.string.stored_media))
-                .build());
+        setMenuItemList();
 
-        final Context context = getApplication().getApplicationContext();
-        if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.ONE)) {
-            showImageAndNameOfRoom(context, inboxDto);
-
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("viewCommonGroup")
-                    .imageResource(R.drawable.ic_baseline_groups_24)
-                    .name(getString(R.string.view_groups_in_common))
-                    .build());
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("createRoomWithThisUser")
-                    .imageResource(R.drawable.ic_baseline_group_create_24_black)
-                    .name(getString(R.string.create_group_with_this_user))
-                    .build());
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("viewProfile")
-                    .imageResource(R.drawable.ic_baseline_profile_circle_24)
-                    .name(getString(R.string.view_profile))
-                    .build());
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("block")
-                    .imageResource(R.drawable.ic_baseline_block_24)
-                    .name(getString(R.string.block_messages))
-                    .build());
-        } else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
-            showImageAndNameOfRoom(context, inboxDto);
-            room_detail_create_at.setVisibility(View.VISIBLE);
-            room_detail_create_at.setText(String.format("%s: %s", getString(R.string.created), inboxDto.getRoom().getCreateAt()));
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("viewMembers")
-                    .imageResource(R.drawable.ic_baseline_groups_24)
-                    .name(getString(R.string.view_members))
-                    .build());
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("addMember")
-                    .imageResource(R.drawable.ic_baseline_group_create_24_black)
-                    .name(getString(R.string.title_add_member))
-                    .build());
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("leaveRoom")
-                    .imageResource(R.drawable.ic_baseline_leave_24)
-                    .name(getString(R.string.leave_group))
-                    .build());
-            if (user.getId().equals(inboxDto.getRoom().getCreateByUserId())) {
-                myMenuItems.add(MyMenuItem.builder()
-                        .key("deleteGroup")
-                        .imageResource(R.drawable.ic_baseline_delete_forever_24)
-                        .name(getString(R.string.delete_group))
-                        .build());
-            }
-            btn_change_image_of_room.setVisibility(View.VISIBLE);
-            btn_change_image_of_room.setPadding(3, 0, 3, 3);
-            if (isValidContextForGlide(context)) {
-                Glide.with(context)
-                        .load(R.drawable.ic_baseline_camera_24)
-                        .centerCrop()
-                        .transition(DrawableTransitionOptions.withCrossFade())
-                        .into(btn_change_image_of_room);
-            }
-
-            // thay doi hinh anh cua nhom
-            btn_change_image_of_room.setOnClickListener(v -> {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        new AlertDialog.Builder(this)
-                                .setTitle(getString(R.string.permission_needed_title))
-                                .setMessage(getString(R.string.permission_needed_message))
-                                .setPositiveButton(getString(R.string.confirm_button), (dialog, which) ->
-                                        ActivityCompat.requestPermissions(RoomDetailActivity.this,
-                                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                                REQUEST_PERMISSION))
-                                .setNegativeButton(getString(R.string.cancel_button), (dialog, which) -> dialog.cancel()).create().show();
-                    } else {
-                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
-                    }
+        // thay doi hinh anh cua nhom
+        btn_change_image_of_room.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    new AlertDialog.Builder(this)
+                            .setTitle(getString(R.string.permission_needed_title))
+                            .setMessage(getString(R.string.permission_needed_message))
+                            .setPositiveButton(getString(R.string.confirm_button), (dialog, which) ->
+                                    ActivityCompat.requestPermissions(RoomDetailActivity.this,
+                                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                            REQUEST_PERMISSION))
+                            .setNegativeButton(getString(R.string.cancel_button), (dialog, which) -> dialog.cancel()).create().show();
                 } else {
-                    openFileChoose();
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
                 }
-            });
-
-            btn_change_name_of_room.setPadding(1, 1, 1, 1);
-            if (isValidContextForGlide(context)) {
-                Glide.with(context)
-                        .load(R.drawable.ic_baseline_change_circle_24)
-                        .centerCrop().circleCrop()
-                        .transition(DrawableTransitionOptions.withCrossFade())
-                        .into(btn_change_name_of_room);
+            } else {
+                openFileChoose();
             }
+        });
 
-            btn_change_name_of_room.setOnClickListener(v -> showRenameDialog());
-        }
-
-        myMenuItems.add(MyMenuItem.builder()
-                .key("deleteInbox")
-                .imageResource(R.drawable.ic_baseline_delete_forever_24)
-                .name(getString(R.string.delete_chat_history))
-                .build());
-
-        myMenuItems.add(MyMenuItem.builder()
-                .key("report")
-                .imageResource(R.drawable.ic_baseline_report_24)
-                .name(getString(R.string.report))
-                .build());
-        for (int i = 0; i < 10; i++) {
-            myMenuItems.add(MyMenuItem.builder()
-                    .key("----------------")
-                    .name("----------------")
-                    .build());
-        }
+        btn_change_name_of_room.setOnClickListener(v -> showRenameDialog());
 
         MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(RoomDetailActivity.this, R.layout.line_item_menu_button_vertical, myMenuItems);
         lv_menu_items.setAdapter(menuAdapter);
@@ -371,10 +283,138 @@ public class RoomDetailActivity extends AppCompatActivity {
                     ViewCommonGroupDialog viewCommonGroupDialog = new ViewCommonGroupDialog(this, inboxDto.getRoom().getTo());
                     viewCommonGroupDialog.show();
                     break;
+                case "block":
+                    AlertDialog.Builder blockBuilder = new AlertDialog.Builder(this);
+                    blockBuilder.setMessage(getString(R.string.block_message_confirm, inboxDto.getRoom().getTo().getDisplayName()))
+                            .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
+                            .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
+                                block(inboxDto.getRoom().getTo().getId());
+                            });
+                    blockBuilder.create().show();
+                    break;
+                case "unBlock":
+                    AlertDialog.Builder unBlockBuilder = new AlertDialog.Builder(this);
+                    unBlockBuilder.setMessage(getString(R.string.un_block_message_confirm, inboxDto.getRoom().getTo().getDisplayName()))
+                            .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
+                            .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
+                                unBlock(inboxDto.getRoom().getTo().getId());
+                            });
+                    unBlockBuilder.create().show();
+                    break;
             }
         });
         setListViewHeightBasedOnChildren(lv_menu_items);
         scrollView.post(() -> scrollView.scrollTo(0, 0));
+    }
+
+    private void setMenuItemList() {
+        try {
+            myMenuItems.clear();
+        } catch (Exception e) {
+            myMenuItems = new ArrayList<>();
+        }
+        myMenuItems.add(MyMenuItem.builder()
+                .key("viewStoredMedia")
+                .imageResource(R.drawable.ic_baseline_folder_open_24)
+                .name(getString(R.string.stored_media))
+                .build());
+
+        final Context context = getApplication().getApplicationContext();
+        showImageAndNameOfRoom(context, inboxDto);
+        if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.ONE)) {
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("viewCommonGroup")
+                    .imageResource(R.drawable.ic_baseline_groups_24)
+                    .name(getString(R.string.view_groups_in_common))
+                    .build());
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("createRoomWithThisUser")
+                    .imageResource(R.drawable.ic_baseline_group_create_24_black)
+                    .name(getString(R.string.create_group_with_this_user))
+                    .build());
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("viewProfile")
+                    .imageResource(R.drawable.ic_baseline_profile_circle_24)
+                    .name(getString(R.string.view_profile))
+                    .build());
+            if (inboxDto.getRoom().getTo().isMeBLock()) {
+                myMenuItems.add(MyMenuItem.builder()
+                        .key("unBlock")
+                        .imageResource(R.drawable.ic_baseline_block_24)
+                        .name(getString(R.string.un_block_messages))
+                        .build());
+            } else {
+                myMenuItems.add(MyMenuItem.builder()
+                        .key("block")
+                        .imageResource(R.drawable.ic_baseline_block_24)
+                        .name(getString(R.string.block_messages))
+                        .build());
+            }
+        } else if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.GROUP)) {
+            TextView room_detail_create_at = findViewById(R.id.room_detail_create_at);
+            room_detail_create_at.setVisibility(View.VISIBLE);
+            room_detail_create_at.setText(String.format("%s: %s", getString(R.string.created), inboxDto.getRoom().getCreateAt()));
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("viewMembers")
+                    .imageResource(R.drawable.ic_baseline_groups_24)
+                    .name(getString(R.string.view_members))
+                    .build());
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("addMember")
+                    .imageResource(R.drawable.ic_baseline_group_create_24_black)
+                    .name(getString(R.string.title_add_member))
+                    .build());
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("leaveRoom")
+                    .imageResource(R.drawable.ic_baseline_leave_24)
+                    .name(getString(R.string.leave_group))
+                    .build());
+            if (currentUser.getId().equals(inboxDto.getRoom().getCreateByUserId())) {
+                myMenuItems.add(MyMenuItem.builder()
+                        .key("deleteGroup")
+                        .imageResource(R.drawable.ic_baseline_delete_forever_24)
+                        .name(getString(R.string.delete_group))
+                        .build());
+            }
+            btn_change_image_of_room.setVisibility(View.VISIBLE);
+            btn_change_image_of_room.setPadding(3, 0, 3, 3);
+            if (isValidContextForGlide(context)) {
+                Glide.with(context)
+                        .load(R.drawable.ic_baseline_camera_24)
+                        .centerCrop()
+                        .transition(DrawableTransitionOptions.withCrossFade())
+                        .into(btn_change_image_of_room);
+            }
+
+            btn_change_name_of_room.setPadding(1, 1, 1, 1);
+            if (isValidContextForGlide(context)) {
+                Glide.with(context)
+                        .load(R.drawable.ic_baseline_change_circle_24)
+                        .centerCrop().circleCrop()
+                        .transition(DrawableTransitionOptions.withCrossFade())
+                        .into(btn_change_name_of_room);
+            }
+        }
+
+        myMenuItems.add(MyMenuItem.builder()
+                .key("deleteInbox")
+                .imageResource(R.drawable.ic_baseline_delete_forever_24)
+                .name(getString(R.string.delete_chat_history))
+                .build());
+
+        myMenuItems.add(MyMenuItem.builder()
+                .key("report")
+                .imageResource(R.drawable.ic_baseline_report_24)
+                .name(getString(R.string.report))
+                .build());
+        for (int i = 0; i < 10; i++) {
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("----------------")
+                    .name("----------------")
+                    .build());
+        }
+        MenuButtonAdapterVertical menuAdapter = new MenuButtonAdapterVertical(RoomDetailActivity.this, R.layout.line_item_menu_button_vertical, myMenuItems);
+        lv_menu_items.setAdapter(menuAdapter);
     }
 
     public boolean isValidContextForGlide(final Context context) {
@@ -723,6 +763,54 @@ public class RoomDetailActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(renameRoom);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(changeImageRoom);
         super.onDestroy();
+    }
+
+    private void block(String userIdToBlock) {
+        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_BLOCK + "/" + userIdToBlock,
+                response -> {
+                    RoomDTO room = inboxDto.getRoom();
+                    UserProfileDto to = room.getTo();
+                    to.setMeBLock(true);
+                    room.setTo(to);
+                    inboxDto.setRoom(room);
+                    setMenuItemList();
+                },
+                error -> Log.i("block error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        requestQueue.add(request);
+    }
+
+    private void unBlock(String userIdToBlock) {
+        StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_BLOCK + "/" + userIdToBlock,
+                response -> {
+                    RoomDTO room = inboxDto.getRoom();
+                    UserProfileDto to = room.getTo();
+                    to.setMeBLock(false);
+                    room.setTo(to);
+                    inboxDto.setRoom(room);
+                    setMenuItemList();
+                },
+                error -> Log.i("block error", error.toString())) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Authorization", "Bearer " + token);
+                return map;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(retryPolicy);
+        requestQueue.add(request);
     }
 
 }

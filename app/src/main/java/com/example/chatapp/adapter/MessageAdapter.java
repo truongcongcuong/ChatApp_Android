@@ -71,7 +71,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
     public void updateReactionToMessage(ReactionReceiver receiver) {
         for (int i = 0; i < list.size(); i++) {
             MessageDto m = list.get(i);
-            if (m.getId().equals(receiver.getMessageId())) {
+            if (m.getId() != null && m.getId().equals(receiver.getMessageId())) {
                 List<Reaction> reactions = m.getReactions();
                 if (reactions == null)
                     reactions = new ArrayList<>();
@@ -93,7 +93,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
 
             // cập nhật read tracking mới cho message
             Set<ReadByDto> readbyes = m.getReadbyes();
-            if (m.getId().equals(readByReceiver.getMessageId())) {
+            if (m.getId() != null && m.getId().equals(readByReceiver.getMessageId())) {
                 if (readbyes == null)
                     readbyes = new HashSet<>();
                 ReadByDto readByDto = new ReadByDto();
@@ -123,13 +123,25 @@ public class MessageAdapter extends RecyclerView.Adapter {
     public void deleteOldReadTracking(MessageDto newMessage, String userId) {
         for (int i = 0; i < list.size(); i++) {
             MessageDto m = list.get(i);
-            if (!m.getId().equals(newMessage.getId())) {
-                Set<ReadByDto> readbyes = m.getReadbyes();
-                // xóa readby cũ cho message
-                if (readbyes != null && !readbyes.isEmpty()) {
-                    readbyes.removeIf(x -> x.getReadByUser().getId().equals(userId));
-                    m.setReadbyes(readbyes);
-                    notifyItemChanged(i);
+            if (newMessage.getId() != null) {
+                if (m.getId() != null && !m.getId().equals(newMessage.getId())) {
+                    Set<ReadByDto> readbyes = m.getReadbyes();
+                    // xóa readby cũ cho message
+                    if (readbyes != null && !readbyes.isEmpty()) {
+                        readbyes.removeIf(x -> x.getReadByUser().getId().equals(userId));
+                        m.setReadbyes(readbyes);
+                        notifyItemChanged(i);
+                    }
+                }
+            } else {
+                if (m.getId() == null) {
+                    Set<ReadByDto> readbyes = m.getReadbyes();
+                    // xóa readby cũ cho message
+                    if (readbyes != null && !readbyes.isEmpty()) {
+                        readbyes.removeIf(x -> x.getReadByUser().getId().equals(userId));
+                        m.setReadbyes(readbyes);
+                        notifyItemChanged(i);
+                    }
                 }
             }
         }
@@ -899,9 +911,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
         notifyItemChanged(size - 1);
     }
 
-    public MessageDto getLastMessage() {
-        if (list != null && !list.isEmpty())
-            return list.get(list.size() - 1);
+    public MessageDto getLastMessageNotSystem() {
+        if (list != null && !list.isEmpty()) {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                if (list.get(i) != null && !list.get(i).getType().equals(MessageType.SYSTEM))
+                    return list.get(i);
+            }
+        }
         return null;
     }
 

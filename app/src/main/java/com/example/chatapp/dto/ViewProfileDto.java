@@ -24,4 +24,6 @@ public class ViewProfileDto {
     private OnlineStatus onlineStatus;
     private String lastOnline;
     private FriendStatus friendStatus;
+    private boolean blockMe;
+    private boolean meBLock;
 }

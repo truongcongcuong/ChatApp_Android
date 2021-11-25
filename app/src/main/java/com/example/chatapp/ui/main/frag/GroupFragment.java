@@ -69,7 +69,7 @@ public class GroupFragment extends Fragment {
     private List<InboxDto> searchGroup;
     private Gson gson;
     private String token;
-    private int page = 100;
+    private int page = 0;
     private final int size = 1;
     private final String type = RoomType.GROUP.toString();
 
@@ -288,7 +288,6 @@ public class GroupFragment extends Fragment {
                         Type listType = new TypeToken<List<InboxDto>>() {
                         }.getType();
                         List<InboxDto> newList = gson.fromJson(array.toString(), listType);
-                        System.out.println(newList);
                         if (!newList.isEmpty()) {
                             if (page == 0) {
                                 list = newList;

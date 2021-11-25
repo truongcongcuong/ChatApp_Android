@@ -40,8 +40,10 @@ import com.example.chatapp.R;
 import com.example.chatapp.adapter.SyncContactAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.GetNewAccessToken;
+import com.example.chatapp.dto.FriendDeleteDto;
 import com.example.chatapp.dto.PhoneBookFriendDTO;
 import com.example.chatapp.dto.UserProfileDto;
+import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.entity.Contact;
 import com.example.chatapp.entity.FriendRequest;
 import com.example.chatapp.enumvalue.FriendStatus;
@@ -68,6 +70,7 @@ public class SyncContactActivity extends AppCompatActivity {
     private String token;
     private List<PhoneBookFriendDTO> listPhoneBookFriend;
     private SyncContactAdapter adapter;
+    private UserSummaryDTO currentUser;
 
     private final BroadcastReceiver friendRequestReceived = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.N)
@@ -76,18 +79,28 @@ public class SyncContactActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
+                if (currentUser.getId().equals(dto.getTo().getId())) {
                     UserProfileDto from = dto.getFrom();
-                    if (from != null) {
-                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
-                            UserProfileDto user = phoneBook.getUser();
-                            if (user != null && user.getId().equals(from.getId())) {
-                                user.setFriendStatus(FriendStatus.RECEIVED);
-                                phoneBook.setUser(user);
-                            }
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.RECEIVED);
+                            phoneBook.setUser(user);
+                            break;
                         }
-                        adapter.notifyDataSetChanged();
                     }
+                    adapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.SENT);
+                            phoneBook.setUser(user);
+                            break;
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
@@ -100,18 +113,28 @@ public class SyncContactActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
-                    UserProfileDto to = dto.getTo();
-                    if (to != null) {
-                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
-                            UserProfileDto user = phoneBook.getUser();
-                            if (user.getId().equals(to.getId())) {
-                                user.setFriendStatus(FriendStatus.FRIEND);
-                                phoneBook.setUser(user);
-                            }
+                if (currentUser.getId().equals(dto.getTo().getId())) {
+                    UserProfileDto from = dto.getFrom();
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.FRIEND);
+                            phoneBook.setUser(user);
+                            break;
                         }
-                        adapter.notifyDataSetChanged();
                     }
+                    adapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.FRIEND);
+                            phoneBook.setUser(user);
+                            break;
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
@@ -124,18 +147,28 @@ public class SyncContactActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
+                if (currentUser.getId().equals(dto.getTo().getId())) {
                     UserProfileDto from = dto.getFrom();
-                    if (from != null) {
-                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
-                            UserProfileDto user = phoneBook.getUser();
-                            if (user.getId().equals(from.getId())) {
-                                user.setFriendStatus(FriendStatus.NONE);
-                                phoneBook.setUser(user);
-                            }
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            phoneBook.setUser(user);
+                            break;
                         }
-                        adapter.notifyDataSetChanged();
                     }
+                    adapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            phoneBook.setUser(user);
+                            break;
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
@@ -148,18 +181,60 @@ public class SyncContactActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 FriendRequest dto = (FriendRequest) bundle.getSerializable("dto");
-                if (dto != null) {
-                    UserProfileDto to = dto.getTo();
-                    if (to != null) {
-                        for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
-                            UserProfileDto user = phoneBook.getUser();
-                            if (user.getId().equals(to.getId())) {
-                                user.setFriendStatus(FriendStatus.NONE);
-                                phoneBook.setUser(user);
-                            }
+                if (currentUser.getId().equals(dto.getTo().getId())) {
+                    UserProfileDto from = dto.getFrom();
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(from.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            phoneBook.setUser(user);
+                            break;
                         }
-                        adapter.notifyDataSetChanged();
                     }
+                    adapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFrom().getId())) {
+                    UserProfileDto to = dto.getTo();
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(to.getId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            phoneBook.setUser(user);
+                            break;
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver friendDelete = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                FriendDeleteDto dto = (FriendDeleteDto) bundle.getSerializable("dto");
+                if (currentUser.getId().equals(dto.getUserId())) {
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(dto.getFriendId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            phoneBook.setUser(user);
+                            break;
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
+                } else if (currentUser.getId().equals(dto.getFriendId())) {
+                    for (PhoneBookFriendDTO phoneBook : listPhoneBookFriend) {
+                        UserProfileDto user = phoneBook.getUser();
+                        if (user.getId().equals(dto.getUserId())) {
+                            user.setFriendStatus(FriendStatus.NONE);
+                            phoneBook.setUser(user);
+                            break;
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
@@ -176,6 +251,7 @@ public class SyncContactActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestAccept, new IntentFilter("friendRequest/accept"));
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestRecall, new IntentFilter("friendRequest/recall"));
         LocalBroadcastManager.getInstance(this).registerReceiver(friendRequestDelete, new IntentFilter("friendRequest/delete"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(friendDelete, new IntentFilter("friends/delete"));
 
         // gạt ở cạnh trái để trở về
         SlidrConfig config = new SlidrConfig.Builder()
@@ -203,6 +279,8 @@ public class SyncContactActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferencesToken = getSharedPreferences("token", Context.MODE_PRIVATE);
         token = sharedPreferencesToken.getString("access-token", null);
+        SharedPreferences sharedPreferencesUser = getSharedPreferences("user", Context.MODE_PRIVATE);
+        currentUser = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
 
         listContact = new ArrayList<>();
         listPhoneBookFriend = new ArrayList<>();
@@ -305,7 +383,7 @@ public class SyncContactActivity extends AppCompatActivity {
 
             // Get the current contact phone number
             String phoneNumber = contacts.getString(
-                    contacts.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    contacts.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)).replaceAll("\\s+", "");
 
             Log.d("number ", phoneNumber);
             listContact.add(new Contact(name, phoneNumber));
@@ -394,6 +472,7 @@ public class SyncContactActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestAccept);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestRecall);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(friendRequestDelete);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(friendDelete);
         super.onDestroy();
     }
 

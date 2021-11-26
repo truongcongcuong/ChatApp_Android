@@ -197,16 +197,16 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             /*
             khi click vào inbox để xem tin nhắn thì set số tin nhắn mới về 0
              */
-                inboxDto.setCountNewMessage(0);
-                list.set(position, inboxDto);
-                notifyItemChanged(position);
-
                 Intent intent = new Intent(context, ChatActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("dto", inboxDto);
                 intent.putExtras(bundle);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
+
+                inboxDto.setCountNewMessage(0);
+                list.set(position, inboxDto);
+                notifyItemChanged(position);
             });
         }
 

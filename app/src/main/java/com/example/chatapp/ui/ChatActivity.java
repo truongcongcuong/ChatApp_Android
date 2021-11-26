@@ -568,32 +568,39 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     @SuppressLint("CheckResult")
     private void sendReadMessageNotification() {
         Log.d("--------", "send read mess");
-        MessageDto lastMessage = adapter.getLastMessageNotSystem();
+        MessageDto lastMessage = adapter.getLastMessage();
         System.out.println("lastMessage = " + lastMessage);
         boolean find = false;
         if (lastMessage != null && lastMessage.getId() != null) {
-            Set<ReadByDto> readTracking = lastMessage.getReadbyes();
-            if (readTracking != null) {
-                for (ReadByDto read : readTracking) {
-                    if (read.getReadByUser() != null &&
-                            user.getId().equals(read.getReadByUser().getId())) {
-                        find = true;
-                        break;
+            ReadBySend readBySend = ReadBySend.builder()
+                    .messageId(lastMessage.getId())
+                    .readAt(new Date())
+                    .roomId(lastMessage.getRoomId())
+                    .userId(user.getId())
+                    .build();
+            if (lastMessage.getType().equals(MessageType.SYSTEM) && inboxDto.getCountNewMessage() > 0) {
+                WebSocketClient.getInstance().getStompClient()
+                        .send("/app/read/resetUnreadMessage", Json.encode(readBySend))
+                        .subscribe(() -> {
+
+                        });
+            } else {
+                Set<ReadByDto> readTracking = lastMessage.getReadbyes();
+                if (readTracking != null) {
+                    for (ReadByDto read : readTracking) {
+                        if (read.getReadByUser() != null &&
+                                user.getId().equals(read.getReadByUser().getId())) {
+                            find = true;
+                            break;
+                        }
                     }
-                }
-                if (!find) {
-                    ReadBySend readBySend = ReadBySend.builder()
-                            .messageId(lastMessage.getId())
-                            .readAt(new Date())
-                            .roomId(lastMessage.getRoomId())
-                            .userId(user.getId())
-                            .build();
+                    if (!find) {
+                        WebSocketClient.getInstance().getStompClient()
+                                .send("/app/read", Json.encode(readBySend))
+                                .subscribe(() -> {
 
-                    WebSocketClient.getInstance().getStompClient()
-                            .send("/app/read", Json.encode(readBySend))
-                            .subscribe(() -> {
-
-                            });
+                                });
+                    }
                 }
             }
         }
@@ -665,6 +672,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateMessageRealTime(MessageDto messageDto) {
         if (messageDto.getRoomId().equals(inboxDto.getRoom().getId())) {
+            inboxDto.setCountNewMessage(0);
             this.adapter.updateMessage(messageDto);
             rcv_chat_list.getLayoutManager()
                     .smoothScrollToPosition(rcv_chat_list,

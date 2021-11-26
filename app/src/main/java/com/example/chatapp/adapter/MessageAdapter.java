@@ -911,13 +911,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
         notifyItemChanged(size - 1);
     }
 
-    public MessageDto getLastMessageNotSystem() {
-        if (list != null && !list.isEmpty()) {
-            for (int i = list.size() - 1; i >= 0; i--) {
-                if (list.get(i) != null && !list.get(i).getType().equals(MessageType.SYSTEM))
-                    return list.get(i);
-            }
-        }
+    public MessageDto getLastMessage() {
+        if (list != null && !list.isEmpty())
+            return list.get(list.size() - 1);
         return null;
     }
 

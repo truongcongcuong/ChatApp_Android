@@ -206,7 +206,8 @@
             android:id="@+id/send_rcv_read_many"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layoutDirection="rtl">
+            android:layoutDirection="rtl"
+            android:textDirection="ltr">
 
         </androidx.recyclerview.widget.RecyclerView>
     </LinearLayout>

@@ -216,7 +216,8 @@
             android:id="@+id/receiver_rcv_read_many"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layoutDirection="rtl">
+            android:layoutDirection="rtl"
+            android:textDirection="ltr">
 
         </androidx.recyclerview.widget.RecyclerView>
     </LinearLayout>

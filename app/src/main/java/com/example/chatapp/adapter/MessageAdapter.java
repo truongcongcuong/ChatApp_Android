@@ -198,13 +198,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         int top = 0;
                         if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
                             if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
-                                top = (int) convertDpToPixel(3, context);
+                                top = (int) convertDpToPixel(5, context);
                         }
                         senderViewHolder.timeOfMessage.setPadding(
                                 (int) convertDpToPixel(10, context),
                                 top,
                                 (int) convertDpToPixel(10, context),
-                                (int) convertDpToPixel(3, context)
+                                (int) convertDpToPixel(5, context)
                         );
                         senderViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                         senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
@@ -214,13 +214,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 int top = 0;
                                 if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
                                     if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
-                                        top = (int) convertDpToPixel(3, context);
+                                        top = (int) convertDpToPixel(5, context);
                                 }
                                 senderViewHolder.timeOfMessage.setPadding(
                                         (int) convertDpToPixel(10, context),
                                         top,
                                         (int) convertDpToPixel(10, context),
-                                        (int) convertDpToPixel(3, context)
+                                        (int) convertDpToPixel(5, context)
                                 );
                                 senderViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                 senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
@@ -228,13 +228,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 int top = 0;
                                 if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
                                     if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
-                                        top = (int) convertDpToPixel(3, context);
+                                        top = (int) convertDpToPixel(5, context);
                                 }
                                 senderViewHolder.timeOfMessage.setPadding(
                                         (int) convertDpToPixel(10, context),
                                         top,
                                         (int) convertDpToPixel(10, context),
-                                        (int) convertDpToPixel(3, context)
+                                        (int) convertDpToPixel(5, context)
                                 );
                                 senderViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                 senderViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
@@ -282,10 +282,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             int top = 0;
                             int bottom = 0;
                             if (senderViewHolder.timeOfMessage.getVisibility() == View.GONE) {
-                                bottom = (int) convertDpToPixel(3, context);
+                                bottom = (int) convertDpToPixel(5, context);
                             }
                             if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
-                                top = (int) convertDpToPixel(3, context);
+                                top = (int) convertDpToPixel(5, context);
                             }
                             senderViewHolder.senderMessage.setPadding(
                                     (int) convertDpToPixel(10, context),
@@ -305,10 +305,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 int bt = 0;
                                 int tp = 0;
                                 if (senderViewHolder.timeOfMessage.getVisibility() == View.GONE) {
-                                    bt = (int) convertDpToPixel(3, context);
+                                    bt = (int) convertDpToPixel(5, context);
                                 }
                                 if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
-                                    tp = (int) convertDpToPixel(3, context);
+                                    tp = (int) convertDpToPixel(5, context);
                                 }
                                 senderViewHolder.senderMessage.setPadding(
                                         (int) convertDpToPixel(10, context),
@@ -434,13 +434,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             int top = 0;
                             if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
                                 if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
-                                    top = (int) convertDpToPixel(3, context);
+                                    top = (int) convertDpToPixel(5, context);
                             }
                             receiverViewHolder.timeOfMessage.setPadding(
                                     (int) convertDpToPixel(10, context),
                                     top,
                                     (int) convertDpToPixel(10, context),
-                                    (int) convertDpToPixel(3, context)
+                                    (int) convertDpToPixel(5, context)
                             );
 
                             receiverViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
@@ -455,13 +455,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     int top = 0;
                                     if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
                                         if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
-                                            top = (int) convertDpToPixel(3, context);
+                                            top = (int) convertDpToPixel(5, context);
                                     }
                                     receiverViewHolder.timeOfMessage.setPadding(
                                             (int) convertDpToPixel(10, context),
                                             top,
                                             (int) convertDpToPixel(10, context),
-                                            (int) convertDpToPixel(3, context)
+                                            (int) convertDpToPixel(5, context)
                                     );
                                     receiverViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                     receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
@@ -475,13 +475,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                     int top = 0;
                                     if (messageDto.getContent() == null || messageDto.getContent().isEmpty()) {
                                         if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty())
-                                            top = (int) convertDpToPixel(3, context);
+                                            top = (int) convertDpToPixel(5, context);
                                     }
                                     receiverViewHolder.timeOfMessage.setPadding(
                                             (int) convertDpToPixel(10, context),
                                             top,
                                             (int) convertDpToPixel(10, context),
-                                            (int) convertDpToPixel(3, context)
+                                            (int) convertDpToPixel(5, context)
                                     );
                                     receiverViewHolder.timeOfMessage.setVisibility(View.VISIBLE);
                                     receiverViewHolder.timeOfMessage.setText(messageDto.getCreateAt().replaceAll("-", "/"));
@@ -539,10 +539,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             int top = 0;
                             int bottom = 0;
                             if (receiverViewHolder.timeOfMessage.getVisibility() == View.GONE) {
-                                bottom = (int) convertDpToPixel(3, context);
+                                bottom = (int) convertDpToPixel(5, context);
                             }
                             if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
-                                top = (int) convertDpToPixel(3, context);
+                                top = (int) convertDpToPixel(5, context);
                             }
                             receiverViewHolder.receiverMessage.setPadding(
                                     (int) convertDpToPixel(10, context),
@@ -562,10 +562,10 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 int bt = 0;
                                 int tp = 0;
                                 if (receiverViewHolder.timeOfMessage.getVisibility() == View.GONE) {
-                                    bt = (int) convertDpToPixel(3, context);
+                                    bt = (int) convertDpToPixel(5, context);
                                 }
                                 if (messageDto.getMedia() == null || messageDto.getMedia().isEmpty()) {
-                                    tp = (int) convertDpToPixel(3, context);
+                                    tp = (int) convertDpToPixel(5, context);
                                 }
                                 receiverViewHolder.receiverMessage.setPadding(
                                         (int) convertDpToPixel(10, context),

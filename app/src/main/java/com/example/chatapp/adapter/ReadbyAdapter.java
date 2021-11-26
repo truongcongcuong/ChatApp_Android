@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.StrictMode;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -66,24 +68,32 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
             ReadByDto readBy = list.get(position);
 
             // hiện ảnh của người xem dùng thư viện Glide
-            if (position < max - 1) {
+            if (position < max) {
+                holder.readby_image.setVisibility(View.VISIBLE);
                 holder.readby_image.setBackgroundResource(R.drawable.border_for_circle_image);
                 Glide.with(context).load(readBy.getReadByUser().getImageUrl())
                         .placeholder(R.drawable.img_avatar_placeholer)
                         .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop().circleCrop().into(holder.readby_image);
+                RecyclerView.LayoutParams back_ground_read_moreLayoutParams = (RecyclerView.LayoutParams) holder.back_ground_read_more.getLayoutParams();
+                back_ground_read_moreLayoutParams.rightMargin = (int) convertDpToPixel(0, context);
+                holder.readby_more.setVisibility(View.GONE);
             }
 
             if (position == max - 1) {
-                int remain = list.size() - max;
-                holder.readby_image.setBackgroundResource(R.drawable.border_for_circle_image);
-                Glide.with(context).load(readBy.getReadByUser().getImageUrl())
-                        .placeholder(R.drawable.img_avatar_placeholer)
-                        .transition(DrawableTransitionOptions.withCrossFade())
-                        .centerCrop().circleCrop().into(holder.readby_image);
+                int remain = list.size() - max + 1;
                 if (remain > 0) {
-                    holder.readby_image.setAlpha(0.3f);
+                    holder.readby_more.setVisibility(View.VISIBLE);
+                    holder.readby_image.setVisibility(View.GONE);
+                    RecyclerView.LayoutParams back_ground_read_moreLayoutParams = (RecyclerView.LayoutParams) holder.back_ground_read_more.getLayoutParams();
+                    back_ground_read_moreLayoutParams.rightMargin = (int) convertDpToPixel(8, context);
+                    holder.readby_more.setBackgroundResource(R.drawable.background_read_more);
                     holder.readby_more.setText(String.format("+%d", remain));
+                } else {
+                    holder.readby_image.setVisibility(View.VISIBLE);
+                    RecyclerView.LayoutParams back_ground_read_moreLayoutParams = (RecyclerView.LayoutParams) holder.back_ground_read_more.getLayoutParams();
+                    back_ground_read_moreLayoutParams.rightMargin = (int) convertDpToPixel(0, context);
+                    holder.readby_more.setVisibility(View.GONE);
                 }
             }
 
@@ -103,12 +113,18 @@ public class ReadbyAdapter extends RecyclerView.Adapter<ReadbyAdapter.ViewHolder
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView readby_image;
         TextView readby_more;
+        ConstraintLayout back_ground_read_more;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             readby_more = itemView.findViewById(R.id.readby_more);
             readby_image = itemView.findViewById(R.id.readby_image);
+            back_ground_read_more = itemView.findViewById(R.id.back_ground_read_more);
         }
+    }
+
+    public float convertDpToPixel(float dp, Context context) {
+        return dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
 }

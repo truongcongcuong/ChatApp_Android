@@ -74,6 +74,7 @@ public class WebSocketClient {
         Log.i("userId", userId);
         Log.i("access_token", access_token);
 
+        stompClient.withClientHeartbeat(55000);
         stompClient.connect(headers);
 
     }

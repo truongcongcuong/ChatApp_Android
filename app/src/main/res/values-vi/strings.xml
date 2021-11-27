@@ -192,4 +192,12 @@
     <string name="delete_group_confirm">Bạn có chắc muốn xóa nhóm này. Tất cả tin nhắn và dữ liệu sẽ bị xóa. Bạn và các thành viên sẽ không thể truy cập được nhóm sau khi xóa?</string>
     <string name="please_wait">Vui lòng đợi.</string>
     <string name="signout_confirm">Đăng xuất khỏi tài khoản %1$s?</string>
+    <string name="year">năm</string>
+    <string name="month">tháng</string>
+    <string name="day">ngày</string>
+    <string name="hour">giờ</string>
+    <string name="minute">phút</string>
+    <string name="seconds">giây</string>
+    <string name="yesterday">hôm qua</string>
+    <string name="now">bây giờ</string>
 </resources>

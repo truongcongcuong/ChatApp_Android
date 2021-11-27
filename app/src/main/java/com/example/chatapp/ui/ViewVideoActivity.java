@@ -69,7 +69,7 @@ public class ViewVideoActivity extends AppCompatActivity {
 
             setTitle(activityTitle);
             try {
-                toolbar.setSubtitle(TimeAgo.getTime(activitySubTitle));
+                toolbar.setSubtitle(TimeAgo.getTime(activitySubTitle, this));
             } catch (ParseException | NullPointerException e) {
                 toolbar.setSubtitle(activitySubTitle);
             }

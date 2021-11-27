@@ -67,7 +67,7 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
             holder.txt_search_user_display_name.setText(user.getDisplayName());
             try {
                 holder.txt_search_user_detail.setText(String.format("%s: %s",
-                        context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
+                        context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline(), context)));
             } catch (ParseException | NullPointerException e) {
                 if (user.getOnlineStatus() == OnlineStatus.ONLINE)
                     holder.txt_search_user_detail.setText(context.getString(R.string.present_online));

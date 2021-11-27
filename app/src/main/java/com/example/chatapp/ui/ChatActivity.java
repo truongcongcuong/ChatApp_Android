@@ -457,7 +457,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 detail = getString(R.string.present_online);
             else {
                 try {
-                    detail = String.format("%s %s", getString(R.string.online), TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline()));
+                    detail = String.format("%s %s", getString(R.string.online), TimeAgo.getTime(inboxDto.getRoom().getTo().getLastOnline(), this));
                 } catch (ParseException e) {
                     detail = "";
                 }

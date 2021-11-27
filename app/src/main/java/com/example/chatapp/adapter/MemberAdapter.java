@@ -28,6 +28,7 @@ import com.example.chatapp.dto.InboxDto;
 import com.example.chatapp.dto.MemberDto;
 import com.example.chatapp.dto.RoomDTO;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.utils.TimeAgo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -174,7 +175,7 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                     detail.setText(context.getString(R.string.group_admin));
                 } else {
                     try {
-                        String s = context.getString(R.string.member_add_by, member.getAddByUser().getDisplayName(), member.getAddTime());
+                        String s = context.getString(R.string.member_add_by, member.getAddByUser().getDisplayName(), TimeAgo.getTime(member.getAddTime(), context));
                         detail.setText(s);
                     } catch (Exception ignored) {
                         detail.setText(context.getString(R.string.member_add_by_undefine));

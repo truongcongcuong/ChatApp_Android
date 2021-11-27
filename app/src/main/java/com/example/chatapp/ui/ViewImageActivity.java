@@ -54,7 +54,7 @@ public class ViewImageActivity extends AppCompatActivity {
             setTitle(activityTitle);
 
             try {
-                toolbar.setSubtitle(TimeAgo.getTime(activitySubTitle));
+                toolbar.setSubtitle(TimeAgo.getTime(activitySubTitle, this));
             } catch (ParseException e) {
                 toolbar.setSubtitle(activitySubTitle);
             }

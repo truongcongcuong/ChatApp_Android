@@ -1,7 +1,15 @@
 package com.example.chatapp.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.example.chatapp.R;
+import com.example.chatapp.entity.Language;
+import com.google.gson.Gson;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,6 +21,7 @@ public class TimeAgo {
     private static final SimpleDateFormat yearFormat = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat monthFormat = new SimpleDateFormat("dd/MM");
     private static final SimpleDateFormat onlyTimeFormat = new SimpleDateFormat("HH:mm");
+    private static final Gson GSON = new Gson();
 
     public static final List<Long> times = Arrays.asList(
             TimeUnit.DAYS.toMillis(365),
@@ -22,8 +31,6 @@ public class TimeAgo {
             TimeUnit.MINUTES.toMillis(1),
             TimeUnit.SECONDS.toMillis(1));
 
-    public static final List<String> timesString = Arrays.asList("năm", "tháng", "ngày", "giờ", "phút", "giây");
-
     public static long getMiliSeconds(String date1) throws ParseException {
         Date d1 = new Date();
         Date d2 = new Date();
@@ -32,7 +39,18 @@ public class TimeAgo {
         return (d1.getTime() - d2.getTime());
     }
 
-    public static String getTime(String date1) throws ParseException {
+    public static String getTime(String date1, Context context) throws ParseException {
+        SharedPreferences sharedPreferencesLanguage = context.getSharedPreferences("multi-language", Context.MODE_PRIVATE);
+        Language currentLanguage = GSON.fromJson(sharedPreferencesLanguage.getString("language", null), Language.class);
+        boolean english = currentLanguage.getCode().equals("en");
+
+        List<String> timesString = new ArrayList<>();
+        timesString.add(context.getString(R.string.year));
+        timesString.add(context.getString(R.string.month));
+        timesString.add(context.getString(R.string.day));
+        timesString.add(context.getString(R.string.hour));
+        timesString.add(context.getString(R.string.minute));
+        timesString.add(context.getString(R.string.seconds));
 
 //        Date d1 = new Date(new Date().getTime() + 7 * 3600 * 1000);
         Date d1 = new Date();
@@ -54,18 +72,19 @@ public class TimeAgo {
             if ((i == 1 && temp > 0) || calendar1.get(Calendar.MONTH) - calendar2.get(Calendar.MONTH) > 0)
                 return monthFormat.format(d2);
             if (i == 2 && temp == 1)
-                return "hôm qua";
+                return context.getString(R.string.yesterday);
             if ((i == 2 && temp > 7) || calendar1.get(Calendar.DAY_OF_MONTH) - calendar2.get(Calendar.DAY_OF_MONTH) > 7)
                 return monthFormat.format(d2);
             if (temp > 0) {
                 res.append(temp)
                         .append(" ")
-                        .append(TimeAgo.timesString.get(i));
+                        .append(timesString.get(i))
+                        .append(english && temp > 1 ? "s" : "");
                 break;
             }
         }
         if ("".equals(res.toString()))
-            return "bây giờ";
+            return context.getString(R.string.now);
         else
             return res.toString();
     }

@@ -128,7 +128,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
             if (lastMessage != null) {
                 holder.txt_lim_last_message.setText(lastMessage.getContent());
                 try {
-                    holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt()));
+                    holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt(), context));
                 } catch (ParseException e) {
                     holder.txt_lim_time_last_message.setText("");
                 }

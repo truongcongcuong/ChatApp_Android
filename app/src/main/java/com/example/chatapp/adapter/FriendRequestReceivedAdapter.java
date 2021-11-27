@@ -84,7 +84,7 @@ public class FriendRequestReceivedAdapter extends RecyclerView.Adapter<FriendReq
                     .centerCrop().circleCrop().into(holder.img_line_friend_request_avt);
             holder.txt_line_friend_request_name.setText(friendDTO.getFrom().getDisplayName());
             try {
-                holder.txt_line_friend_request_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt()));
+                holder.txt_line_friend_request_create_at.setText(TimeAgo.getTime(friendDTO.getCreateAt(), context));
             } catch (ParseException | NullPointerException e) {
                 holder.txt_line_friend_request_create_at.setText("");
             }

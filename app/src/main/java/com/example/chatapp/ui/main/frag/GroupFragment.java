@@ -207,7 +207,7 @@ public class GroupFragment extends Fragment {
 
         list = new ArrayList<>();
         rcv_list_group.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        this.adapter = new ListMessageAdapter(getActivity().getApplicationContext(), null);
+        this.adapter = new ListMessageAdapter(getActivity(), null);
         rcv_list_group.setAdapter(adapter);
         updateListInboxGroup();
 

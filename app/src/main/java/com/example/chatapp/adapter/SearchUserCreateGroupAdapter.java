@@ -90,7 +90,7 @@ public class SearchUserCreateGroupAdapter extends RecyclerView.Adapter<SearchUse
                     .into(holder.item_create_group_user_img);
             holder.item_create_group_user_name.setText(user.getDisplayName());
             try {
-                holder.item_create_group_user_detail.setText(String.format("%s: %s", context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline())));
+                holder.item_create_group_user_detail.setText(String.format("%s: %s", context.getString(R.string.online), TimeAgo.getTime(user.getLastOnline(), context)));
             } catch (ParseException | NullPointerException e) {
                 if (user.getOnlineStatus() == OnlineStatus.ONLINE)
                     holder.item_create_group_user_detail.setText(context.getString(R.string.present_online));

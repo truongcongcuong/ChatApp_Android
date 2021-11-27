@@ -2,6 +2,7 @@ package com.example.chatapp.adapter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
@@ -65,27 +66,27 @@ public class SearchPhoneAdapter extends RecyclerView.Adapter<SearchPhoneAdapter.
             if (user.getFriendStatus().equals(FriendStatus.SENT)) {
                 holder.btn_li_search_phone_action.setText(context.getString(R.string.recall_button));
                 holder.btn_li_search_phone_action.setTextColor(Color.WHITE);
-                holder.btn_li_search_phone_action.setBackgroundResource(R.drawable.background_btn_friend_phonebook);
+                holder.btn_li_search_phone_action.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.purple_200)));
                 holder.btn_li_search_phone_action.setOnClickListener(v -> {
                     deleteSentRequest(user);
                 });
             } else if (user.getFriendStatus().equals(FriendStatus.RECEIVED)) {
                 holder.btn_li_search_phone_action.setText(R.string.accept);
                 holder.btn_li_search_phone_action.setTextColor(Color.WHITE);
-                holder.btn_li_search_phone_action.setBackgroundResource(R.drawable.background_btn_friend_phonebook);
+                holder.btn_li_search_phone_action.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.purple_200)));
                 holder.btn_li_search_phone_action.setOnClickListener(v -> {
                     acceptFriendRequest(user);
                 });
             } else if (user.getFriendStatus().equals(FriendStatus.FRIEND)) {
                 holder.btn_li_search_phone_action.setText(context.getString(R.string.friend));
                 holder.btn_li_search_phone_action.setTextColor(Color.DKGRAY);
-                holder.btn_li_search_phone_action.setBackground(null);
+                holder.btn_li_search_phone_action.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.background_material_light)));
                 holder.btn_li_search_phone_action.setOnClickListener(null);
 
             } else if (user.getFriendStatus().equals(FriendStatus.NONE)) {
                 holder.btn_li_search_phone_action.setText(context.getString(R.string.add_friend));
                 holder.btn_li_search_phone_action.setTextColor(Color.WHITE);
-                holder.btn_li_search_phone_action.setBackgroundResource(R.drawable.background_btn_friend_phonebook);
+                holder.btn_li_search_phone_action.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.purple_200)));
                 holder.btn_li_search_phone_action.setOnClickListener(v -> {
                     sendFriendRequest(user);
                 });

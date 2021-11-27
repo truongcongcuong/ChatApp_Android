@@ -3,6 +3,7 @@ package com.example.chatapp.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -74,6 +75,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import lombok.SneakyThrows;
 
@@ -246,7 +249,14 @@ public class RoomDetailActivity extends AppCompatActivity {
                     builder.setMessage(getString(R.string.leave_group_confirm, inboxDto.getRoom().getName()))
                             .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
                             .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
-                                leaveGroup();
+                                ProgressDialog progress = new ProgressDialog(this);
+                                progress.setMessage(getResources().getString(R.string.please_wait));
+                                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                                progress.setIndeterminate(true);
+                                progress.setCanceledOnTouchOutside(false);
+                                progress.setCancelable(false);
+                                progress.show();
+                                leaveGroup(progress);
                             });
                     builder.create().show();
                     break;
@@ -256,7 +266,14 @@ public class RoomDetailActivity extends AppCompatActivity {
                     builder.setMessage(getString(R.string.delete_chat_history_confirm))
                             .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
                             .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
-                                deleteInbox();
+                                ProgressDialog progress = new ProgressDialog(this);
+                                progress.setMessage(getResources().getString(R.string.please_wait));
+                                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                                progress.setIndeterminate(true);
+                                progress.setCanceledOnTouchOutside(false);
+                                progress.setCancelable(false);
+                                progress.show();
+                                deleteInbox(progress);
                             });
                     builder.create().show();
                     break;
@@ -279,11 +296,12 @@ public class RoomDetailActivity extends AppCompatActivity {
                     startActivity(intent);
                     break;
                 }
-                case "viewCommonGroup":
+                case "viewCommonGroup": {
                     ViewCommonGroupDialog viewCommonGroupDialog = new ViewCommonGroupDialog(this, inboxDto.getRoom().getTo());
                     viewCommonGroupDialog.show();
                     break;
-                case "block":
+                }
+                case "block": {
                     AlertDialog.Builder blockBuilder = new AlertDialog.Builder(this);
                     blockBuilder.setMessage(getString(R.string.block_message_confirm, inboxDto.getRoom().getTo().getDisplayName()))
                             .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
@@ -292,7 +310,8 @@ public class RoomDetailActivity extends AppCompatActivity {
                             });
                     blockBuilder.create().show();
                     break;
-                case "unBlock":
+                }
+                case "unBlock": {
                     AlertDialog.Builder unBlockBuilder = new AlertDialog.Builder(this);
                     unBlockBuilder.setMessage(getString(R.string.un_block_message_confirm, inboxDto.getRoom().getTo().getDisplayName()))
                             .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
@@ -301,10 +320,70 @@ public class RoomDetailActivity extends AppCompatActivity {
                             });
                     unBlockBuilder.create().show();
                     break;
+                }
+                case "report": {
+                    Intent intent = new Intent(RoomDetailActivity.this, ReportActivity.class);
+                    Bundle bundle2 = new Bundle();
+                    bundle2.putSerializable("user", inboxDto.getRoom().getTo());
+                    intent.putExtras(bundle2);
+                    startActivity(intent);
+                    break;
+                }
+                case "deleteGroup": {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage(getString(R.string.delete_group_confirm))
+                            .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
+                            .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
+                                ProgressDialog progress = new ProgressDialog(this);
+                                progress.setMessage(getResources().getString(R.string.please_wait));
+                                progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                                progress.setIndeterminate(true);
+                                progress.setCanceledOnTouchOutside(false);
+                                progress.setCancelable(false);
+                                progress.show();
+                                deleteGroup(progress);
+                            });
+                    builder.create().show();
+                    break;
+                }
             }
         });
         setListViewHeightBasedOnChildren(lv_menu_items);
         scrollView.post(() -> scrollView.scrollTo(0, 0));
+    }
+
+    private void deleteGroup(Dialog progressBarDialog) {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_ROOM + "delete/" + inboxDto.getRoom().getId(),
+                        response -> {
+                            progressBarDialog.cancel();
+                            Intent intent = new Intent(RoomDetailActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            finish();
+                        },
+                        error -> {
+                            progressBarDialog.cancel();
+                            Log.i("delete group error", error.toString());
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + token);
+                        return map;
+                    }
+                };
+                RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
+                DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                request.setRetryPolicy(retryPolicy);
+                requestQueue.add(request);
+            }
+        }, 5000);
     }
 
     private void setMenuItemList() {
@@ -402,11 +481,13 @@ public class RoomDetailActivity extends AppCompatActivity {
                 .name(getString(R.string.delete_chat_history))
                 .build());
 
-        myMenuItems.add(MyMenuItem.builder()
-                .key("report")
-                .imageResource(R.drawable.ic_baseline_report_24)
-                .name(getString(R.string.report))
-                .build());
+        if (inboxDto != null && inboxDto.getRoom().getType().equals(RoomType.ONE)) {
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("report")
+                    .imageResource(R.drawable.ic_baseline_report_24)
+                    .name(getString(R.string.report))
+                    .build());
+        }
         for (int i = 0; i < 10; i++) {
             myMenuItems.add(MyMenuItem.builder()
                     .key("----------------")
@@ -481,28 +562,38 @@ public class RoomDetailActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), PICK_IMAGE);
     }
 
-    private void deleteInbox() {
-        StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_INBOX + "/" + inboxDto.getId(),
-                response -> {
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    super.finish();
-                },
-                error -> Log.i("delete inbox error", error.toString())) {
+    private void deleteInbox(Dialog progressDialog) {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
             @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
-                return map;
+            public void run() {
+                StringRequest request = new StringRequest(Request.Method.DELETE, Constant.API_INBOX + "/" + inboxDto.getId(),
+                        response -> {
+                            progressDialog.cancel();
+                            Intent intent = new Intent(RoomDetailActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            finish();
+                        },
+                        error -> {
+                            progressDialog.cancel();
+                            Log.i("delete inbox error", error.toString());
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + token);
+                        return map;
+                    }
+                };
+                RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
+                DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                request.setRetryPolicy(retryPolicy);
+                requestQueue.add(request);
             }
-        };
-        RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
-        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        request.setRetryPolicy(retryPolicy);
-        requestQueue.add(request);
+        }, 3000);
     }
 
     /*
@@ -573,28 +664,38 @@ public class RoomDetailActivity extends AppCompatActivity {
         btn_ok.setOnClickListener(v1 -> rename(inboxDto, dialog, newName.getText().toString().trim()));
     }
 
-    private void leaveGroup() {
-        StringRequest request = new StringRequest(Request.Method.POST, Constant.API_ROOM + "leave/" + inboxDto.getRoom().getId(),
-                response -> {
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    super.finish();
-                },
-                error -> Log.i("leave error", error.toString())) {
+    private void leaveGroup(Dialog progressDialog) {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
             @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
-                return map;
+            public void run() {
+                StringRequest request = new StringRequest(Request.Method.POST, Constant.API_ROOM + "leave/" + inboxDto.getRoom().getId(),
+                        response -> {
+                            progressDialog.cancel();
+                            Intent intent = new Intent(RoomDetailActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            finish();
+                        },
+                        error -> {
+                            progressDialog.cancel();
+                            Log.i("leave error", error.toString());
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + token);
+                        return map;
+                    }
+                };
+                RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
+                DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+                request.setRetryPolicy(retryPolicy);
+                requestQueue.add(request);
             }
-        };
-        RequestQueue requestQueue = Volley.newRequestQueue(RoomDetailActivity.this);
-        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        request.setRetryPolicy(retryPolicy);
-        requestQueue.add(request);
+        }, 3000);
     }
 
     private void rename(InboxDto ibdto, Dialog dialog, String newName) {
@@ -811,6 +912,12 @@ public class RoomDetailActivity extends AppCompatActivity {
         DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         request.setRetryPolicy(retryPolicy);
         requestQueue.add(request);
+    }
+
+    @Override
+    protected void onResume() {
+        scrollView.post(() -> scrollView.scrollTo(0, 0));
+        super.onResume();
     }
 
 }

@@ -678,39 +678,43 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
         if (mediaList != null && !mediaList.isEmpty()) {
             room.setImageUrl(mediaList.get(0).getUrl());
         }
+        if (timer != null)
+            timer.cancel();
+        timer = new Timer();
         JSONObject object = new JSONObject(gson.toJson(room));
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Constant.API_ROOM, object,
-                response -> {
-                    String res;
-                    try {
-                        res = URLDecoder.decode(URLEncoder.encode(response.toString(), "iso8859-1"), "UTF-8");
-                        Log.d("///", res);
-
-                        InboxDto inboxDto = gson.fromJson(res, InboxDto.class);
-
-                        Intent intent = new Intent(this, ChatActivity.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable("dto", inboxDto);
-                        intent.putExtras(bundle);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        progress.cancel();
-                        startActivity(intent);
-                        finish();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> {
-
-        }) {
+        timer.schedule(new TimerTask() {
             @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Authorization", "Bearer " + token);
-                return map;
+            public void run() {
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Constant.API_ROOM, object,
+                        response -> {
+                            String res = response.toString();
+                            System.out.println("response = " + response);
+
+                            InboxDto inboxDto = gson.fromJson(res, InboxDto.class);
+
+                            Intent intent = new Intent(CreateGroupActivity.this, ChatActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("dto", inboxDto);
+                            intent.putExtras(bundle);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            progress.cancel();
+                            startActivity(intent);
+                            finish();
+                        }, error -> {
+                    progress.cancel();
+
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("Authorization", "Bearer " + token);
+                        return map;
+                    }
+                };
+                request.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
+                Volley.newRequestQueue(CreateGroupActivity.this).add(request);
             }
-        };
-        request.setRetryPolicy(new DefaultRetryPolicy(0, 1, 2));//10000
-        Volley.newRequestQueue(this).add(request);
+        }, 3000);
     }
 
     @Override

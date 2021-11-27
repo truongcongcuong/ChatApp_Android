@@ -43,6 +43,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.dto.FriendDeleteDto;
 import com.example.chatapp.dto.InboxDto;
+import com.example.chatapp.dto.UserProfileDto;
 import com.example.chatapp.dto.UserSummaryDTO;
 import com.example.chatapp.dto.ViewProfileDto;
 import com.example.chatapp.entity.FriendRequest;
@@ -261,6 +262,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
                 menuOpts.getItem(0).setTitle(getString(R.string.view_information));
                 menuOpts.getItem(1).setTitle(getString(R.string.remove_friend));
+                menuOpts.getItem(2).setTitle(getString(R.string.report_user));
                 if (viewProfileDto == null) {
                     menuOpts.getItem(1).setVisible(false);
                     menuOpts.getItem(1).setEnabled(false);
@@ -305,6 +307,22 @@ public class ViewProfileActivity extends AppCompatActivity {
                                     deleteFriend(userId);
                                 });
                         builder.create().show();
+                    } else if (item1.getItemId() == R.id.view_profile_item_report_user) {
+                        Intent intent = new Intent(ViewProfileActivity.this, ReportActivity.class);
+                        Bundle bundle = new Bundle();
+                        UserProfileDto profile = new UserProfileDto();
+                        profile.setMeBLock(viewProfileDto.isMeBLock());
+                        profile.setFriendStatus(viewProfileDto.getFriendStatus());
+                        profile.setDisplayName(viewProfileDto.getDisplayName());
+                        profile.setId(viewProfileDto.getId());
+                        profile.setImageUrl(viewProfileDto.getImageUrl());
+                        profile.setBlockMe(viewProfileDto.isBlockMe());
+                        profile.setLastOnline(viewProfileDto.getLastOnline());
+                        profile.setOnlineStatus(viewProfileDto.getOnlineStatus());
+                        profile.setPhoneNumber(viewProfileDto.getPhoneNumber());
+                        bundle.putSerializable("user", profile);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
                     }
                     return true;
                 });

@@ -190,6 +190,15 @@
     <string name="un_block_messages">Un block message</string>
     <string name="block_message_confirm">Block message from %1$s?</string>
     <string name="un_block_message_confirm">Un block message from %1$s?</string>
+    <string name="report_content">Report content</string>
+    <string name="file_attachment">Attach photo</string>
+    <string name="report_message">Report message</string>
+    <string name="report_user">Report user</string>
+    <string name="sender">Sender</string>
+    <string name="error_report_content_empty">Please enter the content to report.</string>
+    <string name="report_success">Successful report. Thank you for submitting your report to us.</string>
+    <string name="delete_group_confirm">Are you sure you want to delete this group? All messages and data will be deleted. You and your members will not be able to access the group after deleting?</string>
+    <string name="please_wait">Please wait.</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

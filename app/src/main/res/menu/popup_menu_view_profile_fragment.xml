@@ -14,4 +14,10 @@
         android:title="@string/remove_friend"
         app:showAsAction="ifRoom|withText" />
 
+    <item
+        android:id="@+id/view_profile_item_report_user"
+        android:icon="@drawable/ic_baseline_report_24"
+        android:title="@string/report_user"
+        app:showAsAction="ifRoom|withText" />
+
 </menu>

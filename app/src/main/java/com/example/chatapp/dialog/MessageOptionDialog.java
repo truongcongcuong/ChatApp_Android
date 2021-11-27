@@ -1,6 +1,7 @@
 package com.example.chatapp.dialog;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,9 +28,10 @@ import com.example.chatapp.adapter.MenuButtonAdapterHorizontal;
 import com.example.chatapp.adapter.ReactionDialogCreateAdapter;
 import com.example.chatapp.cons.Constant;
 import com.example.chatapp.cons.SendDataReplyMessage;
-import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.MessageDto;
+import com.example.chatapp.dto.MyMenuItem;
 import com.example.chatapp.dto.UserSummaryDTO;
+import com.example.chatapp.ui.ReportActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.gson.Gson;
 
@@ -88,6 +90,14 @@ public class MessageOptionDialog extends BottomSheetDialogFragment implements Vi
                     .build());
         }
 
+        if (messageDto.getSender() != null && !user.getId().equals(messageDto.getSender().getId())) {
+            myMenuItems.add(MyMenuItem.builder()
+                    .key("reportMessage")
+                    .imageResource(R.drawable.ic_baseline_report_24)
+                    .name(context.getString(R.string.report_message))
+                    .build());
+        }
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
         ReactionDialogCreateAdapter arrayAdapter = new ReactionDialogCreateAdapter(messageDto, context, this);
         rcvReaction.setLayoutManager(layoutManager);
@@ -117,6 +127,13 @@ public class MessageOptionDialog extends BottomSheetDialogFragment implements Vi
         } else if (myMenuItem.getKey().equals("reply")) {
             SendDataReplyMessage sendDataReplyMessage = (SendDataReplyMessage) context;
             sendDataReplyMessage.reply(messageDto);
+            dismiss();
+        } else if (myMenuItem.getKey().equals("reportMessage")) {
+            Intent intent = new Intent(context, ReportActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("message", messageDto);
+            intent.putExtras(bundle);
+            context.startActivity(intent);
             dismiss();
         }
     }

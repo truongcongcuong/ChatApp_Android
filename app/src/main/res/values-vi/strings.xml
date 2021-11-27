@@ -182,4 +182,13 @@
     <string name="un_block_messages">Bỏ chặn tin nhắn</string>
     <string name="block_message_confirm">Chặn tin nhắn từ %1$s?</string>
     <string name="un_block_message_confirm">Bỏ chặn tin nhắn từ %1$s?</string>
+    <string name="report_content">Nội dung báo cáo</string>
+    <string name="file_attachment">Đính kèm ảnh</string>
+    <string name="report_message">Báo cáo tin nhắn</string>
+    <string name="report_user">Báo cáo người dùng</string>
+    <string name="sender">Người gửi</string>
+    <string name="error_report_content_empty">Vui lòng nhập nội dung cần báo cáo.</string>
+    <string name="report_success">Báo cáo thành công. Cảm ơn vì bạn đã gửi báo cáo cho chúng tôi.</string>
+    <string name="delete_group_confirm">Bạn có chắc muốn xóa nhóm này. Tất cả tin nhắn và dữ liệu sẽ bị xóa. Bạn và các thành viên sẽ không thể truy cập được nhóm sau khi xóa?</string>
+    <string name="please_wait">Vui lòng đợi.</string>
 </resources>

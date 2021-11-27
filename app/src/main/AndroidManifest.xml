@@ -19,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp">
         <activity
+            android:name=".ui.ReportActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
             android:name=".ui.ViewProfileActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
         <activity

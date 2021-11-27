@@ -67,6 +67,7 @@ public class InfoFragment extends Fragment {
     private NestedScrollView nestedScrollView;
     private Gson gson;
     private MenuButtonAdapterVertical menuAdapter;
+    private UserSummaryDTO currentUser;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -147,7 +148,18 @@ public class InfoFragment extends Fragment {
             } else if (item.getKey().equals("changePassword")) {
                 changePassword();
             } else if (item.getKey().equals("signout")) {
-                signout();
+                String content;
+                if (currentUser != null && currentUser.getDisplayName() != null)
+                    content = getString(R.string.signout_confirm, currentUser.getDisplayName());
+                else
+                    content = getString(R.string.signout_confirm);
+                AlertDialog.Builder blockBuilder = new AlertDialog.Builder(getActivity());
+                blockBuilder.setMessage(content)
+                        .setPositiveButton(getString(R.string.cancel_button), (dialog, id) -> dialog.cancel())
+                        .setNegativeButton(getString(R.string.confirm_button), (dialog, id) -> {
+                            signout();
+                        });
+                blockBuilder.create().show();
             } else if (item.getKey().equals("infoApp")) {
                 Toast.makeText(getActivity(), getString(R.string.app_info), Toast.LENGTH_SHORT).show();
             } else if (item.getKey().equals("changeLanguage")) {
@@ -315,8 +327,8 @@ public class InfoFragment extends Fragment {
 
     private void getUserInfo() {
         SharedPreferences sharedPreferencesUser = getActivity().getApplicationContext().getSharedPreferences("user", Context.MODE_PRIVATE);
-        UserSummaryDTO user = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
-        displayInformation(user);
+        currentUser = gson.fromJson(sharedPreferencesUser.getString("user-info", null), UserSummaryDTO.class);
+        displayInformation(currentUser);
     }
 
     private void displayInformation(UserSummaryDTO user) {

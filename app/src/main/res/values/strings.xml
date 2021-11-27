@@ -199,6 +199,7 @@
     <string name="report_success">Successful report. Thank you for submitting your report to us.</string>
     <string name="delete_group_confirm">Are you sure you want to delete this group? All messages and data will be deleted. You and your members will not be able to access the group after deleting?</string>
     <string name="please_wait">Please wait.</string>
+    <string name="signout_confirm">Log out of %1$s account?</string>
 
     <string-array name="language_codes">
         <item>@string/language_english_code</item>

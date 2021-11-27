@@ -151,8 +151,17 @@ public class FriendRequestSentAdapter extends RecyclerView.Adapter<FriendRequest
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void notifyDataChange(FriendRequest friendRequest) {
-        list.removeIf(x -> x.getTo().getId().equals(friendRequest.getTo().getId()));
-        notifyDataSetChanged();
+        int index = -1;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getTo().getId().equals(friendRequest.getTo().getId())) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            list.remove(index);
+            notifyItemRemoved(index);
+        }
 
         /*
         khi có thay đổi thì gửi thông báo đến cho FriendRequestActivity,

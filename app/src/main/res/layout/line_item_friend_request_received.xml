@@ -7,9 +7,9 @@
     android:clickable="true"
     android:focusable="true"
     android:paddingStart="10dp"
-    android:paddingTop="10dp"
+    android:paddingTop="4dp"
     android:paddingEnd="5dp"
-    android:paddingBottom="10dp">
+    android:paddingBottom="4dp">
 
     <ImageView
         android:id="@+id/img_line_friend_request_avt"
@@ -64,48 +64,52 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_friend_received_text"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
         android:layout_marginEnd="5dp"
         android:layout_toEndOf="@+id/img_line_friend_request_avt"
         android:gravity="center"
         android:orientation="horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_line_friend_request_accept"
+            style="@style/Widget.MaterialComponents.Button.Icon"
             android:layout_width="100dp"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:background="@drawable/background_btn_friend_phonebook"
             android:gravity="center_vertical|center_horizontal"
             android:includeFontPadding="false"
             android:maxLines="1"
+            android:minWidth="120dp"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:text="@string/accept_button"
             android:textAlignment="center"
             android:textColor="@color/white"
-            app:backgroundTint="@null">
+            app:backgroundTint="@color/purple_200"
+            app:cornerRadius="16dp"
+            app:iconGravity="textStart" />
 
-        </Button>
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_line_friend_request_cancel"
+            style="@style/Widget.MaterialComponents.Button.Icon"
             android:layout_width="100dp"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
             android:layout_marginStart="10dp"
             android:layout_weight="1"
-            android:background="@drawable/background_btn_friend_phonebook"
             android:gravity="center_vertical|center_horizontal"
             android:includeFontPadding="false"
             android:maxLines="1"
+            android:minWidth="120dp"
             android:paddingStart="2dp"
             android:paddingEnd="2dp"
             android:text="@string/delete"
             android:textAlignment="center"
             android:textColor="@color/white"
-            app:backgroundTint="@color/gray">
+            app:backgroundTint="@color/gray"
+            app:cornerRadius="16dp"
+            app:iconGravity="textStart" />
 
-        </Button>
     </LinearLayout>
 
 </RelativeLayout>

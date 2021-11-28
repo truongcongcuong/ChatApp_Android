@@ -346,6 +346,14 @@ public class RoomDetailActivity extends AppCompatActivity {
                     builder.create().show();
                     break;
                 }
+                case "viewStoredMedia": {
+                    Intent intent = new Intent(RoomDetailActivity.this, MediaActivity.class);
+                    Bundle bundle2 = new Bundle();
+                    bundle2.putSerializable("inboxDto", inboxDto);
+                    intent.putExtras(bundle2);
+                    startActivity(intent);
+                    break;
+                }
             }
         });
         setListViewHeightBasedOnChildren(lv_menu_items);

@@ -14,8 +14,9 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
         android:focusable="true"
-        android:minWidth="70dp"
-        android:minHeight="70dp">
+        android:minWidth="60dp"
+        android:minHeight="60dp"
+        android:scaleType="centerCrop">
 
     </ImageView>
 

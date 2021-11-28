@@ -21,9 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.dialog.MessageOptionDialog;
 import com.example.chatapp.dto.MessageDto;
@@ -92,10 +90,10 @@ public class LineItemMediaAdapter extends RecyclerView.Adapter {
                         context.startActivity(intent);
                     });
                     imageViewHolder.line_item_message_media_image.setMaxHeight((int) (getScreenHeight(context) * 0.45));
-                    GranularRoundedCorners corners = new GranularRoundedCorners(CORNER, CORNER, CORNER, CORNER);
+//                    GranularRoundedCorners corners = new GranularRoundedCorners(CORNER, CORNER, CORNER, CORNER);
                     Glide.with(context).load(media.getUrl())
                             .placeholder(R.drawable.background_preload_image_video)
-                            .apply(RequestOptions.bitmapTransform(corners))
+//                            .apply(RequestOptions.bitmapTransform(corners))
                             .transition(DrawableTransitionOptions.withCrossFade())
                             .into(imageViewHolder.line_item_message_media_image);
 
@@ -113,10 +111,10 @@ public class LineItemMediaAdapter extends RecyclerView.Adapter {
                         showVideoViewActivity(media);
                     });
                     videoViewHolder.line_item_message_media_thumbnail.setMaxHeight((int) (getScreenHeight(context) * 0.45));
-                    GranularRoundedCorners corners = new GranularRoundedCorners(CORNER, CORNER, CORNER, CORNER);
+//                    GranularRoundedCorners corners = new GranularRoundedCorners(CORNER, CORNER, CORNER, CORNER);
                     Glide.with(context).load(media.getUrl())
                             .placeholder(R.drawable.background_preload_image_video)
-                            .apply(RequestOptions.bitmapTransform(corners))
+//                            .apply(RequestOptions.bitmapTransform(corners))
                             .transition(DrawableTransitionOptions.withCrossFade())
                             .into(videoViewHolder.line_item_message_media_thumbnail);
                 } else if (media.getType().equals(MediaType.FILE)) {

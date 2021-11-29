@@ -27,26 +27,33 @@ import com.example.chatapp.dialog.MessageOptionDialog;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.enumvalue.MediaType;
-import com.example.chatapp.ui.ViewImageActivity;
-import com.example.chatapp.ui.ViewVideoActivity;
+import com.example.chatapp.ui.ViewImageVideoActivity;
 
 import org.apache.commons.io.FileUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LineItemMediaAdapter extends RecyclerView.Adapter {
 
     private final Context context;
-    private MessageDto messageDto;
+    private final MessageDto messageDto;
+    private List<String> urls;
     public final int COLUMNS;
-    public final int CORNER = 30;
     public static final int IMAGE = 1;
     public static final int VIDEO = 2;
     public static final int FILE = 3;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public LineItemMediaAdapter(Context context, MessageDto messageDto, int numColumn) {
         this.context = context;
         this.messageDto = messageDto;
+        if (messageDto != null && messageDto.getMedia() != null) {
+            urls = messageDto.getMedia().stream()
+                    .filter(x -> !x.getType().equals(MediaType.FILE))
+                    .map(MyMedia::getUrl).collect(Collectors.toList());
+        }
         this.COLUMNS = numColumn;
     }
 
@@ -81,19 +88,12 @@ public class LineItemMediaAdapter extends RecyclerView.Adapter {
                     imageViewHolder.line_item_message_media_image.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
 
                     imageViewHolder.line_item_message_media_image.setOnClickListener(v -> {
-                        Intent intent = new Intent(context, ViewImageActivity.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putString("activityTitle", messageDto.getSender().getDisplayName());
-                        bundle.putString("activitySubTitle", messageDto.getCreateAt());
-                        bundle.putString("imageUrl", media.getUrl());
-                        intent.putExtras(bundle);
-                        context.startActivity(intent);
+                        view(position);
                     });
                     imageViewHolder.line_item_message_media_image.setMaxHeight((int) (getScreenHeight(context) * 0.45));
-//                    GranularRoundedCorners corners = new GranularRoundedCorners(CORNER, CORNER, CORNER, CORNER);
+
                     Glide.with(context).load(media.getUrl())
                             .placeholder(R.drawable.background_preload_image_video)
-//                            .apply(RequestOptions.bitmapTransform(corners))
                             .transition(DrawableTransitionOptions.withCrossFade())
                             .into(imageViewHolder.line_item_message_media_image);
 
@@ -104,17 +104,16 @@ public class LineItemMediaAdapter extends RecyclerView.Adapter {
                     videoViewHolder.line_item_message_media_thumbnail.setOnLongClickListener(v -> showReactionCreateDialog(messageDto));
 
                     videoViewHolder.line_item_message_media_icon_center.setOnClickListener(v -> {
-                        showVideoViewActivity(media);
+                        view(position);
                     });
 
                     videoViewHolder.line_item_message_media_thumbnail.setOnClickListener(v -> {
-                        showVideoViewActivity(media);
+                        view(position);
                     });
                     videoViewHolder.line_item_message_media_thumbnail.setMaxHeight((int) (getScreenHeight(context) * 0.45));
-//                    GranularRoundedCorners corners = new GranularRoundedCorners(CORNER, CORNER, CORNER, CORNER);
+
                     Glide.with(context).load(media.getUrl())
                             .placeholder(R.drawable.background_preload_image_video)
-//                            .apply(RequestOptions.bitmapTransform(corners))
                             .transition(DrawableTransitionOptions.withCrossFade())
                             .into(videoViewHolder.line_item_message_media_thumbnail);
                 } else if (media.getType().equals(MediaType.FILE)) {
@@ -134,16 +133,6 @@ public class LineItemMediaAdapter extends RecyclerView.Adapter {
             }
         }
 
-    }
-
-    private void showVideoViewActivity(MyMedia media) {
-        Intent intent = new Intent(context, ViewVideoActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("activityTitle", messageDto.getSender().getDisplayName());
-        bundle.putString("activitySubTitle", messageDto.getCreateAt());
-        bundle.putString("videoUrl", media.getUrl());
-        intent.putExtras(bundle);
-        context.startActivity(intent);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -217,6 +206,15 @@ public class LineItemMediaAdapter extends RecyclerView.Adapter {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         return displayMetrics.heightPixels;
+    }
+
+    private void view(int position) {
+        Intent intent = new Intent(context, ViewImageVideoActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList("urls", (ArrayList<String>) urls);
+        bundle.putInt("index", position);
+        intent.putExtras(bundle);
+        context.startActivity(intent);
     }
 
 }

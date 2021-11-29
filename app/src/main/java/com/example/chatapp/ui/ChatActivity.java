@@ -368,6 +368,11 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
         });
 
         ibt_chat_send_media.setOnClickListener(v -> {
+            try {
+                fileList.clear();
+            } catch (Exception e) {
+                fileList = new ArrayList<>();
+            }
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     new AlertDialog.Builder(this)

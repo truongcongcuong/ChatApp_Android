@@ -21,8 +21,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.chatapp.R;
 import com.example.chatapp.enumvalue.MediaType;
-import com.example.chatapp.ui.ViewImageActivity;
-import com.example.chatapp.ui.ViewVideoActivity;
+import com.example.chatapp.ui.ViewImageVideoActivity;
 import com.example.chatapp.utils.FileUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -30,17 +29,23 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineItemPictureBeforeSendAdapter.ViewHolder> {
     private List<File> files;
+    private final List<String> urls;
     private final Context context;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public LineItemPictureBeforeSendAdapter(Context context, List<File> files) {
         this.context = context;
         if (files == null)
             this.files = new ArrayList<>(0);
         else
             this.files = files;
+        urls = files.stream()
+                .filter(x -> !FileUtil.getMessageType(x).equals(MediaType.FILE))
+                .map(File::getAbsolutePath).collect(Collectors.toList());
     }
 
     @NonNull
@@ -77,13 +82,7 @@ public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineI
                         .into(holder.item_picture_before_send_img_content);
 
                 holder.item_picture_before_send_img_content.setOnClickListener(v -> {
-                    Intent intent = new Intent(context, ViewImageActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("activityTitle", context.getString(R.string.view_image_before_send));
-                    bundle.putString("activitySubTitle", FileUtils.byteCountToDisplaySize(f.length()));
-                    bundle.putString("imageUrl", f.getAbsolutePath());
-                    intent.putExtras(bundle);
-                    context.startActivity(intent);
+                    view(position);
                 });
             } else if (FileUtil.getMessageType(f).equals(MediaType.VIDEO)) {
                 Glide.with(context)
@@ -94,14 +93,9 @@ public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineI
 
                 holder.item_picture_before_send_icon_center.setVisibility(View.VISIBLE);
                 holder.item_picture_before_send_icon_center.setImageResource(R.drawable.ic_play_video_24);
+
                 holder.item_picture_before_send_img_content.setOnClickListener(v -> {
-                    Intent intent = new Intent(context, ViewVideoActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("activityTitle", context.getString(R.string.view_video_before_send));
-                    bundle.putString("activitySubTitle", FileUtils.byteCountToDisplaySize(f.length()));
-                    bundle.putString("videoUrl", f.getAbsolutePath());
-                    intent.putExtras(bundle);
-                    context.startActivity(intent);
+                    view(position);
                 });
             } else if (FileUtil.getMessageType(f).equals(MediaType.FILE)) {
                 holder.itemView.setOnClickListener(v -> {
@@ -138,6 +132,15 @@ public class LineItemPictureBeforeSendAdapter extends RecyclerView.Adapter<LineI
             item_picture_before_send_icon_center = itemView.findViewById(R.id.item_picture_before_send_icon_center);
             item_picture_before_send_icon_center.setVisibility(View.GONE);
         }
+    }
+
+    private void view(int position) {
+        Intent intent = new Intent(context, ViewImageVideoActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList("urls", (ArrayList<String>) urls);
+        bundle.putInt("index", position);
+        intent.putExtras(bundle);
+        context.startActivity(intent);
     }
 
 }

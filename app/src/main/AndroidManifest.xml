@@ -19,8 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp">
         <activity
+            android:name=".ui.ViewImageVideoActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
             android:name=".ui.MediaActivity"
-            android:theme="@style/Theme.AppCompat.Dialog"/>
+            android:theme="@style/Theme.AppCompat.Dialog" />
         <activity
             android:name=".ui.ReportActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />

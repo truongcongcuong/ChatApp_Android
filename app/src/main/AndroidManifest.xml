@@ -19,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatApp">
         <activity
+            android:name=".ui.signup.SignupPhoneActivity2"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
             android:name=".ui.ViewImageVideoActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
         <activity
@@ -73,7 +76,7 @@
             android:name=".ui.ChatActivity"
             android:theme="@style/Theme.AppCompat.Dialog" />
         <activity
-            android:name=".ui.signup.SignUpStep2Activity"
+            android:name=".ui.signup.SignUpEmailActivity2"
             android:theme="@style/Theme.AppCompat.Dialog" />
         <activity
             android:name=".ui.signup.SignUpActivity"

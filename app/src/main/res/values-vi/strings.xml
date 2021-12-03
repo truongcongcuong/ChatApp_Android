@@ -9,7 +9,7 @@
 
     <string name="sign_up">Đăng ký</string>
     <string name="full_name">Nhập tên đầy đủ</string>
-    <string name="create_account">Tạo tài khoản</string>
+    <string name="create_account12">Tạo tài khoản 1/2</string>
     <string name="create_account_name_detail">Sử dụng tên thật giúp bạn dễ nhận ra hơn</string>
     <string name="confirm_button">Xác nhận</string>
     <string name="enter_confirmation">Vui lòng kiểm tra email của bạn và nhập mã xác nhận</string>
@@ -200,4 +200,12 @@
     <string name="seconds">giây</string>
     <string name="yesterday">hôm qua</string>
     <string name="now">bây giờ</string>
+    <string name="create_account_by_phone">Tạo tài khoản bằng số điện thoại</string>
+    <string name="create_account_by_email">Tạo tài khoản bằng email</string>
+    <string name="we_send_otp_to_email">Mã xác nhận sẽ được gửi đến email của bạn.\nEmail và mật khẩu sẽ được dùng để đăng nhập.</string>
+    <string name="we_send_otp_to_phone">Mã xác nhận sẽ được gửi đến số điện thoại của bạn.\nSố điện thoại và mật khẩu sẽ được dùng để đăng nhập.</string>
+    <string name="i_dont_receiver_otp">Tôi không nhận được mã.</string>
+    <string name="send">Gửi</string>
+    <string name="create_account22">Tạo tài khoản 2/2</string>
+    <string name="authen_fail_try_again">Xác thực không thành công. Đã xảy ra lỗi. Vui lòng thử lại sau.</string>
 </resources>

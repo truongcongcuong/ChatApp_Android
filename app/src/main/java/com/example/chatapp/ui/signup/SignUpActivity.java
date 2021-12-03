@@ -1,44 +1,32 @@
 package com.example.chatapp.ui.signup;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.ServerError;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.chatapp.R;
-import com.example.chatapp.cons.Constant;
-import com.example.chatapp.dto.UserSignUpDTO;
-import com.google.android.material.textfield.TextInputLayout;
+import com.example.chatapp.cons.ZoomOutPageTransformer;
+import com.example.chatapp.ui.signup.frag.SignupEmailFragment1;
+import com.example.chatapp.ui.signup.frag.SignupPhoneFragment1;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class SignUpActivity extends AppCompatActivity {
-    private TextInputLayout edt_sign_up_re_enter_password;
-    private TextInputLayout edt_sign_up_name;
-    private TextInputLayout edt_sign_up_phone_number;
-    private TextInputLayout edt_sign_up_enter_password;
-    private TextView txt_sign_up_error_response;
+
+    private static final int NUM_PAGES = 2;
+    private SignupEmailFragment1 emailFragment1;
+    private SignupPhoneFragment1 phoneFragment1;
+    private String[] title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +37,8 @@ public class SignUpActivity extends AppCompatActivity {
         SlidrConfig config = new SlidrConfig.Builder()
                 .position(SlidrPosition.LEFT)
                 .sensitivity(1f)
+                .edge(true)
+                .edgeSize(1f)
                 .velocityThreshold(2400)
                 .distanceThreshold(0.25f)
                 .build();
@@ -56,7 +46,7 @@ public class SignUpActivity extends AppCompatActivity {
         Slidr.attach(this, config);
 
         Toolbar toolbar = findViewById(R.id.toolbar_signup_activity);
-        toolbar.setTitle(getString(R.string.create_account));
+        toolbar.setTitle(getString(R.string.create_account12));
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
@@ -67,131 +57,21 @@ public class SignUpActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        edt_sign_up_re_enter_password = findViewById(R.id.edt_sign_up_re_enter_password);
-        edt_sign_up_name = findViewById(R.id.edt_sign_up_name);
-        edt_sign_up_phone_number = findViewById(R.id.edt_sign_up_phone_number);
-        edt_sign_up_enter_password = findViewById(R.id.edt_sign_up_enter_password);
-        ImageButton ibt_sign_up_next_step1 = findViewById(R.id.ibt_sign_up_next_step1);
-        txt_sign_up_error_response = findViewById(R.id.txt_sign_up_error_response);
+        TabLayout tableLayout = findViewById(R.id.tab_layout_signup_activity);
+        ViewPager2 viewPager = findViewById(R.id.view_paper_signup_activity);
 
-        ibt_sign_up_next_step1.setOnClickListener(v -> {
-            if (valid()) {
-                UserSignUpDTO user = new UserSignUpDTO();
-                user.setPassword(edt_sign_up_enter_password.getEditText().getText().toString().trim());
-                user.setDisplayName(edt_sign_up_name.getEditText().getText().toString().trim());
-                user.setPhoneNumber(edt_sign_up_phone_number.getEditText().getText().toString().trim());
-                sendSignUpUserToServer(user);
-            }
-        });
+        FragmentStateAdapter pagerAdapter = new ScreenSlidePagerAdapter(this);
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setPageTransformer(new ZoomOutPageTransformer());
 
-    }
+        title = new String[NUM_PAGES];
+        title[0] = getString(R.string.create_account_by_phone);
+        title[1] = getString(R.string.create_account_by_email);
 
-    private boolean valid() {
-        txt_sign_up_error_response.setText("");
-        if (edt_sign_up_name.getEditText().getText().toString().trim().isEmpty()) {
-            edt_sign_up_name.setError(getString(R.string.check_name_empty));
-            edt_sign_up_name.requestFocus();
-            return false;
-        }
-        edt_sign_up_name.setError(null);
+        new TabLayoutMediator(tableLayout, viewPager, (tab, position) -> {
+            tab.setText(String.format("%s", title[position]));
+        }).attach();
 
-        if (edt_sign_up_enter_password.getEditText().getText().toString().trim().isEmpty()) {
-            edt_sign_up_enter_password.setError(getString(R.string.check_password_empty));
-            edt_sign_up_enter_password.requestFocus();
-            return false;
-        }
-        if (!edt_sign_up_enter_password.getEditText().getText().toString().trim().matches("[\\w]{8,}")) {
-            edt_sign_up_enter_password.setError(getString(R.string.change_password_detail_8_char));
-            edt_sign_up_enter_password.requestFocus();
-            return false;
-        }
-        edt_sign_up_enter_password.setError(null);
-
-        if (!edt_sign_up_enter_password.getEditText().getText().toString().trim().equals(edt_sign_up_re_enter_password.getEditText().getText().toString())) {
-            edt_sign_up_re_enter_password.setError(getString(R.string.check_password));
-            edt_sign_up_re_enter_password.requestFocus();
-            return false;
-        }
-        edt_sign_up_re_enter_password.setError(null);
-
-        if (edt_sign_up_phone_number.getEditText().getText().toString().trim().isEmpty()) {
-            edt_sign_up_phone_number.setError(getString(R.string.check_phone_empty));
-            edt_sign_up_phone_number.requestFocus();
-            return false;
-        }
-        edt_sign_up_phone_number.setError(null);
-
-        if (!edt_sign_up_phone_number.getEditText().getText().toString().trim().matches("[0-9]{10,11}")) {
-            edt_sign_up_phone_number.setError(getString(R.string.check_phone_regex));
-            edt_sign_up_phone_number.requestFocus();
-            return false;
-        }
-        edt_sign_up_phone_number.setError(null);
-        return true;
-    }
-
-    private void sendSignUpUserToServer(UserSignUpDTO user) {
-        JSONObject objectRequest = new JSONObject();
-        try {
-            objectRequest.put("displayName", user.getDisplayName());
-            objectRequest.put("password", user.getPassword());
-            objectRequest.put("phoneNumber", user.getPhoneNumber());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
-                Constant.API_SIGNUP + "save_information",
-                objectRequest,
-                response -> {
-                    try {
-//                        JSONObject object = new JSONObject(response);
-                        user.setId((response.getString("id")));
-                        Intent intent = new Intent(SignUpActivity.this, SignUpStep2Activity.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable("user", user);
-                        intent.putExtras(bundle);
-                        startActivity(intent);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> {
-            NetworkResponse response = error.networkResponse;
-            if (error instanceof ServerError && error != null) {
-                try {
-                    String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                    JSONObject object = new JSONObject(res);
-                    String fieldName = object.getString("field");
-                    if (fieldName != null) {
-                        if (fieldName.equalsIgnoreCase("phoneNumber")) {
-                            edt_sign_up_phone_number.setError(object.getString("message"));
-                            edt_sign_up_phone_number.requestFocus();
-                        } else if (fieldName.equalsIgnoreCase("displayName")) {
-                            edt_sign_up_name.setError(object.getString("message"));
-                            edt_sign_up_name.requestFocus();
-                        } else if (fieldName.equalsIgnoreCase("password")) {
-                            edt_sign_up_enter_password.setError(object.getString("message"));
-                            edt_sign_up_enter_password.requestFocus();
-                        }
-                    } else {
-                        txt_sign_up_error_response.setText(object.getString("message"));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }) {
-            @Nullable
-            @Override
-            protected Map<String, String> getParams() {
-                HashMap<String, String> map = new HashMap<>();
-                return map;
-            }
-        };
-
-        RequestQueue queue = Volley.newRequestQueue(SignUpActivity.this);
-        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        request.setRetryPolicy(retryPolicy);
-        queue.add(request);
     }
 
     @Override
@@ -204,6 +84,29 @@ public class SignUpActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+    }
+
+    private class ScreenSlidePagerAdapter extends FragmentStateAdapter {
+        public ScreenSlidePagerAdapter(FragmentActivity fa) {
+            super(fa);
+        }
+
+        @Override
+        public Fragment createFragment(int position) {
+            if (position == 0) {
+                if (phoneFragment1 == null)
+                    phoneFragment1 = SignupPhoneFragment1.newInstance(null, null);
+                return phoneFragment1;
+            }
+            if (emailFragment1 == null)
+                emailFragment1 = SignupEmailFragment1.newInstance(null, null);
+            return emailFragment1;
+        }
+
+        @Override
+        public int getItemCount() {
+            return NUM_PAGES;
+        }
     }
 
 }

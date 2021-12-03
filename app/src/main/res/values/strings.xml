@@ -8,7 +8,7 @@
 
     <string name="sign_up">Sign Up</string>
     <string name="full_name">Enter your full name</string>
-    <string name="create_account">Create Account</string>
+    <string name="create_account12">Create account 1/2</string>
     <string name="create_account_name_detail">Using real name make you more recognize</string>
     <string name="confirm_button">Confirm</string>
     <string name="enter_confirmation">Please check your email and enter confirmation code</string>
@@ -213,5 +213,13 @@
         <item>@string/language_english_code</item>
         <item>@string/language_vietnamese_code</item>
     </string-array>
+    <string name="create_account_by_phone">Create an account with a phone number</string>
+    <string name="create_account_by_email">Create an account by email</string>
+    <string name="we_send_otp_to_email">A verification code will be sent to your email.\nEmail and password will be used to login.</string>
+    <string name="we_send_otp_to_phone">A verification code will be sent to your phone number.\nPhone number and password will be used to log in.</string>
+    <string name="i_dont_receiver_otp">I did not receiver the code.</string>
+    <string name="send">Send</string>
+    <string name="create_account22">Create account 2/2</string>
+    <string name="authen_fail_try_again">Authentication failed. Error! An error occurred. Please try again later. Please try again later.</string>
 
 </resources>

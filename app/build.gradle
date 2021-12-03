@@ -4,6 +4,19 @@ plugins {
 
 android {
 
+    lintOptions {
+        checkReleaseBuilds false
+//        abortOnError false
+    }
+
+    signingConfigs {
+        my_config {
+            storeFile file('C:\\Users\\maikiencuong\\Documents\\intelij\\chatapp_android\\my_keystore.jks')
+            storePassword '123456'
+            keyAlias 'chatappmongo'
+            keyPassword '123456'
+        }
+    }
     packagingOptions {
         exclude 'META-INF/*'
     }
@@ -31,6 +44,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.my_config
         }
     }
     compileOptions {
@@ -39,7 +53,14 @@ android {
     }
 }
 
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
 dependencies {
+    implementation 'com.hbb20:ccp:2.4.7'
+    implementation 'androidx.browser:browser:1.3.0'
+    implementation platform('com.google.firebase:firebase-bom:29.0.0')
+    implementation 'com.google.firebase:firebase-auth'
 
     implementation group: 'com.devbrackets.android', name: 'exomedia', version: '4.3.0'
     implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.3.6'

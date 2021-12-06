@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.StrictMode;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,8 @@ import com.example.chatapp.R;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.enumvalue.MediaType;
-import com.example.chatapp.enumvalue.MessageType;
+import com.example.chatapp.utils.MyAutoLink;
+import com.example.chatapp.utils.TimeAgo;
 
 import org.apache.commons.io.FileUtils;
 
@@ -72,8 +74,6 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
     public int getItemViewType(int position) {
         if (position < list.size()) {
             MessageDto messageDto = list.get(position);
-            if (messageDto.getType().equals(MessageType.LINK))
-                return LINK;
             List<MyMedia> mediaList = messageDto.getMedia();
             if (mediaList != null && !mediaList.isEmpty()) {
                 MyMedia media = mediaList.get(0);
@@ -84,6 +84,8 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
                 if (media.getType().equals(MediaType.FILE))
                     return FILE;
             }
+            if (MyAutoLink.isContainsLink(messageDto.getContent()))
+                return LINK;
         }
         return super.getItemViewType(position);
     }
@@ -128,8 +130,8 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
                 });
             } else if (getItemViewType(position) == LINK) {
                 LinkViewHolder linkViewHolder = (LinkViewHolder) holder;
-                linkViewHolder.line_item_media_link.setText("link");
-                linkViewHolder.line_item_media_link_detail.setText("link detail");
+                linkViewHolder.line_item_media_link.setText(Html.fromHtml(messageDto.getContent()));
+                linkViewHolder.line_item_media_link_detail.setText(TimeAgo.getTime(messageDto.getCreateAt(), context));
 
                 linkViewHolder.itemView.setOnClickListener(view -> {
                     Intent i = new Intent(Intent.ACTION_VIEW);

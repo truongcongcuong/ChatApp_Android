@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
@@ -69,6 +70,7 @@ import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.OnlineStatus;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.utils.MultiPartFileRequest;
+import com.example.chatapp.utils.MyAutoLink;
 import com.example.chatapp.utils.PathUtil;
 import com.example.chatapp.utils.TimeAgo;
 import com.google.gson.Gson;
@@ -703,6 +705,7 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
 //        updateMessageRealTime(messageDto);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SneakyThrows
     @Override
     // xử lý khi chọn hình ảnh để gửi
@@ -876,12 +879,13 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
     @Override
     public void reply(MessageDto messageDto) {
         layout_reply_chat_activity.setVisibility(View.VISIBLE);
-        if (messageDto.getType().equals(MessageType.TEXT))
-            txt_content_reply_chat_activity.setText(messageDto.getContent());
-        else if (messageDto.getType().equals(MessageType.LINK)) {
-            String s = String.format("[%s] %s", getString(R.string.message_type_link), messageDto.getContent());
-            txt_content_reply_chat_activity.setText(s);
-        } else {
+        if (messageDto.getType().equals(MessageType.TEXT)) {
+            if (MyAutoLink.isContainsLink(messageDto.getContent())) {
+                String s = String.format("[%s] %s", getString(R.string.message_type_link), messageDto.getContent());
+                txt_content_reply_chat_activity.setText(Html.fromHtml(s));
+            } else
+                txt_content_reply_chat_activity.setText(Html.fromHtml(messageDto.getContent()));
+        } else if (messageDto.getType().equals(MessageType.MEDIA)) {
             List<MyMedia> mediaList = messageDto.getMedia();
             if (mediaList != null && !mediaList.isEmpty()) {
                 MyMedia media = mediaList.get(mediaList.size() - 1);
@@ -892,9 +896,9 @@ public class ChatActivity extends AppCompatActivity implements SendingData, Send
                 } else if (media.getType().equals(MediaType.IMAGE)) {
                     s = String.format("[%s] %s", getString(R.string.message_type_image), content);
                 }
-                txt_content_reply_chat_activity.setText(s);
+                txt_content_reply_chat_activity.setText(Html.fromHtml(s));
             } else {
-                txt_content_reply_chat_activity.setText(messageDto.getContent());
+                txt_content_reply_chat_activity.setText(Html.fromHtml(messageDto.getContent()));
             }
         }
         txt_name_reply_chat_activity.setText(String.format("%s %s", getString(R.string.reply), messageDto.getSender().getDisplayName()));

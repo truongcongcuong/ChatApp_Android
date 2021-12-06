@@ -57,7 +57,7 @@ public class MediaFileFragment extends Fragment {
     private RecyclerView recyclerView;
     private SwipeRefreshLayout media_file_refresh_layout;
     private int page = 0;
-    private final int size = 1;
+    private final int size = 20;
     private Button btnLoadMore;
     private InboxDto inboxDto;
     private final String typeFile = MediaType.FILE.toString();

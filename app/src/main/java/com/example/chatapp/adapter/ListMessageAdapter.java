@@ -7,6 +7,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +37,7 @@ import com.example.chatapp.enumvalue.MediaType;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.enumvalue.RoomType;
 import com.example.chatapp.ui.ChatActivity;
+import com.example.chatapp.utils.MyAutoLink;
 import com.example.chatapp.utils.TimeAgo;
 import com.google.gson.Gson;
 
@@ -126,7 +128,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
 
             MessageDto lastMessage = inboxDto.getLastMessage();
             if (lastMessage != null) {
-                holder.txt_lim_last_message.setText(lastMessage.getContent());
+                holder.txt_lim_last_message.setText(Html.fromHtml(lastMessage.getContent()));
                 try {
                     holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt(), context));
                 } catch (ParseException e) {
@@ -135,7 +137,12 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
                 String content = lastMessage.getContent();
                 if (lastMessage.getSender() != null) {
                     if (lastMessage.getType().equals(MessageType.TEXT)) {
-                        content = lastMessage.getContent();
+                        if (MyAutoLink.isContainsLink(lastMessage.getContent())) {
+                            content = String.format("[%s]", context.getString(R.string.message_type_link));
+                            if (lastMessage.getContent() != null)
+                                content = String.format("%s %s", content, lastMessage.getContent());
+                        } else
+                            content = lastMessage.getContent();
                     } else if (lastMessage.getType().equals(MessageType.MEDIA)) {
                         List<MyMedia> mediaList = lastMessage.getMedia();
                         if (mediaList != null && !mediaList.isEmpty()) {
@@ -154,10 +161,6 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
                                     content = String.format("%s %s", content, media.getName());
                             }
                         }
-                    } else if (lastMessage.getType().equals(MessageType.LINK)) {
-                        content = String.format("[%s]", context.getString(R.string.message_type_link));
-                        if (lastMessage.getContent() != null)
-                            content = String.format("%s %s", content, lastMessage.getContent());
                     }
 //                    nếu tin nhắn của người dùng hiện tại thì hiện "Bạn :" + nội dung tin nhắn
                     if (user.getId().equals(lastMessage.getSender().getId()))
@@ -167,7 +170,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
                             content = String.format("%s: %s", lastMessage.getSender().getDisplayName(), content);
                     }
                 }
-                holder.txt_lim_last_message.setText(content);
+                holder.txt_lim_last_message.setText(Html.fromHtml(content));
             }
             holder.txt_lim_display_name.setText(displayName);
 

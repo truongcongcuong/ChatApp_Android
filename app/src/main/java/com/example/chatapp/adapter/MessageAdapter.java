@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import com.example.chatapp.enumvalue.MediaType;
 import com.example.chatapp.enumvalue.MessageType;
 import com.example.chatapp.ui.ViewImageActivity;
 import com.example.chatapp.ui.ViewProfileActivity;
+import com.example.chatapp.utils.MyAutoLink;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -248,12 +250,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         senderViewHolder.send_message_reply_layout.setVisibility(View.VISIBLE);
                         if (replySend.getSender() != null)
                             senderViewHolder.send_message_reply_name.setText(replySend.getSender().getDisplayName());
-                        if (replySend.getType().equals(MessageType.TEXT))
-                            senderViewHolder.send_message_reply_content.setText(replySend.getContent());
-                        else if (replySend.getType().equals(MessageType.LINK)) {
-                            String s = String.format("[%s] %s", context.getString(R.string.message_type_link), replySend.getContent());
-                            senderViewHolder.send_message_reply_content.setText(s);
-                        } else {
+                        if (replySend.getType().equals(MessageType.TEXT)) {
+                            if (MyAutoLink.isContainsLink(replySend.getContent())) {
+                                String s = String.format("[%s] %s", context.getString(R.string.message_type_link), replySend.getContent());
+                                senderViewHolder.send_message_reply_content.setText(Html.fromHtml(s));
+                            } else
+                                senderViewHolder.send_message_reply_content.setText(Html.fromHtml(replySend.getContent()));
+                        } else if (replySend.getType().equals(MessageType.MEDIA)) {
                             List<MyMedia> mediaList = replySend.getMedia();
                             if (mediaList != null && !mediaList.isEmpty()) {
                                 MyMedia media = mediaList.get(mediaList.size() - 1);
@@ -264,9 +267,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 } else if (media.getType().equals(MediaType.IMAGE)) {
                                     s = String.format("[%s] %s", context.getString(R.string.message_type_image), content);
                                 }
-                                senderViewHolder.send_message_reply_content.setText(s);
+                                senderViewHolder.send_message_reply_content.setText(Html.fromHtml(s));
                             } else {
-                                senderViewHolder.send_message_reply_content.setText(replySend.getContent());
+                                senderViewHolder.send_message_reply_content.setText(Html.fromHtml(replySend.getContent()));
                             }
                         }
                         RelativeLayout.LayoutParams layoutParamsReply = (RelativeLayout.LayoutParams) senderViewHolder.messageLayout.getLayoutParams();
@@ -275,7 +278,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     switch (messageDto.getType()) {
                         case TEXT:
                             senderViewHolder.senderMessage.setVisibility(View.VISIBLE);
-                            senderViewHolder.senderMessage.setText(messageDto.getContent());
+                            senderViewHolder.senderMessage.setText(Html.fromHtml(messageDto.getContent()));
                             if (messageDto.isDeleted()) {
                                 senderViewHolder.senderMessage.setTextColor(Color.GRAY);
                             }
@@ -298,7 +301,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             final int COLUMNS = 4;
                             if (messageDto.getContent() != null && !messageDto.getContent().isEmpty()) {
                                 senderViewHolder.senderMessage.setVisibility(View.VISIBLE);
-                                senderViewHolder.senderMessage.setText(messageDto.getContent());
+                                senderViewHolder.senderMessage.setText(Html.fromHtml(messageDto.getContent()));
                                 if (messageDto.isDeleted()) {
                                     senderViewHolder.senderMessage.setTextColor(Color.GRAY);
                                 }
@@ -505,12 +508,13 @@ public class MessageAdapter extends RecyclerView.Adapter {
                         receiverViewHolder.receiver_message_reply_layout.setVisibility(View.VISIBLE);
                         if (replyReceiver.getSender() != null)
                             receiverViewHolder.receiver_message_reply_name.setText(replyReceiver.getSender().getDisplayName());
-                        if (replyReceiver.getType().equals(MessageType.TEXT))
-                            receiverViewHolder.receiver_message_reply_content.setText(replyReceiver.getContent());
-                        else if (replyReceiver.getType().equals(MessageType.LINK)) {
-                            String s = String.format("[%s] %s", context.getString(R.string.message_type_link), replyReceiver.getContent());
-                            receiverViewHolder.receiver_message_reply_content.setText(s);
-                        } else {
+                        if (replyReceiver.getType().equals(MessageType.TEXT)) {
+                            if (MyAutoLink.isContainsLink(replyReceiver.getContent())) {
+                                String s = String.format("[%s] %s", context.getString(R.string.message_type_link), replyReceiver.getContent());
+                                receiverViewHolder.receiver_message_reply_content.setText(Html.fromHtml(s));
+                            } else
+                                receiverViewHolder.receiver_message_reply_content.setText(Html.fromHtml(replyReceiver.getContent()));
+                        } else if (replyReceiver.getType().equals(MessageType.MEDIA)) {
                             List<MyMedia> mediaList = replyReceiver.getMedia();
                             if (mediaList != null && !mediaList.isEmpty()) {
                                 MyMedia media = mediaList.get(mediaList.size() - 1);
@@ -521,9 +525,9 @@ public class MessageAdapter extends RecyclerView.Adapter {
                                 } else if (media.getType().equals(MediaType.IMAGE)) {
                                     s = String.format("[%s] %s", context.getString(R.string.message_type_image), content);
                                 }
-                                receiverViewHolder.receiver_message_reply_content.setText(s);
+                                receiverViewHolder.receiver_message_reply_content.setText(Html.fromHtml(s));
                             } else {
-                                receiverViewHolder.receiver_message_reply_content.setText(replyReceiver.getContent());
+                                receiverViewHolder.receiver_message_reply_content.setText(Html.fromHtml(replyReceiver.getContent()));
                             }
                         }
                         RelativeLayout.LayoutParams layoutParamsReply = (RelativeLayout.LayoutParams) receiverViewHolder.messageLayout.getLayoutParams();
@@ -532,7 +536,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                     switch (messageDto.getType()) {
                         case TEXT:
                             receiverViewHolder.receiverMessage.setVisibility(View.VISIBLE);
-                            receiverViewHolder.receiverMessage.setText(messageDto.getContent());
+                            receiverViewHolder.receiverMessage.setText(Html.fromHtml(messageDto.getContent()));
                             if (messageDto.isDeleted()) {
                                 receiverViewHolder.receiverMessage.setTextColor(Color.GRAY);
                             }
@@ -555,7 +559,7 @@ public class MessageAdapter extends RecyclerView.Adapter {
                             final int COLUMNS = 4;
                             if (messageDto.getContent() != null && !messageDto.getContent().isEmpty()) {
                                 receiverViewHolder.receiverMessage.setVisibility(View.VISIBLE);
-                                receiverViewHolder.receiverMessage.setText(messageDto.getContent());
+                                receiverViewHolder.receiverMessage.setText(Html.fromHtml(messageDto.getContent()));
                                 if (messageDto.isDeleted()) {
                                     receiverViewHolder.receiverMessage.setTextColor(Color.GRAY);
                                 }

@@ -56,10 +56,10 @@ public class MediaLinkFragment extends Fragment {
     private RecyclerView recyclerView;
     private SwipeRefreshLayout media_link_refresh_layout;
     private int page = 0;
-    private final int size = 1;
+    private final int size = 20;
     private Button btnLoadMore;
     private InboxDto inboxDto;
-    private final String typeLink = "FILE";
+    private final String typeLink = "LINK";
 
     public static MediaLinkFragment newInstance(String param1, String param2, InboxDto inboxDto) {
         MediaLinkFragment fragment = new MediaLinkFragment();

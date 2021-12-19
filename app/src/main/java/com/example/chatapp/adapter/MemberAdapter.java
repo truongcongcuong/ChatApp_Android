@@ -121,6 +121,8 @@ public class MemberAdapter extends ArrayAdapter<MemberDto> {
                 /*
                 nếu người dùng hiện tại là người tạo nhóm, có quyền cao nhất
                  */
+                setAdmin.setImageResource(0);
+                delete.setImageResource(0);
                 if (creatorId != null && creatorId.equals(user.getId())) {
                     /*
                     hiện icon set admin và xóa trên các thành viên còn lại

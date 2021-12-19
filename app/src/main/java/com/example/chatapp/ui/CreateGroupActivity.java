@@ -128,7 +128,7 @@ public class CreateGroupActivity extends AppCompatActivity implements SendDataCr
 
     private Timer timer;
     private final long DELAY_SEARCH = 250;
-    private final int size = 5;
+    private final int size = 10;
     private int page = 0;
     private int pageSearch = 0;
 

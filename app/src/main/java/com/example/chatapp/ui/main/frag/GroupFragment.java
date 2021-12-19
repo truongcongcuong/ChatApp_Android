@@ -72,7 +72,7 @@ public class GroupFragment extends Fragment {
     private Gson gson;
     private String token;
     private int page = 0;
-    private final int size = 1;
+    private final int size = 10;
     private final String type = RoomType.GROUP.toString();
 
     private Button btnLoadMore;

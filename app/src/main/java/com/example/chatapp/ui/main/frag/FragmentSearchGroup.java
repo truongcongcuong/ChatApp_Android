@@ -55,7 +55,7 @@ public class FragmentSearchGroup extends Fragment {
     private final Context context;
     private Button btn_load_more;
     private int pageSearch = 0;
-    private final int size = 5;
+    private final int size = 10;
     private final Gson gson;
     private final String token;
     private List<InboxDto> inboxList;

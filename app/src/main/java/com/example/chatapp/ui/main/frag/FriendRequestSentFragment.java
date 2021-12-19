@@ -66,7 +66,7 @@ public class FriendRequestSentFragment extends Fragment {
     private SwipeRefreshLayout friend_request_sent_refresh_layout;
     private TextView txt_friend_request_sent_no_request;
     private int page = 0;
-    private final int size = 1;
+    private final int size = 10;
     private final FriendRequestActivity parent;
     private final int POSITION_OF_SENT = 1;
     private Button btnLoadMore;

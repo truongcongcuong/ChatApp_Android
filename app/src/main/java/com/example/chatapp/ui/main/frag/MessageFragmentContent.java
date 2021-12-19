@@ -55,7 +55,7 @@ public class MessageFragmentContent extends Fragment {
     private Gson gson;
     private String token;
     private int page = 0;
-    private final int size = 5;
+    private final int size = 10;
     private Button btnLoadMore;
 
     /*

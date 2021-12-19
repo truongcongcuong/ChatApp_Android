@@ -20,14 +20,16 @@
         app:contentInsetStart="0dp"
         app:contentInsetStartWithNavigation="0dp" />
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <!--<androidx.coordinatorlayout.widget.CoordinatorLayout-->
+    <LinearLayout
         android:id="@+id/create_group_top_coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/create_group_bottom_layout"
         android:layout_below="@+id/tlb_create_group_activity"
         android:layout_gravity="fill_vertical"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:orientation="vertical">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/a"
@@ -133,7 +135,8 @@
 
         </androidx.core.widget.NestedScrollView>
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <!--</androidx.coordinatorlayout.widget.CoordinatorLayout>-->
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/create_group_bottom_layout"

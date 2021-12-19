@@ -128,7 +128,8 @@ public class ListMessageAdapter extends RecyclerView.Adapter<ListMessageAdapter.
 
             MessageDto lastMessage = inboxDto.getLastMessage();
             if (lastMessage != null) {
-                holder.txt_lim_last_message.setText(Html.fromHtml(lastMessage.getContent()));
+                if (lastMessage.getContent() != null)
+                    holder.txt_lim_last_message.setText(Html.fromHtml(lastMessage.getContent()));
                 try {
                     holder.txt_lim_time_last_message.setText(TimeAgo.getTime(lastMessage.getCreateAt(), context));
                 } catch (ParseException e) {

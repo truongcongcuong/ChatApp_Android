@@ -33,7 +33,9 @@ public class Constant {
 //    public static final String API_BLOCK = "http://10.0.2.2:8080/api/blocks";
 
 
-    public static final String SERVER = "http://chatappmongoelasticbeanstalk-env.eba-qzcfuyxf.ap-southeast-1.elasticbeanstalk.com";
+    //    public static final String SERVER = "http://chatappmongoelasticbeanstalk-env.eba-qzcfuyxf.ap-southeast-1.elasticbeanstalk.com";
+    public static final String SERVER = "https://loadbalancerchatappmongo2gb-1982200755.ap-southeast-1.elb.amazonaws.com";
+    //    public static final String SERVER = "http://54.179.42.252:8080";
     public static final String API_SIGNUP = SERVER + "/api/auth/signup/";
     public static final String API_AUTH = SERVER + "/api/auth/";
     public static final String API_INBOX = SERVER + "/api/inboxs";
@@ -43,7 +45,7 @@ public class Constant {
     public static final String API_ME = SERVER + "/api/user/me";
     public static final String API_USER = SERVER + "/api/user/";
     public static final String API_MESSAGE = SERVER + "/api/messages/";
-    public static final String WEB_SOCKET = "ws://chatappmongoelasticbeanstalk-env.eba-qzcfuyxf.ap-southeast-1.elasticbeanstalk.com/ws/websocket";
+    public static final String WEB_SOCKET = SERVER + "/ws/websocket";
     public static final String API_ROOM = SERVER + "/api/rooms/";
     public static final String API_FILE = SERVER + "/api/file";
     public static final String API_FRIEND_REQUEST = SERVER + "/api/friend-request";

@@ -45,7 +45,7 @@ public class Constant {
     public static final String API_ME = SERVER + "/api/user/me";
     public static final String API_USER = SERVER + "/api/user/";
     public static final String API_MESSAGE = SERVER + "/api/messages/";
-    public static final String WEB_SOCKET = SERVER + "/ws/websocket";
+    public static final String WEB_SOCKET = "ws://loadbalancerchatappmongo2gb-1982200755.ap-southeast-1.elb.amazonaws.com" + "/ws/websocket";
     public static final String API_ROOM = SERVER + "/api/rooms/";
     public static final String API_FILE = SERVER + "/api/file";
     public static final String API_FRIEND_REQUEST = SERVER + "/api/friend-request";

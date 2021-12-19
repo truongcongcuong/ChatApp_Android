@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import com.example.chatapp.R;
 import com.example.chatapp.dto.MessageDto;
 import com.example.chatapp.dto.MyMedia;
 import com.example.chatapp.enumvalue.MediaType;
+import com.example.chatapp.ui.ViewImageVideoActivity;
 import com.example.chatapp.utils.MyAutoLink;
 import com.example.chatapp.utils.TimeAgo;
 
@@ -29,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.SneakyThrows;
 
@@ -41,7 +44,9 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
     private final int IMAGE = 2;
     private final int FILE = 3;
     private final int LINK = 4;
+    private List<String> urls;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public MediaActivityAdapter(Context context, List<MessageDto> list, String token) {
         if (list == null)
             this.list = new ArrayList<>();
@@ -49,6 +54,21 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
             this.list = list;
         this.context = context;
         this.token = token;
+        urls = getListUrlFromListMessage(this.list);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private List<String> getListUrlFromListMessage(List<MessageDto> list) {
+        List<String> newUrl = new ArrayList<>(0);
+        if (list != null) {
+            for (MessageDto m : list) {
+                List<String> collect = m.getMedia().stream()
+                        .filter(x -> !x.getType().equals(MediaType.FILE))
+                        .map(MyMedia::getUrl).collect(Collectors.toList());
+                newUrl.addAll(collect);
+            }
+        }
+        return newUrl;
     }
 
     @NonNull
@@ -106,6 +126,7 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
                         .centerCrop()
                         .transition(DrawableTransitionOptions.withCrossFade())
                         .into(imageViewHolder.line_item_media_image);
+                imageViewHolder.line_item_media_image.setOnClickListener(v -> view(position));
 
             } else if (getItemViewType(position) == VIDEO) {
                 VideoViewHolder videoViewHolder = (VideoViewHolder) holder;
@@ -115,6 +136,10 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
                         .centerCrop()
                         .transition(DrawableTransitionOptions.withCrossFade())
                         .into(videoViewHolder.line_item_media_video_thumbnail);
+
+                videoViewHolder.line_item_media_video_thumbnail.setOnClickListener(v -> view(position));
+                videoViewHolder.line_item_media_video_icon_center.setOnClickListener(v -> view(position));
+
 
             } else if (getItemViewType(position) == FILE) {
                 FileViewHolder fileViewHolder = (FileViewHolder) holder;
@@ -142,6 +167,15 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private void view(int position) {
+        Intent intent = new Intent(context, ViewImageVideoActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList("urls", (ArrayList<String>) urls);
+        bundle.putInt("index", position);
+        intent.putExtras(bundle);
+        context.startActivity(intent);
+    }
+
     @Override
     public int getItemCount() {
         if (list == null)
@@ -149,16 +183,20 @@ public class MediaActivityAdapter extends RecyclerView.Adapter {
         return list.size();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void setList(List<MessageDto> list) {
         this.list = list;
+        urls = getListUrlFromListMessage(this.list);
         notifyDataSetChanged();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void updateList(List<MessageDto> list) {
         if (this.list == null)
             this.list = new ArrayList<>();
         int from = this.list.size();
         this.list.addAll(list);
+        urls = getListUrlFromListMessage(this.list);
         notifyItemRangeInserted(from, list.size());
     }
 

@@ -205,6 +205,7 @@ public class SignupPhoneActivity2 extends AppCompatActivity {
     }
 
     private void showDialogFail() {
+        progress.cancel();
         AlertDialog.Builder blockBuilder = new AlertDialog.Builder(this);
         blockBuilder.setMessage(getString(R.string.authen_fail_try_again))
                 .setPositiveButton(getString(R.string.confirm_button), (dialog, id) -> dialog.cancel());
@@ -227,6 +228,7 @@ public class SignupPhoneActivity2 extends AppCompatActivity {
                     progress.cancel();
                     showDialogSignupSuccess(SignupPhoneActivity2.this);
                 }, error -> {
+            progress.cancel();
             NetworkResponse response = error.networkResponse;
             if (error instanceof ServerError) {
                 try {

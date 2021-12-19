@@ -168,13 +168,14 @@ public class SignupPhoneFragment1 extends Fragment {
             e.printStackTrace();
         }
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
-                Constant.API_SIGNUP + "valid",
+                Constant.API_SIGNUP + "phone/valid",
                 objectRequest,
                 response -> {
                     System.out.println("response = " + response);
                     progress.show();
                     authen(phone);
                 }, error -> {
+            progress.cancel();
             NetworkResponse response = error.networkResponse;
             if (error instanceof ServerError) {
                 try {

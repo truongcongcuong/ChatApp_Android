@@ -147,7 +147,7 @@ public class SignupEmailFragment1 extends Fragment {
             e.printStackTrace();
         }
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
-                Constant.API_SIGNUP + "valid",
+                Constant.API_SIGNUP + "email/valid",
                 objectRequest,
                 response -> {
                     save(user);
